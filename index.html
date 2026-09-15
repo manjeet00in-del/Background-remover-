@@ -253,7 +253,7 @@ function renderPeople(){
 document.getElementById('addPerson').onclick=()=>{
  const f=makeFinal(); if(!f){alert('पहले photo upload/edit करें');return}
  const copies=Math.max(1,Math.min(20,+document.getElementById('personCopies').value||4));
- people.push({url:f.toDataURL('image/jpeg',.96),copies});
+ people.push({url:f,copies});
  renderPeople();
  // Ready for another person: open picker. Existing person stays saved.
  setTimeout(()=>file.click(),120);
@@ -302,10 +302,10 @@ function qRender(){
 }
 document.getElementById('qAdd').onclick=()=>{
  const f=makeFinal(); if(!f){alert('पहले photo upload और edit करें');return}
- realQueue.push({url:f.toDataURL('image/jpeg',.96),copies:Math.max(1,Math.min(50,+qCopies.value||4))});
+ realQueue.push({url:f,copies:Math.max(1,Math.min(50,+qCopies.value||4))});
  qRender();
 };
-document.getElementById('qNext').onclick=()=>file.click();
+document.getElementById('qNext').onclick=()=>{file.value='';file.click()};
 document.getElementById('qClear').onclick=()=>{realQueue.length=0;qRender()};
 document.getElementById('qFinal').onclick=()=>{
  if(!realQueue.length){alert('Queue में पहले photo add करें');return}
