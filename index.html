@@ -40,7 +40,8 @@ input[type=range]{width:100%}
 .step h3{margin:6px 0}.step p{color:#64748b;font-size:14px;line-height:1.5}
 .privacyNote{font-size:13px;color:#64748b;margin-top:14px}
 #makerScreen{display:none}
-@media(max-width:700px){.steps{grid-template-columns:1fr}.uploadHero{padding:34px 16px}}
+@media(max-width:700px){.steps{grid-template-columns:1fr}.uploadHero{padding:34px 16px}
+#welcomeScreen .welcomeBox>div>div[style*="grid-template-columns"]{grid-template-columns:1fr!important}}
 /* --- Advanced print sheet controls --- */
 .sheetControls{background:#f8fafc;border:1px solid #dbe5f3;border-radius:14px;padding:14px;margin-top:14px}
 .sheetGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
@@ -48,8 +49,6 @@ input[type=range]{width:100%}
 .sheetGrid input,.sheetGrid select{width:100%}
 .sheetActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 @media(max-width:600px){.sheetGrid{grid-template-columns:1fr}}
-
-#livePaper img{position:absolute;object-fit:fill;border:1px solid #334155;box-sizing:border-box}
 </style>
 </head>
 <body>
@@ -58,10 +57,15 @@ input[type=range]{width:100%}
   <div class="brandMini">MANJEET DIGITAL HUB</div>
   <h1 class="heroTitle">Online Passport Photo Maker <span>& Print Sheet</span></h1>
   <p class="heroText">Photo upload करें और कुछ आसान steps में passport/PAN/visa size photo तैयार करें। Background removal browser में MediaPipe person segmentation से होता है, फिर आप background, size, zoom, position और photo enhancement adjust कर सकते हैं.</p>
-  <button class="uploadHero" id="heroUpload">
-   <span class="ico">☁️</span><b>Click to Upload Photo</b>
-   <small>JPG, PNG या phone photo चुनें</small>
-  </button>
+  <div style="max-width:900px;margin:24px auto 8px">
+   <button class="uploadHero" id="heroUpload" style="margin:0;width:100%;padding:48px 18px">
+    <span class="ico">☁️</span>
+    <b>Click to upload photo</b>
+    <small style="display:block;margin-top:6px">or select photo from your phone / computer</small>
+    <span style="display:inline-block;margin-top:14px;background:#1e40af88;padding:7px 13px;border-radius:20px;font-size:13px">💡 Pro Tip: Single या Multiple Person दोनों बना सकते हैं</span>
+   </button>
+   <div style="margin-top:12px;font-size:14px;color:#475569"><b>Single Person:</b> एक photo edit करें &nbsp; • &nbsp; <b>Multiple Persons:</b> editor में “Add Current Person” से 2, 3 या ज्यादा लोगों को एक sheet में जोड़ें.</div>
+  </div>
   <div class="privacyNote">🔒 Processing आपके browser/device पर होती है; इस tool को background removal के लिए अलग upload server की जरूरत नहीं है.</div>
   <div class="steps">
    <div class="step"><div class="n">⬆️</div><h3>1. Upload Photo</h3><p>Phone या computer से अपनी photo select करें.</p></div>
@@ -180,6 +184,7 @@ document.getElementById('reset').onclick=()=>{file.value='';original=working=nul
 // Welcome -> actual maker. Reuse the existing upload input so selected photo carries into editor.
 const welcomeScreen=document.getElementById('welcomeScreen'), makerScreen=document.getElementById('makerScreen');
 document.getElementById('heroUpload').onclick=()=>file.click();
+
 file.addEventListener('change',()=>{if(file.files&&file.files[0]){welcomeScreen.style.display='none';makerScreen.style.display='block';window.scrollTo(0,0)}});
 
 // Advanced sheet controls
@@ -214,36 +219,44 @@ document.getElementById('downloadSheet').onclick=()=>{
 };
 syncSheetLabels();
 
-function selectedMM(){
- if(sizeSel.value==='custom') return [+customW.value||35,+customH.value||45];
- return sizeSel.value.split(',').map(Number);
+// Multiple-person passport sheet
+const people=[];
+const peopleList=document.getElementById('peopleList');
+function renderPeople(){
+ peopleList.innerHTML='';
+ people.forEach((p,i)=>{
+   const box=document.createElement('div');
+   box.style.cssText='background:#fff;border:1px solid #dbe5f3;border-radius:10px;padding:7px;text-align:center;width:88px';
+   const im=document.createElement('img');im.src=p.url;im.style.cssText='width:60px;height:75px;object-fit:cover;border:1px solid #94a3b8';
+   const t=document.createElement('div');t.style.cssText='font-size:11px;margin-top:3px';t.textContent='Person '+(i+1)+' × '+p.copies;
+   const del=document.createElement('button');del.textContent='×';del.title='Remove';del.style.cssText='border:0;background:#fee2e2;border-radius:6px;margin-top:4px;cursor:pointer';
+   del.onclick=()=>{people.splice(i,1);renderPeople()};
+   box.append(im,t,del);peopleList.appendChild(box);
+ });
 }
-function renderLivePaper(){
- const lp=document.getElementById('livePaper'); if(!lp)return;
- let pw=210,ph=297,badge='A4';
- if(paperSize.value==='4x6'){pw=101.6;ph=152.4;badge='4×6'}
- document.getElementById('paperBadge').textContent=badge;
- const displayW=420,scale=displayW/pw;
- lp.style.width=displayW+'px';lp.style.height=(ph*scale)+'px';lp.innerHTML='';
- const final=makeFinal(); if(!final)return;
- const [mw,mh]=selectedMM(), w=mw*scale,h=mh*scale,gx=+gapX.value*scale,gy=+gapY.value*scale;
- const ml=+marginLeft.value*scale,mt=+marginTop.value*scale;
- const url=final.toDataURL('image/jpeg',.94);
- let x=ml,y=mt,n=0,max=Math.max(1,Math.min(40,+copies2.value||10));
- while(n<max){
-   if(x+w>displayW+.1){x=ml;y+=h+gy}
-   if(y+h>ph*scale+.1)break;
-   const im=document.createElement('img');im.src=url;
-   im.style.left=x+'px';im.style.top=y+'px';im.style.width=w+'px';im.style.height=h+'px';
-   lp.appendChild(im);x+=w+gx;n++;
+document.getElementById('addPerson').onclick=()=>{
+ const f=makeFinal(); if(!f){alert('पहले photo upload/edit करें');return}
+ const copies=Math.max(1,Math.min(20,+document.getElementById('personCopies').value||4));
+ people.push({url:f.toDataURL('image/jpeg',.96),copies});
+ renderPeople();
+ // Ready for another person: open picker. Existing person stays saved.
+ setTimeout(()=>file.click(),120);
+};
+document.getElementById('clearPeople').onclick=()=>{people.length=0;renderPeople()};
+
+document.getElementById('combinedSheet').onclick=async()=>{
+ if(!people.length){alert('पहले कम से कम एक person Add करें');return}
+ const holder=sheet;holder.innerHTML='';holder.style.display='grid';
+ holder.style.gridTemplateColumns='repeat(5,1fr)';
+ holder.style.gap='6px';
+ for(const p of people){
+   for(let n=0;n<p.copies;n++){
+     const im=document.createElement('img');im.src=p.url;
+     im.style.cssText='width:100%;display:block;border:1px solid #333;box-sizing:border-box';
+     holder.appendChild(im);
+   }
  }
-}
-[gapX,gapY,marginTop,marginLeft,paperSize,copies2,sizeSel,customW,customH].forEach(e=>e.addEventListener('input',renderLivePaper));
-[zoom,xpos,ypos,brightness,contrast,saturation,border].forEach(e=>e.addEventListener('input',()=>setTimeout(renderLivePaper,0)));
-document.querySelectorAll('.bg').forEach(e=>e.addEventListener('click',()=>setTimeout(renderLivePaper,20)));
-file.addEventListener('change',()=>setTimeout(renderLivePaper,400));
-remove.addEventListener('click',()=>setTimeout(renderLivePaper,1800));
-const oldResetSheet=document.getElementById('resetSheet').onclick;
-document.getElementById('resetSheet').onclick=()=>{oldResetSheet();renderLivePaper()};
+ holder.scrollIntoView({behavior:'smooth',block:'start'});
+};
 </script>
 </div></body></html>
