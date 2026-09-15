@@ -48,6 +48,8 @@ input[type=range]{width:100%}
 .sheetGrid input,.sheetGrid select{width:100%}
 .sheetActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 @media(max-width:600px){.sheetGrid{grid-template-columns:1fr}}
+
+#livePaper img{position:absolute;object-fit:fill;border:1px solid #334155;box-sizing:border-box}
 </style>
 </head>
 <body>
@@ -113,7 +115,7 @@ input[type=range]{width:100%}
   <div class="row"><label>Brightness</label><input id="brightness" type="range" min="50" max="150" value="100"></div>
   <div class="row"><label>Contrast</label><input id="contrast" type="range" min="50" max="150" value="100"></div>
   <div class="row"><label>Saturation</label><input id="saturation" type="range" min="0" max="180" value="100"></div>
-  <div class="row"><label>Border</label><input id="border" type="range" min="0" max="12" value="0"></div>
+  <div class="row"><label>Border</label><input id="border" type="range" min="0" max="50" value="0"></div>
   <div class="actions"><button id="resetTune" class="btn gray">↻ Reset Enhance</button><button id="download" class="btn green" disabled>⬇ Download Photo</button></div>
  </div>
  <div class="panel controlsPrint">
@@ -211,5 +213,37 @@ document.getElementById('downloadSheet').onclick=()=>{
  };img.src=photo.toDataURL('image/jpeg',.96);
 };
 syncSheetLabels();
+
+function selectedMM(){
+ if(sizeSel.value==='custom') return [+customW.value||35,+customH.value||45];
+ return sizeSel.value.split(',').map(Number);
+}
+function renderLivePaper(){
+ const lp=document.getElementById('livePaper'); if(!lp)return;
+ let pw=210,ph=297,badge='A4';
+ if(paperSize.value==='4x6'){pw=101.6;ph=152.4;badge='4×6'}
+ document.getElementById('paperBadge').textContent=badge;
+ const displayW=420,scale=displayW/pw;
+ lp.style.width=displayW+'px';lp.style.height=(ph*scale)+'px';lp.innerHTML='';
+ const final=makeFinal(); if(!final)return;
+ const [mw,mh]=selectedMM(), w=mw*scale,h=mh*scale,gx=+gapX.value*scale,gy=+gapY.value*scale;
+ const ml=+marginLeft.value*scale,mt=+marginTop.value*scale;
+ const url=final.toDataURL('image/jpeg',.94);
+ let x=ml,y=mt,n=0,max=Math.max(1,Math.min(40,+copies2.value||10));
+ while(n<max){
+   if(x+w>displayW+.1){x=ml;y+=h+gy}
+   if(y+h>ph*scale+.1)break;
+   const im=document.createElement('img');im.src=url;
+   im.style.left=x+'px';im.style.top=y+'px';im.style.width=w+'px';im.style.height=h+'px';
+   lp.appendChild(im);x+=w+gx;n++;
+ }
+}
+[gapX,gapY,marginTop,marginLeft,paperSize,copies2,sizeSel,customW,customH].forEach(e=>e.addEventListener('input',renderLivePaper));
+[zoom,xpos,ypos,brightness,contrast,saturation,border].forEach(e=>e.addEventListener('input',()=>setTimeout(renderLivePaper,0)));
+document.querySelectorAll('.bg').forEach(e=>e.addEventListener('click',()=>setTimeout(renderLivePaper,20)));
+file.addEventListener('change',()=>setTimeout(renderLivePaper,400));
+remove.addEventListener('click',()=>setTimeout(renderLivePaper,1800));
+const oldResetSheet=document.getElementById('resetSheet').onclick;
+document.getElementById('resetSheet').onclick=()=>{oldResetSheet();renderLivePaper()};
 </script>
 </div></body></html>
