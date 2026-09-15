@@ -224,19 +224,26 @@ const people=[];
 const peopleList=document.getElementById('peopleList');
 function renderPeople(){
  peopleList.innerHTML='';
+ let total=0;
  people.forEach((p,i)=>{
+   total+=p.copies;
    const box=document.createElement('div');
-   box.style.cssText='background:#fff;border:1px solid #dbe5f3;border-radius:10px;padding:7px;text-align:center;width:88px';
-   const im=document.createElement('img');im.src=p.url;im.style.cssText='width:60px;height:75px;object-fit:cover;border:1px solid #94a3b8';
-   const t=document.createElement('div');t.style.cssText='font-size:11px;margin-top:3px';t.textContent='Person '+(i+1)+' × '+p.copies;
-   const del=document.createElement('button');del.textContent='×';del.title='Remove';del.style.cssText='border:0;background:#fee2e2;border-radius:6px;margin-top:4px;cursor:pointer';
+   box.style.cssText='background:#fff;border:1px solid #dbe5f3;border-radius:10px;padding:8px;text-align:center;width:105px';
+   const im=document.createElement('img');im.src=p.url;im.style.cssText='width:65px;height:82px;object-fit:cover;border:1px solid #94a3b8';
+   const t=document.createElement('div');t.style.cssText='font-size:11px;margin-top:4px;font-weight:700';t.textContent='Person '+(i+1);
+   const cp=document.createElement('input');cp.type='number';cp.min='1';cp.max='50';cp.value=p.copies;
+   cp.style.cssText='width:58px;margin-top:5px;padding:4px';
+   cp.onchange=()=>{p.copies=Math.max(1,Math.min(50,+cp.value||1));renderPeople()};
+   const del=document.createElement('button');del.textContent='Remove';del.title='Remove';del.style.cssText='border:0;background:#fee2e2;border-radius:6px;margin-top:5px;padding:4px 6px;cursor:pointer;font-size:10px';
    del.onclick=()=>{people.splice(i,1);renderPeople()};
-   box.append(im,t,del);peopleList.appendChild(box);
+   box.append(im,t,cp,del);peopleList.appendChild(box);
  });
+ document.getElementById('queueCount').textContent=people.length;
+ document.getElementById('queuePhotos').textContent=total;
 }
 document.getElementById('addPerson').onclick=()=>{
  const f=makeFinal(); if(!f){alert('पहले photo upload/edit करें');return}
- const copies=Math.max(1,Math.min(20,+document.getElementById('personCopies').value||4));
+ const copies=Math.max(1,Math.min(50,+document.getElementById('personCopies').value||4));
  people.push({url:f.toDataURL('image/jpeg',.96),copies});
  renderPeople();
  // Ready for another person: open picker. Existing person stays saved.
