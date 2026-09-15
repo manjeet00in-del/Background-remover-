@@ -79,14 +79,9 @@ input[type=range]{width:100%}
  </div>
 </div>
 <div>
+ <div id="editor" class="editor" style="position:absolute;left:-99999px;top:-99999px;width:350px;height:450px"><canvas id="canvas" width="700" height="900"></canvas><div class="guide"></div></div>
  <div class="panel previewArea">
-  <h3>Final Passport Photo</h3>
-  <div id="editor" class="editor"><canvas id="canvas" width="700" height="900"></canvas><div class="guide"></div></div>
-  <img id="finalPreview" alt="" style="display:none">
-  <div class="hint">यही Final Photo Preview है • photo को finger/mouse से drag करें • sliders से zoom/position adjust करें</div>
- </div>
- <div class="panel previewArea">
-  <h3>Photo Sheet</h3>
+  <h3>Final Passport Photo</h3><img id="finalPreview" class="photoPreview" alt="Preview">
   <div id="sheet" class="sheet" style="display:none"></div>
  </div>
 </div>
