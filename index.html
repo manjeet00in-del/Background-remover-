@@ -26,6 +26,39 @@ input[type=range]{width:100%}
 </style>
 </head>
 <body>
+<div id="landingScreen" style="min-height:100vh;background:linear-gradient(180deg,#f8fbff,#eef5ff);padding:34px 16px;box-sizing:border-box;font-family:Arial,sans-serif">
+  <div style="max-width:1050px;margin:auto;text-align:center">
+    <h1 style="font-size:clamp(30px,5vw,52px);line-height:1.08;margin:15px 0;color:#1d4ed8">
+      Passport Photo Maker & A4 Print Sheet
+    </h1>
+    <p style="max-width:780px;margin:0 auto 26px;color:#475569;font-size:17px;line-height:1.6">
+      Passport/PAN size photo बनाएं, background remove करें, photo adjust करें और Single या Multiple Persons की print sheet तैयार करें।
+    </p>
+
+    <button id="landingUpload" type="button"
+      style="width:100%;max-width:950px;min-height:235px;border:0;border-radius:22px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:white;cursor:pointer;box-shadow:0 12px 30px #2563eb33">
+      <div style="font-size:48px">☁️</div>
+      <div style="font-size:24px;font-weight:900;margin-top:8px">Click to upload photo</div>
+      <div style="font-size:14px;margin-top:7px;opacity:.92">JPG / PNG / phone camera photo</div>
+      <div style="display:inline-block;margin-top:18px;padding:8px 14px;border-radius:20px;background:#1e40af88;font-weight:700">
+        💡 Single और Multiple Person दोनों supported
+      </div>
+    </button>
+
+    <section style="padding:42px 0 20px">
+      <h2 style="color:#1d4ed8;margin-bottom:8px">How it works</h2>
+      <p style="color:#64748b;margin-top:0">Photo upload करने के बाद actual editor खुलेगा।</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;text-align:left" class="landingSteps">
+        <div style="background:white;padding:22px;border-radius:16px;box-shadow:0 5px 18px #0000000d"><b>1. 📷 Upload Photo</b><p style="color:#64748b;line-height:1.5">Phone या computer से photo चुनें।</p></div>
+        <div style="background:white;padding:22px;border-radius:16px;box-shadow:0 5px 18px #0000000d"><b>2. ✨ Edit & Remove BG</b><p style="color:#64748b;line-height:1.5">Background remove, size, color, zoom और position adjust करें।</p></div>
+        <div style="background:white;padding:22px;border-radius:16px;box-shadow:0 5px 18px #0000000d"><b>3. 🖨️ Queue & Print</b><p style="color:#64748b;line-height:1.5">Single photo या कई persons को Queue में जोड़कर final sheet बनाएं।</p></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="makerScreen" style="display:none">
+
 <header><h1>📸 Passport Photo Maker</h1><p>Manjeet Digital Hub • MediaPipe Background Removal</p></header>
 <div class="wrap">
 <div>
@@ -206,4 +239,33 @@ document.getElementById('qfinal').onclick=()=>{
 };
 renderPrintQueue();
 </script>
+
+</div>
+
+<script>
+(function(){
+  var landing=document.getElementById('landingScreen');
+  var maker=document.getElementById('makerScreen');
+  var landingUpload=document.getElementById('landingUpload');
+  var originalFile=document.getElementById('file');
+
+  landingUpload.addEventListener('click',function(){
+    originalFile.value='';
+    originalFile.click();
+  });
+
+  originalFile.addEventListener('change',function(){
+    if(originalFile.files && originalFile.files.length){
+      landing.style.display='none';
+      maker.style.display='block';
+      window.scrollTo(0,0);
+    }
+  });
+})();
+</script>
+<style>
+@media(max-width:700px){
+ .landingSteps{grid-template-columns:1fr!important}
+}
+</style>
 </body></html>
