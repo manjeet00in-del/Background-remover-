@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>0 Cost Background Remover</title>
-    <!-- यह लाइब्रेरी सीधे ब्राउज़र में AI रन करती है -->
-    <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/browser/background-removal.js"></script>
+    <title>Transformers.js BG Remover (No SIMD)</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
             text-align: center; 
-            margin-top: 50px; 
+            margin-top: 40px; 
             background-color: #f4f4f9;
         }
         #result { 
@@ -18,73 +16,85 @@
             margin-top: 20px; 
             border: 2px dashed #ccc; 
             display: none; 
-            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgfQEhjw8T//x8YmBjgNJaRUIUoGkY1gNGAwWgYRjWA0YDBaBgmNgAAS3E+f+9+kZMAAAAASUVORK5CYII='); /* Transparent checkerboard bg */
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgfQEhjw8T//x8YmBjgNJaRUIUoGkY1gNGAwWgYRjWA0YDBaBgmNgAAS3E+f+9+kZMAAAAASUVORK5CYII=');
         }
         .status { 
             color: #007bff; 
             font-weight: bold; 
             margin-top: 15px; 
         }
-        .btn {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            display: none;
-            margin-top: 15px;
-            display: inline-block;
-        }
     </style>
 </head>
 <body>
 
-    <h2>Free AI Background Remover (Zero Server Cost)</h2>
-    <p>यह पूरी तरह से आपके डिवाइस पर काम करता है!</p>
+    <h2>Offline AI Background Remover</h2>
+    <p>Transformers.js (SIMD Disabled Fallback)</p>
 
-    <!-- फोटो अपलोड करने का बटन -->
     <input type="file" id="upload" accept="image/*">
-    
     <div id="status" class="status"></div>
     <br>
-    
-    <!-- आउटपुट इमेज और डाउनलोड बटन -->
-    <img id="result" alt="Result Image"><br>
-    <a id="download-btn" class="btn" style="display: none;" download="no-bg.png">Download Photo</a>
+    <img id="result" alt="Result Image">
 
-    <script>
+    <!-- Transformers.js को इम्पोर्ट करने के लिए type="module" जरूरी है -->
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1';
+
+        // 🔴 सबसे जरूरी लाइन: पुराने प्रोसेसर के लिए SIMD को मैन्युअली बंद करना
+        env.backends.onnx.wasm.simd = false;
+
         const uploadInput = document.getElementById('upload');
         const statusText = document.getElementById('status');
         const resultImage = document.getElementById('result');
-        const downloadBtn = document.getElementById('download-btn');
+
+        let segmenter = null;
 
         uploadInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
 
-            // 1. यूज़र को स्टेटस दिखाना
-            statusText.innerText = "⏳ AI मॉडल लोड हो रहा है... (इसमें 10-15 सेकंड लग सकते हैं)";
+            const imageUrl = URL.createObjectURL(file);
+            statusText.innerText = "⏳ AI मॉडल लोड हो रहा है... (पहली बार 1-2 मिनट लग सकते हैं)";
             resultImage.style.display = 'none';
-            downloadBtn.style.display = 'none';
 
             try {
-                // 2. Client-Side AI से बैकग्राउंड हटाना
-                const imageBlob = await imglyRemoveBackground(file);
-                
-                // 3. बिना बैकग्राउंड वाली फोटो को स्क्रीन पर दिखाना
-                const url = URL.createObjectURL(imageBlob);
-                resultImage.src = url;
-                resultImage.style.display = 'inline';
-                
-                // 4. डाउनलोड बटन सेट करना
-                downloadBtn.href = url;
-                downloadBtn.style.display = 'inline-block';
+                // 1. RMBG मॉडल लोड करना
+                if (!segmenter) {
+                    segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4');
+                }
 
-                statusText.innerText = "✅ बैकग्राउंड सफलतापूर्वक हटा दिया गया! (0 Cost)";
+                statusText.innerText = "⚙️ फोटो प्रोसेस हो रही है... (SIMD बंद होने के कारण यह स्लो होगा, कृपया प्रतीक्षा करें)";
+
+                // 2. बैकग्राउंड का मास्क बनाना
+                const result = await segmenter(imageUrl);
+                const mask = result[0].mask;
+
+                // 3. मास्क को असली फोटो के ऊपर अप्लाई करना
+                const canvas = document.createElement('canvas');
+                canvas.width = mask.width;
+                canvas.height = mask.height;
+                const ctx = canvas.getContext('2d');
+
+                const img = new Image();
+                img.src = imageUrl;
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    // पिक्सल के अनुसार बैकग्राउंड को ट्रांसपेरेंट बनाना
+                    for (let i = 0; i < mask.data.length; i++) {
+                        imageData.data[i * 4 + 3] = mask.data[i]; // Alpha channel सेट करना
+                    }
+                    
+                    ctx.putImageData(imageData, 0, 0);
+                    resultImage.src = canvas.toDataURL('image/png');
+                    resultImage.style.display = 'inline';
+                    
+                    statusText.innerText = "✅ काम पूरा हो गया! (0 Cost, Without SIMD)";
+                };
                 
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "❌ कुछ गलती हो गई। कृपया फिर से कोशिश करें।";
+                statusText.innerText = "❌ एरर: " + error.message;
             }
         });
     </script>
