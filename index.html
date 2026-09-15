@@ -75,6 +75,16 @@ input[type=range]{width:100%}
  </div>
 </section>
 <div id="makerScreen">
+<div id="queueTopBar" style="position:sticky;top:6px;z-index:9999;max-width:1050px;margin:8px auto 14px;background:#fff7ed;border:3px solid #f97316;border-radius:14px;padding:12px;box-sizing:border-box;box-shadow:0 5px 18px #0003">
+ <div style="font-size:18px;font-weight:900;color:#9a3412">👥 MULTIPLE PHOTO QUEUE</div>
+ <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">
+  <label style="font-weight:800">Copies</label>
+  <input id="topPersonCopies" type="number" min="1" max="50" value="4" style="width:68px;padding:9px;border:1px solid #aaa;border-radius:8px">
+  <button id="topAddQueue" type="button" style="border:0;border-radius:10px;background:#f97316;color:white;padding:12px 18px;font-size:16px;font-weight:900;cursor:pointer">➕ ADD TO QUEUE</button>
+  <span id="topQueueStatus" style="font-weight:900;color:#7c2d12">0 Person • 0 Photos</span>
+ </div>
+ <div style="font-size:12px;color:#7c2d12;margin-top:6px">Photo edit करें → ADD TO QUEUE → अगली photo चुनें → edit करें → फिर ADD TO QUEUE.</div>
+</div>
 
 <header><h1>📸 Passport Photo Maker</h1><p>Manjeet Digital Hub • MediaPipe Background Removal</p></header>
 <div class="wrap">
@@ -266,19 +276,21 @@ document.getElementById('combinedSheet').onclick=async()=>{
  holder.scrollIntoView({behavior:'smooth',block:'start'});
 };
 
-const topCopies=document.getElementById('topPersonCopies');
-const topStatus=document.getElementById('topQueueStatus');
-document.getElementById('topAddQueue').onclick=()=>{
- document.getElementById('personCopies').value=topCopies.value;
- document.getElementById('addPerson').click();
-};
-function updateTopQueue(){
- if(!topStatus)return;
- let total=people.reduce((a,p)=>a+p.copies,0);
- topStatus.textContent=people.length+' Person • '+total+' Photos';
+const topPersonCopies=document.getElementById('topPersonCopies');
+const topQueueStatus=document.getElementById('topQueueStatus');
+function refreshTopQueue(){
+ if(!topQueueStatus)return;
+ let total=0; for(const p of people) total+=Number(p.copies)||0;
+ topQueueStatus.textContent=people.length+' Person • '+total+' Photos';
 }
-const _renderPeople=renderPeople;
-renderPeople=function(){_renderPeople();updateTopQueue();};
-updateTopQueue();
+document.getElementById('topAddQueue').addEventListener('click',function(){
+ const f=makeFinal();
+ if(!f){alert('पहले photo upload/edit करें');return;}
+ const copies=Math.max(1,Math.min(50,+topPersonCopies.value||4));
+ people.push({url:f.toDataURL('image/jpeg',.96),copies});
+ renderPeople(); refreshTopQueue();
+ setTimeout(()=>file.click(),120);
+});
+document.getElementById('clearPeople').addEventListener('click',()=>setTimeout(refreshTopQueue,0));
 </script>
 </div></body></html>
