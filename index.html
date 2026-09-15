@@ -265,5 +265,20 @@ document.getElementById('combinedSheet').onclick=async()=>{
  }
  holder.scrollIntoView({behavior:'smooth',block:'start'});
 };
+
+const topCopies=document.getElementById('topPersonCopies');
+const topStatus=document.getElementById('topQueueStatus');
+document.getElementById('topAddQueue').onclick=()=>{
+ document.getElementById('personCopies').value=topCopies.value;
+ document.getElementById('addPerson').click();
+};
+function updateTopQueue(){
+ if(!topStatus)return;
+ let total=people.reduce((a,p)=>a+p.copies,0);
+ topStatus.textContent=people.length+' Person • '+total+' Photos';
+}
+const _renderPeople=renderPeople;
+renderPeople=function(){_renderPeople();updateTopQueue();};
+updateTopQueue();
 </script>
 </div></body></html>
