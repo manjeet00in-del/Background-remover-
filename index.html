@@ -131,7 +131,23 @@ input[type=range]{width:100%}
 <div>
  <div id="editor" class="editor" style="position:absolute;left:-99999px;top:-99999px;width:350px;height:450px"><canvas id="canvas" width="700" height="900"></canvas><div class="guide"></div></div>
  <div class="panel previewArea">
-  <h3>Final Passport Photo</h3><img id="finalPreview" class="photoPreview" alt="Preview">
+  <h3>Final Passport Photo</h3>
+<div id="realQueuePanel" style="margin:12px 0 16px;padding:14px;border:2px solid #cbd5e1;border-radius:14px;background:#f8fafc">
+ <div style="font-size:18px;font-weight:900;margin-bottom:10px">🖨️ Print Queue</div>
+ <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+  <button type="button" id="qMinus" style="width:38px;height:38px;border:1px solid #cbd5e1;border-radius:8px;background:white;font-size:20px">−</button>
+  <input id="qCopies" type="number" min="1" max="50" value="4" style="width:58px;height:38px;text-align:center;border:1px solid #cbd5e1;border-radius:8px">
+  <button type="button" id="qPlus" style="width:38px;height:38px;border:1px solid #cbd5e1;border-radius:8px;background:white;font-size:20px">+</button>
+  <button type="button" id="qAdd" style="padding:11px 18px;border:0;border-radius:9px;background:#16a34a;color:white;font-weight:900;font-size:15px">➕ Add to Queue</button>
+ </div>
+ <div id="qList" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+  <button type="button" id="qNext" style="padding:10px 14px;border:1px solid #2563eb;border-radius:9px;background:white;color:#1d4ed8;font-weight:800">📷 Select Next Person</button>
+  <button type="button" id="qFinal" style="padding:10px 14px;border:0;border-radius:9px;background:#1d4ed8;color:white;font-weight:900">🖨️ Final Print Sheet</button>
+  <button type="button" id="qClear" style="padding:10px 14px;border:1px solid #ef4444;border-radius:9px;background:white;color:#dc2626;font-weight:800">Clear Queue</button>
+ </div>
+ <div id="qInfo" style="margin-top:8px;font-size:13px;font-weight:800;color:#475569">0 Person • 0 Photos</div>
+</div><img id="finalPreview" class="photoPreview" alt="Preview">
   <div id="sheet" class="sheet" style="display:none"></div>
  </div>
 </div>
@@ -224,30 +240,23 @@ const people=[];
 const peopleList=document.getElementById('peopleList');
 function renderPeople(){
  peopleList.innerHTML='';
- let total=0;
  people.forEach((p,i)=>{
-   total+=p.copies;
    const box=document.createElement('div');
-   box.style.cssText='background:#fff;border:1px solid #dbe5f3;border-radius:10px;padding:8px;text-align:center;width:105px';
-   const im=document.createElement('img');im.src=p.url;im.style.cssText='width:65px;height:82px;object-fit:cover;border:1px solid #94a3b8';
-   const t=document.createElement('div');t.style.cssText='font-size:11px;margin-top:4px;font-weight:700';t.textContent='Person '+(i+1);
-   const cp=document.createElement('input');cp.type='number';cp.min='1';cp.max='50';cp.value=p.copies;
-   cp.style.cssText='width:58px;margin-top:5px;padding:4px';
-   cp.onchange=()=>{p.copies=Math.max(1,Math.min(50,+cp.value||1));renderPeople()};
-   const del=document.createElement('button');del.textContent='Remove';del.title='Remove';del.style.cssText='border:0;background:#fee2e2;border-radius:6px;margin-top:5px;padding:4px 6px;cursor:pointer;font-size:10px';
+   box.style.cssText='background:#fff;border:1px solid #dbe5f3;border-radius:10px;padding:7px;text-align:center;width:88px';
+   const im=document.createElement('img');im.src=p.url;im.style.cssText='width:60px;height:75px;object-fit:cover;border:1px solid #94a3b8';
+   const t=document.createElement('div');t.style.cssText='font-size:11px;margin-top:3px';t.textContent='Person '+(i+1)+' × '+p.copies;
+   const del=document.createElement('button');del.textContent='×';del.title='Remove';del.style.cssText='border:0;background:#fee2e2;border-radius:6px;margin-top:4px;cursor:pointer';
    del.onclick=()=>{people.splice(i,1);renderPeople()};
-   box.append(im,t,cp,del);peopleList.appendChild(box);
+   box.append(im,t,del);peopleList.appendChild(box);
  });
- document.getElementById('queueCount').textContent=people.length;
- document.getElementById('queuePhotos').textContent=total;
 }
 document.getElementById('addPerson').onclick=()=>{
- const f=makeFinal();
- if(!f){alert('पहले photo upload/edit करें');return}
- const copies=Math.max(1,Math.min(50,+document.getElementById('personCopies').value||4));
+ const f=makeFinal(); if(!f){alert('पहले photo upload/edit करें');return}
+ const copies=Math.max(1,Math.min(20,+document.getElementById('personCopies').value||4));
  people.push({url:f.toDataURL('image/jpeg',.96),copies});
  renderPeople();
- setTimeout(()=>file.click(),150);
+ // Ready for another person: open picker. Existing person stays saved.
+ setTimeout(()=>file.click(),120);
 };
 document.getElementById('clearPeople').onclick=()=>{people.length=0;renderPeople()};
 
@@ -265,5 +274,45 @@ document.getElementById('combinedSheet').onclick=async()=>{
  }
  holder.scrollIntoView({behavior:'smooth',block:'start'});
 };
+
+// Reliable visible Print Queue
+const realQueue=[];
+const qCopies=document.getElementById('qCopies'),qList=document.getElementById('qList'),qInfo=document.getElementById('qInfo');
+document.getElementById('qMinus').onclick=()=>qCopies.value=Math.max(1,(+qCopies.value||1)-1);
+document.getElementById('qPlus').onclick=()=>qCopies.value=Math.min(50,(+qCopies.value||1)+1);
+function qRender(){
+ qList.innerHTML=''; let total=0;
+ realQueue.forEach((p,i)=>{
+  total+=p.copies;
+  const card=document.createElement('div');card.style.cssText='width:105px;padding:7px;border:1px solid #cbd5e1;border-radius:10px;background:white;text-align:center';
+  const im=document.createElement('img');im.src=p.url;im.style.cssText='width:72px;height:92px;object-fit:cover;border:1px solid #334155';
+  const lab=document.createElement('div');lab.textContent='Person '+(i+1);lab.style.cssText='font-size:11px;font-weight:800;margin:3px';
+  const row=document.createElement('div');row.style.cssText='display:flex;justify-content:center;gap:3px;align-items:center';
+  const minus=document.createElement('button');minus.textContent='−';
+  const num=document.createElement('span');num.textContent=p.copies;num.style.cssText='min-width:20px;font-weight:800';
+  const plus=document.createElement('button');plus.textContent='+';
+  [minus,plus].forEach(b=>b.style.cssText='width:25px;height:25px;border:1px solid #cbd5e1;background:#fff;border-radius:5px');
+  minus.onclick=()=>{p.copies=Math.max(1,p.copies-1);qRender()};
+  plus.onclick=()=>{p.copies=Math.min(50,p.copies+1);qRender()};
+  const del=document.createElement('button');del.textContent='🗑';del.style.cssText='margin-top:4px;border:0;background:#fee2e2;border-radius:5px';
+  del.onclick=()=>{realQueue.splice(i,1);qRender()};
+  row.append(minus,num,plus);card.append(im,lab,row,del);qList.appendChild(card);
+ });
+ qInfo.textContent=realQueue.length+' Person • '+total+' Photos';
+}
+document.getElementById('qAdd').onclick=()=>{
+ const f=makeFinal(); if(!f){alert('पहले photo upload और edit करें');return}
+ realQueue.push({url:f.toDataURL('image/jpeg',.96),copies:Math.max(1,Math.min(50,+qCopies.value||4))});
+ qRender();
+};
+document.getElementById('qNext').onclick=()=>file.click();
+document.getElementById('qClear').onclick=()=>{realQueue.length=0;qRender()};
+document.getElementById('qFinal').onclick=()=>{
+ if(!realQueue.length){alert('Queue में पहले photo add करें');return}
+ sheet.innerHTML='';sheet.style.display='grid';sheet.style.gridTemplateColumns='repeat(5,1fr)';sheet.style.gap='6px';
+ realQueue.forEach(p=>{for(let i=0;i<p.copies;i++){const im=document.createElement('img');im.src=p.url;im.style.cssText='width:100%;display:block;border:1px solid #222;box-sizing:border-box';sheet.appendChild(im)}});
+ sheet.scrollIntoView({behavior:'smooth',block:'start'});
+};
+qRender();
 </script>
 </div></body></html>
