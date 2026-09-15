@@ -177,8 +177,8 @@ document.getElementById('reset').onclick=()=>{file.value='';original=working=nul
 
 // Welcome -> actual maker. Reuse the existing upload input so selected photo carries into editor.
 const welcomeScreen=document.getElementById('welcomeScreen'), makerScreen=document.getElementById('makerScreen');
-document.getElementById('heroUpload').onclick=()=>upload.click();
-upload.addEventListener('change',()=>{if(upload.files&&upload.files[0]){welcomeScreen.style.display='none';makerScreen.style.display='block';window.scrollTo(0,0)}});
+document.getElementById('heroUpload').onclick=()=>file.click();
+file.addEventListener('change',()=>{if(file.files&&file.files[0]){welcomeScreen.style.display='none';makerScreen.style.display='block';window.scrollTo(0,0)}});
 
 // Advanced sheet controls
 const gapX=document.getElementById('gapX'),gapY=document.getElementById('gapY'),
