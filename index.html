@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transformers.js BG Remover (No SIMD)</title>
+    <title>MediaPipe AI Background Remover</title>
+    <!-- Google MediaPipe लाइब्रेरी -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -11,91 +13,98 @@
             margin-top: 40px; 
             background-color: #f4f4f9;
         }
-        #result { 
+        canvas { 
             max-width: 400px; 
             margin-top: 20px; 
             border: 2px dashed #ccc; 
             display: none; 
-            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgfQEhjw8T//x8YmBjgNJaRUIUoGkY1gNGAwWgYRjWA0YDBaBgmNgAAS3E+f+9+kZMAAAAASUVORK5CYII=');
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgfQEhjw8T//x8YmBjgNJaRUIUoGkY1gNGAwWgYRjWA0YDBaBgmNgAAS3E+f+9+kZMAAAAASUVORK5CYII='); /* Transparent checkerboard bg */
         }
         .status { 
             color: #007bff; 
             font-weight: bold; 
             margin-top: 15px; 
         }
+        .btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: none;
+            margin-top: 15px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
-    <h2>Offline AI Background Remover</h2>
-    <p>Transformers.js (SIMD Disabled Fallback)</p>
+    <h2>Fast AI Background Remover</h2>
+    <p>Powered by Google MediaPipe (Works on Older PCs)</p>
 
     <input type="file" id="upload" accept="image/*">
     <div id="status" class="status"></div>
+    
     <br>
-    <img id="result" alt="Result Image">
+    <!-- कैनवस जहाँ फाइनल फोटो दिखेगी -->
+    <canvas id="canvas"></canvas><br>
+    <a id="download-btn" class="btn" download="no-bg.png">Download Photo</a>
 
-    <!-- Transformers.js को इम्पोर्ट करने के लिए type="module" जरूरी है -->
-    <script type="module">
-        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1';
-
-        // 🔴 सबसे जरूरी लाइन: पुराने प्रोसेसर के लिए SIMD को मैन्युअली बंद करना
-        env.backends.onnx.wasm.simd = false;
-
+    <script>
         const uploadInput = document.getElementById('upload');
         const statusText = document.getElementById('status');
-        const resultImage = document.getElementById('result');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const downloadBtn = document.getElementById('download-btn');
 
-        let segmenter = null;
+        // 1. MediaPipe Selfie Segmentation सेटअप करना
+        const selfieSegmentation = new SelfieSegmentation({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
+        }});
 
+        selfieSegmentation.setOptions({
+            modelSelection: 1, // 1 = हल्का और फ़ास्ट मॉडल
+        });
+
+        // 2. जब AI अपना काम पूरा कर ले, तब क्या करना है:
+        selfieSegmentation.onResults((results) => {
+            canvas.width = results.image.width;
+            canvas.height = results.image.height;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // बैकग्राउंड को ट्रांसपेरेंट बनाना
+            ctx.globalCompositeOperation = 'copy';
+            ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+
+            ctx.globalCompositeOperation = 'source-in';
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+            canvas.style.display = 'inline';
+            downloadBtn.href = canvas.toDataURL('image/png');
+            downloadBtn.style.display = 'inline-block';
+            
+            statusText.innerText = "✅ बैकग्राउंड हटा दिया गया! (0 Cost)";
+        });
+
+        let currentImg = new Image();
+
+        // 3. फोटो अपलोड होने पर प्रोसेसिंग शुरू करना
         uploadInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
 
-            const imageUrl = URL.createObjectURL(file);
-            statusText.innerText = "⏳ AI मॉडल लोड हो रहा है... (पहली बार 1-2 मिनट लग सकते हैं)";
-            resultImage.style.display = 'none';
+            statusText.innerText = "⏳ फोटो प्रोसेस हो रही है... कृपया प्रतीक्षा करें।";
+            canvas.style.display = 'none';
+            downloadBtn.style.display = 'none';
 
-            try {
-                // 1. RMBG मॉडल लोड करना
-                if (!segmenter) {
-                    segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4');
-                }
-
-                statusText.innerText = "⚙️ फोटो प्रोसेस हो रही है... (SIMD बंद होने के कारण यह स्लो होगा, कृपया प्रतीक्षा करें)";
-
-                // 2. बैकग्राउंड का मास्क बनाना
-                const result = await segmenter(imageUrl);
-                const mask = result[0].mask;
-
-                // 3. मास्क को असली फोटो के ऊपर अप्लाई करना
-                const canvas = document.createElement('canvas');
-                canvas.width = mask.width;
-                canvas.height = mask.height;
-                const ctx = canvas.getContext('2d');
-
-                const img = new Image();
-                img.src = imageUrl;
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    
-                    // पिक्सल के अनुसार बैकग्राउंड को ट्रांसपेरेंट बनाना
-                    for (let i = 0; i < mask.data.length; i++) {
-                        imageData.data[i * 4 + 3] = mask.data[i]; // Alpha channel सेट करना
-                    }
-                    
-                    ctx.putImageData(imageData, 0, 0);
-                    resultImage.src = canvas.toDataURL('image/png');
-                    resultImage.style.display = 'inline';
-                    
-                    statusText.innerText = "✅ काम पूरा हो गया! (0 Cost, Without SIMD)";
-                };
-                
-            } catch (error) {
-                console.error(error);
-                statusText.innerText = "❌ एरर: " + error.message;
-            }
+            const url = URL.createObjectURL(file);
+            currentImg.src = url;
+            
+            currentImg.onload = async () => {
+                // इमेज को MediaPipe के पास भेजना
+                await selfieSegmentation.send({image: currentImg});
+            };
         });
     </script>
 </body>
