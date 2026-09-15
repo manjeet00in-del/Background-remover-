@@ -23,9 +23,53 @@ button,select,input[type=number]{font:inherit}.btn{border:0;border-radius:9px;pa
 input[type=range]{width:100%}
 @media(max-width:760px){.wrap{grid-template-columns:1fr}.panel{margin-bottom:10px}.editor{max-width:360px}.sheet{grid-template-columns:repeat(3,1fr)}}
 @media print{body *{visibility:hidden}.sheet,.sheet *{visibility:visible}.sheet{position:absolute;left:0;top:0;width:100%;max-width:none;grid-template-columns:repeat(5,1fr)!important;gap:4mm;padding:8mm}header,.controlsPrint{display:none}}
+
+/* --- Passport Maker welcome/upload screen --- */
+#welcomeScreen{min-height:100vh;background:linear-gradient(180deg,#f7faff,#eef5ff);padding:28px 16px 55px}
+.welcomeBox{max-width:1050px;margin:auto;text-align:center}
+.brandMini{font-weight:800;color:#1746c7;font-size:18px;margin-bottom:18px}
+.heroTitle{font-size:clamp(30px,5vw,54px);line-height:1.08;margin:12px auto;color:#172554;max-width:850px}
+.heroTitle span{color:#7c3aed}
+.heroText{max-width:760px;margin:14px auto 24px;color:#526174;font-size:17px;line-height:1.6}
+.uploadHero{display:block;max-width:900px;margin:24px auto;background:linear-gradient(135deg,#2448db,#2f80ed);color:white;padding:45px 20px;border-radius:20px;box-shadow:0 16px 35px #1d4ed822;cursor:pointer;border:0;width:100%}
+.uploadHero .ico{font-size:42px;display:block;margin-bottom:8px}
+.uploadHero b{font-size:22px;display:block}.uploadHero small{opacity:.9}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:38px auto 12px;max-width:950px}
+.step{background:white;border:1px solid #dbe5f3;border-radius:16px;padding:22px 15px;box-shadow:0 8px 22px #0f172a0b}
+.step .n{width:46px;height:46px;display:grid;place-items:center;margin:0 auto 10px;border-radius:50%;background:#dbeafe;font-size:23px}
+.step h3{margin:6px 0}.step p{color:#64748b;font-size:14px;line-height:1.5}
+.privacyNote{font-size:13px;color:#64748b;margin-top:14px}
+#makerScreen{display:none}
+@media(max-width:700px){.steps{grid-template-columns:1fr}.uploadHero{padding:34px 16px}}
+/* --- Advanced print sheet controls --- */
+.sheetControls{background:#f8fafc;border:1px solid #dbe5f3;border-radius:14px;padding:14px;margin-top:14px}
+.sheetGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.sheetGrid label{font-size:13px;font-weight:700;color:#475569}
+.sheetGrid input,.sheetGrid select{width:100%}
+.sheetActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:600px){.sheetGrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+<section id="welcomeScreen">
+ <div class="welcomeBox">
+  <div class="brandMini">MANJEET DIGITAL HUB</div>
+  <h1 class="heroTitle">Online Passport Photo Maker <span>& Print Sheet</span></h1>
+  <p class="heroText">Photo upload करें और कुछ आसान steps में passport/PAN/visa size photo तैयार करें। Background removal browser में MediaPipe person segmentation से होता है, फिर आप background, size, zoom, position और photo enhancement adjust कर सकते हैं.</p>
+  <button class="uploadHero" id="heroUpload">
+   <span class="ico">☁️</span><b>Click to Upload Photo</b>
+   <small>JPG, PNG या phone photo चुनें</small>
+  </button>
+  <div class="privacyNote">🔒 Processing आपके browser/device पर होती है; इस tool को background removal के लिए अलग upload server की जरूरत नहीं है.</div>
+  <div class="steps">
+   <div class="step"><div class="n">⬆️</div><h3>1. Upload Photo</h3><p>Phone या computer से अपनी photo select करें.</p></div>
+   <div class="step"><div class="n">✨</div><h3>2. Remove BG & Adjust</h3><p>Background remove करें, सही country size चुनें और zoom/position/enhance करें.</p></div>
+   <div class="step"><div class="n">🖨️</div><h3>3. Download & Print</h3><p>Final photo download करें या A4 print sheet बनाकर HD में save/print करें.</p></div>
+  </div>
+ </div>
+</section>
+<div id="makerScreen">
+
 <header><h1>📸 Passport Photo Maker</h1><p>Manjeet Digital Hub • MediaPipe Background Removal</p></header>
 <div class="wrap">
 <div>
@@ -130,5 +174,42 @@ download.onclick=()=>{const a=document.createElement('a');a.href=makeFinal();a.d
 makeSheet.onclick=()=>{const d=makeFinal();if(!d)return;sheet.innerHTML='';let n=Math.max(1,Math.min(24,+document.getElementById('copies').value||8));for(let i=0;i<n;i++){const im=new Image();im.src=d;sheet.appendChild(im)}sheet.style.display='grid';printBtn.disabled=false;sheet.scrollIntoView({behavior:'smooth'})};
 printBtn.onclick=()=>window.print();
 document.getElementById('reset').onclick=()=>{file.value='';original=working=null;ctx.clearRect(0,0,canvas.width,canvas.height);finalPreview.removeAttribute('src');sheet.innerHTML='';sheet.style.display='none';remove.disabled=download.disabled=makeSheet.disabled=printBtn.disabled=true;zoom.value=100;xpos.value=0;ypos.value=0;statusEl.textContent='पहले photo select करें।'};
+
+// Welcome -> actual maker. Reuse the existing upload input so selected photo carries into editor.
+const welcomeScreen=document.getElementById('welcomeScreen'), makerScreen=document.getElementById('makerScreen');
+document.getElementById('heroUpload').onclick=()=>upload.click();
+upload.addEventListener('change',()=>{if(upload.files&&upload.files[0]){welcomeScreen.style.display='none';makerScreen.style.display='block';window.scrollTo(0,0)}});
+
+// Advanced sheet controls
+const gapX=document.getElementById('gapX'),gapY=document.getElementById('gapY'),
+ marginTop=document.getElementById('marginTop'),marginLeft=document.getElementById('marginLeft'),
+ paperSize=document.getElementById('paperSize'),copies2=document.getElementById('sheetCopies2');
+function syncSheetLabels(){
+ document.getElementById('gapXVal').textContent=gapX.value;document.getElementById('gapYVal').textContent=gapY.value;
+ document.getElementById('marginTopVal').textContent=marginTop.value;document.getElementById('marginLeftVal').textContent=marginLeft.value;
+}
+[gapX,gapY,marginTop,marginLeft].forEach(e=>e.oninput=syncSheetLabels);
+document.getElementById('resetSheet').onclick=()=>{gapX.value=2;gapY.value=2;marginTop.value=5;marginLeft.value=5;copies2.value=10;paperSize.value='a4';syncSheetLabels()};
+
+document.getElementById('downloadSheet').onclick=()=>{
+ const photo=makeFinal(); if(!photo){alert('पहले photo upload करें');return}
+ let mw,mh;if(sizeSel.value==='custom'){mw=+customW.value||35;mh=+customH.value||45}else{[mw,mh]=sizeSel.value.split(',').map(Number)}
+ const dpi=300, mm2px=mm=>Math.round(mm/25.4*dpi);
+ let pw=210,ph=297;if(paperSize.value==='4x6'){pw=101.6;ph=152.4}
+ const out=document.createElement('canvas');out.width=mm2px(pw);out.height=mm2px(ph);
+ const c=out.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,out.width,out.height);
+ const w=mm2px(mw),h=mm2px(mh),gx=mm2px(+gapX.value),gy=mm2px(+gapY.value),
+       ml=mm2px(+marginLeft.value),mt=mm2px(+marginTop.value);
+ const img=new Image();img.onload=()=>{
+   let x=ml,y=mt,n=0,max=Math.max(1,Math.min(40,+copies2.value||10));
+   while(n<max){
+     if(x+w>out.width){x=ml;y+=h+gy}
+     if(y+h>out.height)break;
+     c.drawImage(img,x,y,w,h);x+=w+gx;n++;
+   }
+   const a=document.createElement('a');a.download='passport-photo-sheet-300dpi.png';a.href=out.toDataURL('image/png');a.click();
+ };img.src=photo.toDataURL('image/jpeg',.96);
+};
+syncSheetLabels();
 </script>
-</body></html>
+</div></body></html>
