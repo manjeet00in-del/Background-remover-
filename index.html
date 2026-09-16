@@ -38,7 +38,8 @@ h3{font-size:16px;margin:0 0 11px}.upload{display:block;border:2px dashed #8aa4c
   <div class="row"><label>Brightness</label><input id="brightness" type="range" min="50" max="170" value="100"></div>
   <div class="row"><label>Contrast</label><input id="contrast" type="range" min="50" max="220" value="100"></div>
   <div class="row"><label>Mode</label><select id="mode"><option value="color">Color</option><option value="clean">Clean Document</option><option value="gray">Grayscale</option><option value="bw">Black & White</option></select></div>
-  <div class="actions"><button class="btn gray" id="resetCrop">Reset Crop</button><button class="btn" id="applyCrop">Apply Crop</button></div>
+  <button class="btn green" id="autoCrop" style="width:100%;margin-top:4px">✨ Auto Detect Document</button>
+  <div class="actions"><button class="btn gray" id="resetCrop">Full Page Crop</button><button class="btn" id="applyCrop">Apply Crop</button></div>
   <button class="btn gray" id="resetAll" style="width:100%;margin-top:8px">↻ Reset All</button>
   <p class="hint">Blue box को finger से move करें। चार blue circles से crop area resize करें।</p>
  </div>
@@ -79,7 +80,7 @@ function updateMobile(){
  let scale=Math.min(1,280/fc.width);mc.width=Math.max(1,Math.round(fc.width*scale));mc.height=Math.max(1,Math.round(fc.height*scale));
  mctx.clearRect(0,0,mc.width,mc.height);mctx.drawImage(fc,0,0,mc.width,mc.height)
 }
-function resetCrop(){if(!img)return;$('crop').classList.remove('hide');cr={x:can.width*.06,y:can.height*.06,w:can.width*.88,h:can.height*.88};positionCrop();updateMobile()}
+function resetCrop(){if(!img)return;$('crop').classList.remove('hide');cr={x:0,y:0,w:can.width,h:can.height};positionCrop();updateMobile()}
 function positionCrop(){let e=$('crop');e.style.left=cr.x+'px';e.style.top=cr.y+'px';e.style.width=cr.w+'px';e.style.height=cr.h+'px'}
 $('resetCrop').onclick=resetCrop;
 $('left').onclick=()=>{if(img){angle-=90;draw();resetCrop()}};
@@ -96,9 +97,55 @@ $('crop').onpointermove=e=>{
 };
 $('crop').onpointerup=$('crop').onpointercancel=()=>drag=null;
 function finalCanvas(){
- if(!img||!cr.w)return null;let o=document.createElement('canvas');o.width=Math.round(cr.w);o.height=Math.round(cr.h);
- o.getContext('2d').drawImage(can,cr.x,cr.y,cr.w,cr.h,0,0,o.width,o.height);return o
+ if(!img||!cr.w||!cr.h)return null;
+ let x=Math.max(0,Math.floor(cr.x)),y=Math.max(0,Math.floor(cr.y));
+ let w=Math.min(can.width-x,Math.ceil(cr.w)),h=Math.min(can.height-y,Math.ceil(cr.h));
+ if(w<1||h<1)return null;
+ let o=document.createElement('canvas');o.width=w;o.height=h;
+ o.getContext('2d').drawImage(can,x,y,w,h,0,0,w,h);return o
 }
+
+/* Local auto document detection: detects light/contrasting page edges.
+   No upload/API is used; it runs entirely in the browser. */
+function autoDetect(){
+ if(!img)return alert('पहले document photo upload करें।');
+ const W=can.width,H=can.height;
+ const tw=Math.min(420,W),th=Math.max(1,Math.round(H*tw/W));
+ const t=document.createElement('canvas');t.width=tw;t.height=th;
+ const tc=t.getContext('2d',{willReadFrequently:true});tc.drawImage(can,0,0,tw,th);
+ const d=tc.getImageData(0,0,tw,th).data;
+ const lum=(x,y)=>{let i=(y*tw+x)*4;return .299*d[i]+.587*d[i+1]+.114*d[i+2]};
+ // Estimate background brightness from a border band.
+ let bg=0,n=0,band=Math.max(2,Math.round(Math.min(tw,th)*.035));
+ for(let y=0;y<th;y+=2)for(let x=0;x<tw;x+=2)
+   if(x<band||x>=tw-band||y<band||y>=th-band){bg+=lum(x,y);n++}
+ bg/=Math.max(1,n);
+ // Score rows/columns for pixels differing from border background.
+ let cols=new Array(tw).fill(0),rows=new Array(th).fill(0);
+ for(let y=0;y<th;y+=2)for(let x=0;x<tw;x+=2){
+   let L=lum(x,y),diff=Math.abs(L-bg);
+   // Document pages are commonly brighter than surroundings, but difference also handles white backgrounds.
+   if(diff>22 || (L>bg+14)){cols[x]++;rows[y]++}
+ }
+ // Smooth sparse scores.
+ function smooth(a,r=5){return a.map((_,i)=>{let z=0,c=0;for(let j=Math.max(0,i-r);j<=Math.min(a.length-1,i+r);j++){z+=a[j];c++}return z/c})}
+ cols=smooth(cols);rows=smooth(rows);
+ const cmax=Math.max(...cols),rmax=Math.max(...rows);
+ let xs=[],ys=[];
+ cols.forEach((v,i)=>{if(v>cmax*.16)xs.push(i)});
+ rows.forEach((v,i)=>{if(v>rmax*.16)ys.push(i)});
+ if(!xs.length||!ys.length){resetCrop();return alert('Document edge साफ detect नहीं हुई। Full Page Crop लगाया है; blue corners से adjust करें।')}
+ let l=Math.min(...xs),r=Math.max(...xs),top=Math.min(...ys),bot=Math.max(...ys);
+ // Small safety margin prevents cutting document edges.
+ let mx=Math.round(tw*.018),my=Math.round(th*.018);
+ l=Math.max(0,l-mx);r=Math.min(tw-1,r+mx);top=Math.max(0,top-my);bot=Math.min(th-1,bot+my);
+ // Reject implausibly tiny detections.
+ if((r-l)<tw*.35||(bot-top)<th*.35){resetCrop();return alert('Document edge साफ detect नहीं हुई। Full Page Crop लगाया है; blue corners से adjust करें।')}
+ cr={x:l/tw*W,y:top/th*H,w:(r-l+1)/tw*W,h:(bot-top+1)/th*H};
+ positionCrop();updateMobile();
+}
+$('autoCrop').onclick=autoDetect;
+
 $('applyCrop').onclick=()=>{let o=finalCanvas();if(!o)return alert('पहले document photo upload करें।');let i=new Image();i.onload=()=>{img=i;angle=0;draw();resetCrop()};i.src=o.toDataURL('image/png')};
 $('resetAll').onclick=()=>{if(!original)return;img=original;angle=0;$('brightness').value=100;$('contrast').value=100;$('mode').value='color';draw();resetCrop()};
 function download(type,ext){let o=finalCanvas();if(!o)return alert('पहले document photo upload करें।');let a=document.createElement('a');a.download='manjeet-document.'+ext;a.href=o.toDataURL(type,.95);a.click()}
