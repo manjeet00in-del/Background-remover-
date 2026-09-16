@@ -24,6 +24,8 @@ label{font-size:11px;font-weight:700;display:block;margin:7px 0 4px}input,select
 .card img{width:100%;height:100%;object-fit:fill;display:block}
 .cut{position:absolute;background:#111;opacity:.65}
 .emptyCard{font-size:8px;color:#94a3b8;text-align:center}
+.queueItem{display:grid;grid-template-columns:42px 42px 1fr 34px 34px 34px;gap:5px;align-items:center;border:1px solid #e2e8f0;border-radius:9px;padding:6px;margin-top:6px;background:#fff}
+.queueItem img{width:42px;height:28px;object-fit:cover;border-radius:4px;border:1px solid #ddd}.queueItem .qname{font-size:10px;min-width:0;overflow:hidden}.queueItem button{min-height:30px;padding:2px;font-size:12px}.queueEmpty{font-size:10px;color:#64748b;text-align:center;padding:8px;background:#f8fafc;border-radius:8px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.stat{background:#eff6ff;border-radius:8px;padding:7px;text-align:center}.stat span{font-size:9px;color:#64748b;display:block}.stat b{font-size:11px}
 @media(max-width:760px){
  .wrap{display:flex;flex-direction:column;padding:8px}.previewWrap{order:-1;position:sticky;top:67px;z-index:25;background:#f4f7fb;padding-bottom:5px}.controls{order:1}
@@ -37,19 +39,25 @@ label{font-size:11px;font-weight:700;display:block;margin:7px 0 4px}input,select
 <div class="wrap">
 <div class="controls">
  <div class="panel">
-  <h3>1. Upload ID Card</h3>
-  <div class="grid2">
-   <label class="upload">🪪<b>Front Image</b><small>JPG / PNG</small><input id="frontFile" type="file" accept="image/*"></label>
+  <h3>1. Add Person ID to Queue</h3>
+  <label>Person Name / Label</label>
+  <input id="personName" type="text" placeholder="e.g. Manjeet">
+  <div class="grid2" style="margin-top:8px">
+   <label class="upload">🪪<b>Front Image</b><small>Required</small><input id="frontFile" type="file" accept="image/*"></label>
    <label class="upload">🔄<b>Back Image</b><small>Optional</small><input id="backFile" type="file" accept="image/*"></label>
   </div>
-  <div class="note">Employee ID, School ID ya kisi bhi ready ID card ki front/back image upload kar sakte hain.</div>
+  <label>Copies for this person</label>
+  <input id="personCopies" type="number" min="1" max="20" value="1">
+  <button id="addPerson" class="btn" style="margin-top:8px">➕ Add Person to Queue</button>
+  <div id="queue" style="margin-top:9px"></div>
+  <div class="note">Har person ka Front + Back add karein. Queue ke sabhi different ID cards ek hi A4 sheet me arrange honge.</div>
  </div>
  <div class="panel">
   <h3>2. Card Size & Layout</h3>
   <label>Standard / Custom Size</label>
   <select id="sizePreset"><option value="85.6,54">CR80 Standard — 85.6 × 54 mm</option><option value="54,85.6">CR80 Portrait — 54 × 85.6 mm</option><option value="custom">Custom Size</option></select>
   <div class="grid2"><div><label>Width (mm)</label><input id="cardW" type="number" step=".1" value="85.6"></div><div><label>Height (mm)</label><input id="cardH" type="number" step=".1" value="54"></div></div>
-  <div class="grid2"><div><label>Copies</label><input id="copies" type="number" min="1" max="30" value="8"></div><div><label>Gap (mm)</label><input id="gap" type="number" min="0" max="15" step=".5" value="4"></div></div>
+  <div class="grid2"><div><label>Total Queued IDs</label><input id="copies" type="number" value="0" readonly></div><div><label>Gap (mm)</label><input id="gap" type="number" min="0" max="15" step=".5" value="4"></div></div>
   <div class="grid2"><div><label>Page Margin (mm)</label><input id="margin" type="number" min="0" max="30" step=".5" value="10"></div><div><label>Image Fit</label><select id="fit"><option value="fill">Exact Card Size</option><option value="contain">Fit Inside</option><option value="cover">Crop to Fill</option></select></div></div>
   <div class="check"><input id="cutMarks" type="checkbox" checked> Show cut marks</div>
  </div>
@@ -80,23 +88,43 @@ label{font-size:11px;font-weight:700;display:block;margin:7px 0 4px}input,select
 <script>
 (function(){
 "use strict";
-var $=function(id){return document.getElementById(id)},front="",back="",side="front";
-var PW=210,PH=297,pxPerMm=3.2;
-function readFile(inp,cb){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){cb(r.result);render()};r.readAsDataURL(f)}
-$("frontFile").onchange=function(){readFile(this,function(v){front=v})};
-$("backFile").onchange=function(){readFile(this,function(v){back=v})};
+var $=function(id){return document.getElementById(id)},queue=[],tempFront="",tempBack="",side="front",PW=210,PH=297;
+function readFile(inp,cb){var f=inp.files[0];if(!f){cb("");return}var r=new FileReader();r.onload=function(){cb(r.result)};r.readAsDataURL(f)}
+$("frontFile").onchange=function(){readFile(this,function(v){tempFront=v})};
+$("backFile").onchange=function(){readFile(this,function(v){tempBack=v})};
+
+function expanded(){
+ var a=[];queue.forEach(function(q){for(var i=0;i<q.copies;i++)a.push({front:q.front,back:q.back,name:q.name})});return a;
+}
+function renderQueue(){
+ var q=$("queue");q.innerHTML="";
+ if(!queue.length)q.innerHTML='<div class="queueEmpty">Queue empty — add first person.</div>';
+ queue.forEach(function(it,i){
+  var d=document.createElement("div");d.className="queueItem";
+  d.innerHTML='<img src="'+it.front+'"><img src="'+(it.back||it.front)+'"><div class="qname"><b>'+esc(it.name||("Person "+(i+1)))+'</b><br>'+it.copies+' cop'+(it.copies>1?'ies':'y')+'</div><button class="btn alt" data-a="up">↑</button><button class="btn alt" data-a="down">↓</button><button class="btn danger" data-a="del">×</button>';
+  d.querySelector('[data-a=up]').onclick=function(){if(i>0){var x=queue.splice(i,1)[0];queue.splice(i-1,0,x);renderQueue();render()}};
+  d.querySelector('[data-a=down]').onclick=function(){if(i<queue.length-1){var x=queue.splice(i,1)[0];queue.splice(i+1,0,x);renderQueue();render()}};
+  d.querySelector('[data-a=del]').onclick=function(){queue.splice(i,1);renderQueue();render()};
+  q.appendChild(d);
+ });
+ $("copies").value=expanded().length;
+}
+function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML}
+$("addPerson").onclick=function(){
+ if(!tempFront)return alert("Front ID image select karein.");
+ queue.push({name:$("personName").value.trim()||("Person "+(queue.length+1)),front:tempFront,back:tempBack,copies:Math.max(1,Math.min(20,+$("personCopies").value||1))});
+ $("personName").value="";$("personCopies").value=1;$("frontFile").value="";$("backFile").value="";tempFront=tempBack="";
+ renderQueue();render();
+};
+
 function vals(){
- var w=Math.max(10,+$("cardW").value||85.6),h=Math.max(10,+$("cardH").value||54),g=Math.max(0,+$("gap").value||0),m=Math.max(0,+$("margin").value||0),n=Math.max(1,Math.min(30,+$("copies").value||1));
+ var w=Math.max(10,+$("cardW").value||85.6),h=Math.max(10,+$("cardH").value||54),g=Math.max(0,+$("gap").value||0),m=Math.max(0,+$("margin").value||0);
  var cols=Math.max(1,Math.floor((PW-2*m+g)/(w+g))),rows=Math.max(1,Math.floor((PH-2*m+g)/(h+g)));
- return {w:w,h:h,g:g,m:m,n:n,cols:cols,rows:rows,cap:cols*rows};
+ return {w:w,h:h,g:g,m:m,cols:cols,rows:rows,cap:cols*rows};
 }
 function positionFor(i,v,isBack){
- var col=i%v.cols,row=Math.floor(i/v.cols),x=v.m+col*(v.w+v.g),y=v.m+row*(v.h+v.g);
- if(isBack){
-  var a=$("backAlign").value;
-  if(a==="mirrorX"||a==="mirrorXY")x=PW-v.m-v.w-col*(v.w+v.g);
-  if(a==="mirrorY"||a==="mirrorXY")y=PH-v.m-v.h-row*(v.h+v.g);
- }
+ var col=i%v.cols,row=Math.floor(i/v.cols),x=v.m+col*(v.w+v.g),y=v.m+row*(v.h+v.g),a=$("backAlign").value;
+ if(isBack){if(a==="mirrorX"||a==="mirrorXY")x=PW-v.m-v.w-col*(v.w+v.g);if(a==="mirrorY"||a==="mirrorXY")y=PH-v.m-v.h-row*(v.h+v.g)}
  return{x:x,y:y};
 }
 function addCut(p,x,y,w,h,scale){
@@ -104,49 +132,48 @@ function addCut(p,x,y,w,h,scale){
  items.forEach(function(a){var d=document.createElement("div");d.className="cut";d.style.left=(a[0]*scale)+"px";d.style.top=(a[1]*scale)+"px";d.style.width=(a[2]*scale)+"px";d.style.height=(a[3]*scale)+"px";p.appendChild(d)});
 }
 function render(){
- var v=vals(),p=$("paper"),outer=p.parentNode,avail=Math.min(650,outer.clientWidth-10),scale=Math.max(.5,avail/PW);
+ var v=vals(),p=$("paper"),outer=p.parentNode,avail=Math.min(650,outer.clientWidth-10),scale=Math.max(.5,avail/PW),ids=expanded(),count=Math.min(ids.length,v.cap),isBack=side==="back";
  p.innerHTML="";p.style.width=(PW*scale)+"px";p.style.height=(PH*scale)+"px";
- var isBack=side==="back",src=isBack?back:front,count=Math.min(v.n,v.cap);
  for(var i=0;i<count;i++){
-  var pos=positionFor(i,v,isBack),d=document.createElement("div");d.className="card";d.style.left=(pos.x*scale)+"px";d.style.top=(pos.y*scale)+"px";d.style.width=(v.w*scale)+"px";d.style.height=(v.h*scale)+"px";
-  if(src){var im=document.createElement("img");im.src=src;im.style.objectFit=$("fit").value;d.appendChild(im)}else{d.innerHTML='<div class="emptyCard">'+(isBack?"BACK IMAGE":"FRONT IMAGE")+'</div>';d.style.border="1px dashed #cbd5e1"}
+  var pos=positionFor(i,v,isBack),src=isBack?ids[i].back:ids[i].front,d=document.createElement("div");d.className="card";d.style.left=(pos.x*scale)+"px";d.style.top=(pos.y*scale)+"px";d.style.width=(v.w*scale)+"px";d.style.height=(v.h*scale)+"px";
+  if(src){var im=document.createElement("img");im.src=src;im.style.objectFit=$("fit").value;d.appendChild(im)}
+  else{d.innerHTML='<div class="emptyCard">NO BACK<br>'+esc(ids[i].name)+'</div>';d.style.border="1px dashed #cbd5e1"}
   p.appendChild(d);addCut(p,pos.x,pos.y,v.w,v.h,scale);
  }
  $("capacity").textContent=v.cap+" cards";$("gridInfo").textContent=v.rows+" × "+v.cols;$("showing").textContent=isBack?"Back":"Front";
 }
-["cardW","cardH","copies","gap","margin","fit","cutMarks","backAlign"].forEach(function(id){$(id).oninput=render;$(id).onchange=render});
+["cardW","cardH","gap","margin","fit","cutMarks","backAlign"].forEach(function(id){$(id).oninput=render;$(id).onchange=render});
 $("sizePreset").onchange=function(){if(this.value!=="custom"){var a=this.value.split(",");$("cardW").value=a[0];$("cardH").value=a[1]}render()};
 $("frontTab").onclick=function(){side="front";this.className="btn alt active";$("backTab").className="btn alt";render()};
 $("backTab").onclick=function(){side="back";this.className="btn alt active";$("frontTab").className="btn alt";render()};
+
+function loadImg(src){return new Promise(function(resolve){if(!src)return resolve(null);var im=new Image();im.onload=function(){resolve(im)};im.onerror=function(){resolve(null)};im.src=src})}
+function drawFit(x,img,X,Y,W,H,fit){
+ if(!img)return;
+ if(fit==="fill"){x.drawImage(img,X,Y,W,H);return}
+ var ir=img.width/img.height,tr=W/H,sw=img.width,sh=img.height,sx=0,sy=0,dw=W,dh=H,dx=X,dy=Y;
+ if(fit==="contain"){if(ir>tr){dh=W/ir;dy=Y+(H-dh)/2}else{dw=H*ir;dx=X+(W-dw)/2}}
+ else{if(ir>tr){sw=img.height*tr;sx=(img.width-sw)/2}else{sh=img.width/tr;sy=(img.height-sh)/2}}
+ x.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
+}
 function makeCanvas(which){
- var v=vals(),S=4,c=document.createElement("canvas");c.width=Math.round(PW*S);c.height=Math.round(PH*S);var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
- var src=which==="back"?back:front,count=Math.min(v.n,v.cap),pending=[],fit=$("fit").value;
- function drawCard(i,img){
-  var q=positionFor(i,v,which==="back"),X=q.x*S,Y=q.y*S,W=v.w*S,H=v.h*S;
-  if(img){
-   if(fit==="fill")x.drawImage(img,X,Y,W,H);
-   else{var ir=img.width/img.height,tr=W/H,sw=img.width,sh=img.height,sx=0,sy=0,dw=W,dh=H,dx=X,dy=Y;
-    if(fit==="contain"){if(ir>tr){dh=W/ir;dy=Y+(H-dh)/2}else{dw=H*ir;dx=X+(W-dw)/2}}else{if(ir>tr){sw=img.height*tr;sx=(img.width-sw)/2}else{sh=img.width/tr;sy=(img.height-sh)/2}}
-    x.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh)}
-  }
-  if($("cutMarks").checked){x.save();x.strokeStyle="#333";x.lineWidth=.18*S;var L=3*S;x.beginPath();x.moveTo(X-L,Y);x.lineTo(X,Y);x.moveTo(X,Y-L);x.lineTo(X,Y);x.moveTo(X+W,Y-L);x.lineTo(X+W,Y);x.moveTo(X+W,Y);x.lineTo(X+W+L,Y);x.moveTo(X-L,Y+H);x.lineTo(X,Y+H);x.moveTo(X,Y+H);x.lineTo(X,Y+H+L);x.moveTo(X+W,Y+H);x.lineTo(X+W+L,Y+H);x.moveTo(X+W,Y+H);x.lineTo(X+W,Y+H+L);x.stroke();x.restore()}
- }
- return new Promise(function(resolve){
-  if(!src){for(var i=0;i<count;i++)drawCard(i,null);return resolve(c)}
-  var im=new Image();im.onload=function(){for(var i=0;i<count;i++)drawCard(i,im);resolve(c)};im.onerror=function(){resolve(c)};im.src=src;
+ var v=vals(),S=4,c=document.createElement("canvas");c.width=PW*S;c.height=PH*S;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
+ var ids=expanded().slice(0,v.cap),sources=ids.map(function(it){return which==="back"?it.back:it.front});
+ return Promise.all(sources.map(loadImg)).then(function(imgs){
+  imgs.forEach(function(img,i){var q=positionFor(i,v,which==="back"),X=q.x*S,Y=q.y*S,W=v.w*S,H=v.h*S;drawFit(x,img,X,Y,W,H,$("fit").value);
+   if($("cutMarks").checked){x.save();x.strokeStyle="#333";x.lineWidth=.18*S;var L=3*S;x.beginPath();x.moveTo(X-L,Y);x.lineTo(X,Y);x.moveTo(X,Y-L);x.lineTo(X,Y);x.moveTo(X+W,Y-L);x.lineTo(X+W,Y);x.moveTo(X+W,Y);x.lineTo(X+W+L,Y);x.moveTo(X-L,Y+H);x.lineTo(X,Y+H);x.moveTo(X,Y+H);x.lineTo(X,Y+H+L);x.moveTo(X+W,Y+H);x.lineTo(X+W+L,Y+H);x.moveTo(X+W,Y+H);x.lineTo(X+W,Y+H+L);x.stroke();x.restore()}
+  });return c;
  });
 }
-function pdf(which){makeCanvas(which).then(function(c){var jsPDF=window.jspdf.jsPDF,p=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});p.addImage(c.toDataURL("image/jpeg",.96),"JPEG",0,0,210,297);p.save("id-card-"+which+"-sheet.pdf")})}
-$("frontPDF").onclick=function(){if(!front)return alert("Upload front image first.");pdf("front")};
-$("backPDF").onclick=function(){if(!back)return alert("Upload back image first.");pdf("back")};
+function ensureQueue(){if(!queue.length){alert("Queue me ID cards add karein.");return false}return true}
+function pdf(which){if(!ensureQueue())return;makeCanvas(which).then(function(c){var jsPDF=window.jspdf.jsPDF,p=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});p.addImage(c.toDataURL("image/jpeg",.96),"JPEG",0,0,210,297);p.save("id-card-"+which+"-sheet.pdf")})}
+$("frontPDF").onclick=function(){pdf("front")};$("backPDF").onclick=function(){pdf("back")};
 function printCanvases(whiches){
- Promise.all(whiches.map(makeCanvas)).then(function(cs){var w=window.open("","_blank");if(!w)return alert("Please allow pop-ups.");var h='<html><head><title>ID Card Print</title><style>@page{size:A4 portrait;margin:0}html,body{margin:0}.page{width:210mm;height:297mm;page-break-after:always}.page:last-child{page-break-after:auto}.page img{width:210mm;height:297mm;display:block}</style></head><body>';cs.forEach(function(c){h+='<div class="page"><img src="'+c.toDataURL("image/png")+'"></div>'});h+='</body></html>';w.document.write(h);w.document.close();setTimeout(function(){w.focus();w.print()},700)})
+ if(!ensureQueue())return;Promise.all(whiches.map(makeCanvas)).then(function(cs){var w=window.open("","_blank");if(!w)return alert("Please allow pop-ups.");var h='<html><head><title>ID Card Print</title><style>@page{size:A4 portrait;margin:0}html,body{margin:0}.page{width:210mm;height:297mm;page-break-after:always}.page:last-child{page-break-after:auto}.page img{width:210mm;height:297mm;display:block}</style></head><body>';cs.forEach(function(c){h+='<div class="page"><img src="'+c.toDataURL("image/png")+'"></div>'});h+='</body></html>';w.document.write(h);w.document.close();setTimeout(function(){w.focus();w.print()},700)})
 }
-$("printFront").onclick=function(){if(!front)return alert("Upload front image first.");printCanvases(["front"])};
-$("printBack").onclick=function(){if(!back)return alert("Upload back image first.");printCanvases(["back"])};
-$("printBoth").onclick=function(){if(!front||!back)return alert("Upload both Front and Back images.");printCanvases(["front","back"])};
-$("reset").onclick=function(){front=back="";$("frontFile").value="";$("backFile").value="";$("sizePreset").value="85.6,54";$("cardW").value="85.6";$("cardH").value="54";$("copies").value=8;$("gap").value=4;$("margin").value=10;$("fit").value="fill";$("cutMarks").checked=true;$("backAlign").value="same";side="front";render()};
-window.addEventListener("resize",render);render();
+$("printFront").onclick=function(){printCanvases(["front"])};$("printBack").onclick=function(){printCanvases(["back"])};$("printBoth").onclick=function(){printCanvases(["front","back"])};
+$("reset").onclick=function(){queue=[];tempFront=tempBack="";$("personName").value="";$("frontFile").value="";$("backFile").value="";$("sizePreset").value="85.6,54";$("cardW").value="85.6";$("cardH").value="54";$("gap").value=4;$("margin").value=10;$("fit").value="fill";$("cutMarks").checked=true;$("backAlign").value="same";side="front";renderQueue();render()};
+window.addEventListener("resize",render);renderQueue();render();
 })();
 </script>
 </body>
