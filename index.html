@@ -36,7 +36,10 @@ canvas{display:block;max-width:100%;max-height:70vh;touch-action:none}
   <div class="controls">
     <div class="panel">
       <h3>1. Scan / Upload Signature Page</h3>
-      <label class="upload">📷 Choose Photo / Take Photo<input id="file" type="file" accept="image/*" capture="environment"></label>
+      <div class="grid2">
+<label class="upload">🖼️ Upload Photo<input id="file" type="file" accept="image/*"></label>
+<label class="upload">📷 Take Photo<input id="cameraFile" type="file" accept="image/*" capture="environment"></label>
+</div>
       <div class="note">Page par extra text ho to pehle signature ke around crop karo. Uske baad Auto Clean aur Eraser use karo.</div>
     </div>
 
@@ -96,7 +99,7 @@ canvas{display:block;max-width:100%;max-height:70vh;touch-action:none}
 <script>
 (function(){
 "use strict";
-var file=document.getElementById("file"),work=document.getElementById("work"),ctx=work.getContext("2d"),result=document.getElementById("resultCanvas"),rctx=result.getContext("2d");
+var file=document.getElementById("file"),cameraFile=document.getElementById("cameraFile"),work=document.getElementById("work"),ctx=work.getContext("2d"),result=document.getElementById("resultCanvas"),rctx=result.getContext("2d");
 var original=null, baseClean=null, undoStack=[], editMode="erase", cropping=false, cropStart=null, cropEnd=null, drawing=false,last=null;
 var threshold=document.getElementById("threshold"),noise=document.getElementById("noise"),brush=document.getElementById("brush");
 function status(t){document.getElementById("status").textContent=t}
@@ -106,7 +109,9 @@ function fitImage(img){
  work.width=Math.round(w*sc);work.height=Math.round(h*sc);ctx.drawImage(img,0,0,work.width,work.height);show();
  original=document.createElement("canvas");original.width=work.width;original.height=work.height;original.getContext("2d").drawImage(work,0,0);baseClean=null;undoStack=[];copyToResult();status("Page loaded. Crop around the signature.");
 }
-file.onchange=function(){var f=this.files[0];if(!f)return;var u=URL.createObjectURL(f),im=new Image();im.onload=function(){fitImage(im);URL.revokeObjectURL(u)};im.src=u};
+function openSelectedFile(input){var f=input.files[0];if(!f)return;var u=URL.createObjectURL(f),im=new Image();im.onload=function(){fitImage(im);URL.revokeObjectURL(u)};im.onerror=function(){URL.revokeObjectURL(u);alert("Unable to open this image.")};im.src=u}
+file.onchange=function(){openSelectedFile(this)};
+cameraFile.onchange=function(){openSelectedFile(this)};
 function copyToResult(){result.width=work.width;result.height=work.height;rctx.clearRect(0,0,result.width,result.height);rctx.drawImage(work,0,0)}
 function point(e,c){
  var rect=c.getBoundingClientRect(),t=e.touches?e.touches[0]:e;
