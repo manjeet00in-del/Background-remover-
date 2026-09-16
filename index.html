@@ -1,174 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPU Photo Enhancer (0 Cost)</title>
-    <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            text-align: center; 
-            background-color: #12122a; 
-            color: #ffffff; 
-            margin: 0; 
-            padding: 20px; 
-        }
-        .app-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #1c1c3d;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 10px 30px rgba(0,0,0,0.5);
-        }
-        canvas { 
-            max-width: 100%; 
-            height: auto; 
-            margin-top: 20px; 
-            border-radius: 10px; 
-            border: 2px solid #333;
-            display: none; 
-        }
-        .btn-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            margin-top: 25px; 
-            display: none; 
-        }
-        button { 
-            font-size: 16px; 
-            font-weight: bold; 
-            padding: 12px 20px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            color: white; 
-            transition: 0.3s;
-        }
-        .btn-lighting { background: #f39c12; }
-        .btn-hdr { background: #8e44ad; }
-        .btn-enhance { background: #2980b9; }
-        .btn-reset { background: #555; }
-        .btn-download { background: #27ae60; margin-top: 10px;}
-        
-        button:hover { opacity: 0.8; }
-        .status { color: #00d2ff; margin-top: 10px; font-weight: bold; }
-    </style>
-</head>
-<body>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Photo Enhancer - Manjeet Digital Hub</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0e1830;color:#fff}.top{padding:15px;background:#111d38;border-bottom:1px solid #31405e}.top b{font-size:20px}.top small{display:block;color:#9fb0cf;margin-top:4px}.wrap{max-width:760px;margin:auto;padding:12px}.card{background:#182640;border:1px solid #344360;border-radius:17px;padding:14px;margin-bottom:13px}.upload{display:block;text-align:center;border:2px dashed #6684b7;border-radius:14px;padding:22px;cursor:pointer}.upload input{display:none}.upload span{display:block;font-size:34px}.muted{color:#a9b8d2;font-size:12px}.status{margin-top:10px;padding:10px;background:#101c33;border-radius:10px;color:#c5d8fa;font-size:13px}.progress{height:8px;background:#091327;border-radius:8px;overflow:hidden;margin-top:9px}.bar{height:100%;width:0;background:#4ca5ff}.hidden{display:none!important}.stage{position:relative;overflow:hidden;border-radius:14px;background:#080f1e;min-height:260px;display:flex;align-items:center;justify-content:center}.stage img{display:block;max-width:100%;max-height:65vh}.afterWrap{position:absolute;left:0;top:0;width:50%;height:100%;overflow:hidden;border-right:3px solid #fff}.afterWrap img{position:absolute;left:0;top:0;max-width:none}.handle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;color:#111;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold}.range{width:100%}.info{display:flex;justify-content:space-between;gap:8px;color:#aebbd3;font-size:12px;margin-top:9px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.btn{border:0;border-radius:11px;padding:13px 9px;font-weight:bold;font-size:15px;color:#fff;background:#3b4964}.btn.ai{background:linear-gradient(90deg,#7757ee,#159fe0)}.btn.white{background:#fff;color:#17223a}.btn:disabled{opacity:.5}.note{font-size:11px;line-height:1.45;color:#aab8d0;margin-top:10px}
+</style></head><body>
+<div class="top"><b>✨ AI Photo Enhancer</b><small>Manjeet Digital Hub • Real AI 2× Super Resolution</small></div>
+<div class="wrap">
+<div class="card"><label class="upload"><input id="file" type="file" accept="image/*"><span>📷</span><b>Choose Photo</b><div class="muted">JPG / PNG / WebP</div></label><div id="status" class="status">Choose a photo to start.</div><div id="progress" class="progress hidden"><div id="bar" class="bar"></div></div></div>
+<div id="preview" class="card hidden"><div id="stage" class="stage"><img id="before"><div id="aw" class="afterWrap"><img id="after"></div><div id="handle" class="handle">↔</div></div><input id="compare" class="range" type="range" min="0" max="100" value="50"><div class="info"><span id="inInfo"></span><span id="outInfo"></span></div><div class="row"><button id="reset" class="btn">Reset</button><button id="download" class="btn white">Download</button></div></div>
+<div id="controls" class="card hidden"><button id="ai" class="btn ai" style="width:100%">🧠 Real AI Enhance 2×</button><div class="note">Uses Real-ESRGAN x2 ONNX. It does not use face restoration or face generation. For compatibility, AI runs through ONNX Runtime Web using WebAssembly (CPU), which is supported across iPhone Safari, Android Chrome and desktop browsers. First run downloads the AI model (~64 MB), so Wi-Fi is recommended.</div></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.min.js"></script>
+<script>
+(function(){
+"use strict";
+var MODEL="https://raw.githubusercontent.com/net2cn/Real-ESRGAN_GUI/master/Real-ESRGAN_GUI/models/realesrgan_x2plus.onnx";
+var file=document.getElementById("file"),before=document.getElementById("before"),after=document.getElementById("after"),aw=document.getElementById("aw"),handle=document.getElementById("handle"),compare=document.getElementById("compare"),status=document.getElementById("status"),progress=document.getElementById("progress"),bar=document.getElementById("bar");
+var original=null,result=null,session=null,url="";
+ort.env.wasm.numThreads=1;
+ort.env.wasm.simd=true;
 
-    <div class="app-container">
-        <h2>✨ AI Photo Enhancer</h2>
-        <p style="color: #aaa; font-size: 14px;">⚡ GPU Engine Active (WebGL / Canvas)</p>
+function sync(){
+ var p=Number(compare.value);aw.style.width=p+"%";handle.style.left=p+"%";
+ if(after.naturalWidth){var s=document.getElementById("stage"),r=before.getBoundingClientRect();after.style.width=r.width+"px";after.style.height=r.height+"px";after.style.objectFit="contain";}
+}
+compare.oninput=sync;window.addEventListener("resize",sync);
 
-        <input type="file" id="upload" accept="image/*">
-        <div id="status" class="status"></div>
-        
-        <!-- आउटपुट स्क्रीन -->
-        <canvas id="canvas"></canvas>
+file.onchange=function(){
+ var f=this.files&&this.files[0];if(!f)return;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(f);
+ var im=new Image();im.onload=function(){
+   original=document.createElement("canvas");original.width=im.naturalWidth;original.height=im.naturalHeight;original.getContext("2d").drawImage(im,0,0);
+   before.src=url;setResult(original);
+   document.getElementById("preview").classList.remove("hidden");document.getElementById("controls").classList.remove("hidden");
+   document.getElementById("inInfo").textContent="Original: "+(f.size/1048576).toFixed(2)+" MB • "+im.naturalWidth+"×"+im.naturalHeight;
+   status.textContent="✅ Photo ready. Tap Real AI Enhance 2×.";
+ };im.src=url;
+};
+function setResult(c){
+ result=c;after.src=c.toDataURL("image/jpeg",.92);after.onload=function(){sync()};
+ document.getElementById("outInfo").textContent="Output: "+c.width+"×"+c.height;
+}
+document.getElementById("reset").onclick=function(){if(original){setResult(original);status.textContent="🔄 Original restored."}};
+document.getElementById("download").onclick=function(){if(!result)return;result.toBlob(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="manjeet-ai-enhanced.png";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1500)},"image/png")};
 
-        <!-- कंट्रोल पैनल -->
-        <div class="btn-group" id="controls">
-            <button class="btn-lighting" onclick="applyLighting()">✨ Fix Face Lighting & Tone</button>
-            <button class="btn-hdr" onclick="applyHDR()">📸 HDR & Vivid Filter</button>
-            <button class="btn-enhance" onclick="applyDeepEnhance()">🧠 Deep Enhance (Sharpen Details)</button>
-            <button class="btn-reset" onclick="resetImage()">🔄 Reset All</button>
-            <button class="btn-download" onclick="downloadImage()">⬇️ Download HD Image</button>
-        </div>
-    </div>
-
-    <script>
-        const uploadInput = document.getElementById('upload');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        const controls = document.getElementById('controls');
-        const statusText = document.getElementById('status');
-        
-        let originalImage = new Image();
-
-        // इमेज अपलोड हैंडल करना
-        uploadInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            statusText.innerText = "लोड हो रहा है...";
-            const url = URL.createObjectURL(file);
-            
-            originalImage.src = url;
-            originalImage.onload = () => {
-                canvas.width = originalImage.width;
-                canvas.height = originalImage.height;
-                resetImage();
-                canvas.style.display = 'block';
-                controls.style.display = 'flex';
-                statusText.innerText = "✅ फोटो रेडी है! नीचे दिए गए इफ़ेक्ट चुनें।";
-            };
-        });
-
-        // 1. Fix Lighting (ब्राइटनेस और वार्म टोन)
-        function applyLighting() {
-            ctx.filter = 'brightness(1.15) contrast(1.1) saturate(1.2) sepia(0.1)';
-            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-            ctx.filter = 'none'; // फ़िल्टर रीसेट
-            statusText.innerText = "✨ Lighting Fix Applied!";
-        }
-
-        // 2. HDR Effect (कलर बूस्ट और हाई कंट्रास्ट)
-        function applyHDR() {
-            ctx.filter = 'contrast(1.25) saturate(1.4) brightness(1.05)';
-            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-            ctx.filter = 'none';
-            statusText.innerText = "📸 HDR Effect Applied!";
-        }
-
-        // 3. Deep Enhance (शार्पनेस बढ़ाना - पिक्सेल लेवल प्रोसेसिंग)
-        function applyDeepEnhance() {
-            statusText.innerText = "⚙️ प्रोसेसिंग... (GPU Active)";
-            
-            // पहले कलर्स को थोड़ा बूस्ट करें
-            ctx.filter = 'contrast(1.1) saturate(1.1)';
-            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-            ctx.filter = 'none';
-
-            // Convolution Matrix (शार्पनिंग)
-            setTimeout(() => {
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                const width = canvas.width;
-                
-                // सिंपल शार्पनिंग लॉजिक
-                for (let i = 0; i < data.length; i += 4) {
-                    if (i % (width * 4) === 0 || i < width * 4) continue; 
-                    
-                    let r = data[i], g = data[i+1], b = data[i+2];
-                    let topR = data[i - width * 4];
-                    let leftR = data[i - 4];
-                    
-                    // पिक्सेल कंट्रास्ट बढ़ाकर डिटेल्स उभारना
-                    data[i] = r + (r - (topR + leftR) / 2) * 0.5;
-                    data[i+1] = g + (g - (data[i+1 - width*4] + data[i+1 - 4]) / 2) * 0.5;
-                    data[i+2] = b + (b - (data[i+2 - width*4] + data[i+2 - 4]) / 2) * 0.5;
-                }
-                ctx.putImageData(imageData, 0, 0);
-                statusText.innerText = "🧠 Deep Enhance Completed!";
-            }, 50);
-        }
-
-        // इमेज को वापस ओरिजिनल करना
-        function resetImage() {
-            ctx.filter = 'none';
-            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-            statusText.innerText = "🔄 ओरिजिनल फोटो";
-        }
-
-        // फोटो डाउनलोड करना
-        function downloadImage() {
-            const link = document.createElement('a');
-            link.download = 'Enhanced_Photo.png';
-            link.href = canvas.toDataURL('image/png', 1.0); // 1.0 मतलब फुल क्वालिटी
-            link.click();
-        }
-    </script>
-</body>
-</html>
+async function getSession(){
+ if(session)return session;
+ progress.classList.remove("hidden");bar.style.width="10%";status.textContent="⬇️ Loading AI model (~64 MB). First time may take a while…";
+ session=await ort.InferenceSession.create(MODEL,{executionProviders:["wasm"],graphOptimizationLevel:"all"});
+ bar.style.width="35%";return session;
+}
+function tileTensor(canvas,x,y,w,h,size){
+ var tc=document.createElement("canvas");tc.width=size;tc.height=size;var cx=tc.getContext("2d");
+ cx.drawImage(canvas,x,y,w,h,0,0,w,h);
+ var d=cx.getImageData(0,0,size,size).data,n=size*size,arr=new Float32Array(3*n);
+ for(var i=0;i<n;i++){arr[i]=d[i*4]/255;arr[n+i]=d[i*4+1]/255;arr[2*n+i]=d[i*4+2]/255}
+ return new ort.Tensor("float32",arr,[1,3,size,size]);
+}
+function tensorCanvas(t){
+ var dims=t.dims,h=dims[dims.length-2],w=dims[dims.length-1],n=w*h,d=t.data,oc=document.createElement("canvas");oc.width=w;oc.height=h;
+ var id=oc.getContext("2d").createImageData(w,h);
+ for(var i=0;i<n;i++){id.data[i*4]=Math.max(0,Math.min(255,d[i]*255));id.data[i*4+1]=Math.max(0,Math.min(255,d[n+i]*255));id.data[i*4+2]=Math.max(0,Math.min(255,d[2*n+i]*255));id.data[i*4+3]=255}
+ oc.getContext("2d").putImageData(id,0,0);return oc;
+}
+document.getElementById("ai").onclick=async function(){
+ if(!original)return;var btn=this;btn.disabled=true;
+ try{
+  var s=await getSession(),size=128,scale=2,out=document.createElement("canvas");out.width=original.width*scale;out.height=original.height*scale;var ox=out.getContext("2d");
+  var nx=Math.ceil(original.width/size),ny=Math.ceil(original.height/size),total=nx*ny,done=0,inputName=s.inputNames[0],outputName=s.outputNames[0];
+  status.textContent="🧠 Real AI enhancing…"; 
+  for(var y=0;y<original.height;y+=size){for(var x=0;x<original.width;x+=size){
+    var w=Math.min(size,original.width-x),h=Math.min(size,original.height-y),input=tileTensor(original,x,y,w,h,size);
+    var feeds={};feeds[inputName]=input;var outputs=await s.run(feeds),tc=tensorCanvas(outputs[outputName]);
+    ox.drawImage(tc,0,0,w*scale,h*scale,x*scale,y*scale,w*scale,h*scale);
+    done++;bar.style.width=(35+65*done/total)+"%";status.textContent="🧠 Real AI enhancing… "+Math.round(done/total*100)+"%";
+    await new Promise(function(r){setTimeout(r,0)});
+  }}
+  setResult(out);bar.style.width="100%";status.textContent="✅ Real AI enhancement complete — 2× image ready.";
+ }catch(e){
+  console.error(e);session=null;status.textContent="❌ AI could not start. Check internet/model loading, then try again.";bar.style.width="0%";
+ }
+ btn.disabled=false;
+};
+})();
+</script></body></html>
