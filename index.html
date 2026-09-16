@@ -13,7 +13,7 @@ h3{font-size:16px;margin:0 0 11px}.upload{display:block;border:2px dashed #8aa4c
 .row{display:flex;gap:9px;align-items:center;margin:11px 0}.row label{font-size:13px;font-weight:700;min-width:90px}.row select{width:100%;padding:9px;border:1px solid #ccd5e1;border-radius:8px}input[type=range]{width:100%}
 .stage{background:#dbe4ef;border-radius:12px;min-height:470px;display:flex;align-items:center;justify-content:center;padding:10px;overflow:auto}
 .cw{position:relative;display:inline-block;touch-action:none;transform-origin:top left}.cw canvas{display:block;background:#fff}
-.crop{position:absolute;border:2px dashed #1976d2;background:#1976d216;touch-action:none;cursor:move}.handle{position:absolute;width:24px;height:24px;border-radius:50%;background:#1976d2;border:3px solid white}
+.crop{position:absolute;border:2px dashed #1976d2;background:#1976d216;touch-action:none;cursor:move;user-select:none;-webkit-user-select:none}.handle{position:absolute;width:30px;height:30px;border-radius:50%;background:#1976d2;border:3px solid white;touch-action:none}
 .tl{left:-12px;top:-12px}.tr{right:-12px;top:-12px}.bl{left:-12px;bottom:-12px}.br{right:-12px;bottom:-12px}.hide{display:none}.hint{font-size:11px;color:#64748b;line-height:1.4}
 .mobilePreview{display:none}.mobilePreview canvas{max-width:100%;max-height:125px;display:block;margin:auto;background:#fff}
 @media(max-width:760px){
@@ -40,7 +40,7 @@ h3{font-size:16px;margin:0 0 11px}.upload{display:block;border:2px dashed #8aa4c
   <div class="row"><label>Mode</label><select id="mode"><option value="color">Color</option><option value="clean">Clean Document</option><option value="gray">Grayscale</option><option value="bw">Black & White</option></select></div>
   <div class="actions"><button class="btn gray" id="resetCrop">Full Page Crop</button><button class="btn" id="applyCrop">Apply Crop</button></div>
   <button class="btn gray" id="resetAll" style="width:100%;margin-top:8px">↻ Reset All</button>
-  <p class="hint">Photo load होते ही scanner document को automatically detect करेगा। जरूरत हो तो blue box/corners से manually adjust करें।</p>
+  <p class="hint">Photo load होते ही scanner document को automatically detect करेगा। Manual edit: blue box के अंदर finger drag करके crop area move करें और blue corners को finger से drag करके resize करें।</p>
  </div>
  <div class="panel">
   <h3>3. Download / Print</h3>
@@ -109,7 +109,41 @@ $('crop').onpointermove=e=>{
  }
  n.w=Math.max(min,n.w);n.h=Math.max(min,n.h);n.x=Math.max(0,Math.min(can.width-min,n.x));n.y=Math.max(0,Math.min(can.height-min,n.y));n.w=Math.min(can.width-n.x,n.w);n.h=Math.min(can.height-n.y,n.h);cr=n;positionCrop();updateMobile()
 };
+
 $('crop').onpointerup=$('crop').onpointercancel=()=>drag=null;
+
+/* Finger-drag fallback for touch browsers:
+   drag inside box = move crop, drag blue corner = resize. */
+let touchDrag=null;
+$('crop').addEventListener('touchstart',e=>{
+ if(!img||!e.touches.length)return;
+ e.preventDefault();
+ let t=e.touches[0];
+ touchDrag={h:e.target.dataset.h||'move',sx:t.clientX,sy:t.clientY,o:{...cr}};
+},{passive:false});
+$('crop').addEventListener('touchmove',e=>{
+ if(!touchDrag||!e.touches.length)return;
+ e.preventDefault();
+ let t=e.touches[0],R=can.getBoundingClientRect();
+ let dx=(t.clientX-touchDrag.sx)*can.width/R.width;
+ let dy=(t.clientY-touchDrag.sy)*can.height/R.height;
+ let o=touchDrag.o,n={...o},min=45,h=touchDrag.h;
+ if(h==='move'){n.x=o.x+dx;n.y=o.y+dy}
+ else{
+   if(h.includes('r'))n.w=o.w+dx;
+   if(h.includes('b'))n.h=o.h+dy;
+   if(h.includes('l')){n.x=o.x+dx;n.w=o.w-dx}
+   if(h.includes('t')){n.y=o.y+dy;n.h=o.h-dy}
+ }
+ n.w=Math.max(min,n.w);n.h=Math.max(min,n.h);
+ n.x=Math.max(0,Math.min(can.width-min,n.x));
+ n.y=Math.max(0,Math.min(can.height-min,n.y));
+ n.w=Math.min(can.width-n.x,n.w);n.h=Math.min(can.height-n.y,n.h);
+ cr=n;positionCrop();updateMobile();
+},{passive:false});
+$('crop').addEventListener('touchend',()=>touchDrag=null,{passive:true});
+$('crop').addEventListener('touchcancel',()=>touchDrag=null,{passive:true});
+
 function finalCanvas(){
  if(!img||!cr.w||!cr.h)return null;
  let x=Math.max(0,Math.floor(cr.x)),y=Math.max(0,Math.floor(cr.y));
