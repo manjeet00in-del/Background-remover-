@@ -37,7 +37,8 @@ label.ctrl{display:block;margin-top:12px;font-size:13px;color:#d6e0f1}.val{float
 <div id="handle" class="handle">↔</div>
 </div>
 <input id="compare" class="range" type="range" min="0" max="100" value="50">
-<div class="info"><span id="originalInfo"></span><span id="outputInfo"></span></div>
+<div class="row"><button id="showOriginal" class="btn">Original</button><button id="showEnhanced" class="btn">Enhanced</button></div>
+<div class="info"><span id="originalInfo"></span><span id="outputInfo"></span><span id="sizeInfo"></span></div>
 <div class="row"><button id="reset" class="btn">Reset All</button><button id="download" class="btn white">Download HD</button></div>
 </div>
 
@@ -54,6 +55,11 @@ label.ctrl{display:block;margin-top:12px;font-size:13px;color:#d6e0f1}.val{float
 <button class="btn presetBtn" data-preset="natural">Natural</button>
 </div>
 
+<h3 style="margin-top:18px">Output Quality</h3>
+<div class="row">
+<button id="qualityOriginal" class="btn">Original Size</button>
+<button id="quality2x" class="btn on">2× HD</button>
+</div>
 <h3 style="margin-top:18px">Manual Adjustments</h3>
 <label class="ctrl">Brightness <span id="brightnessV" class="val">0</span></label>
 <input id="brightness" class="range manual" type="range" min="-25" max="25" value="0">
@@ -74,7 +80,7 @@ label.ctrl{display:block;margin-top:12px;font-size:13px;color:#d6e0f1}.val{float
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var file=$("file"),before=$("before"),after=$("after"),stage=$("stage"),aw=$("afterWrap"),handle=$("handle"),compare=$("compare");
-var source=null,result=null,objUrl="",timer=null;
+var source=null,result=null,objUrl="",timer=null,qualityScale=2;
 var controls=["brightness","contrast","saturation","sharpness","warmth"];
 
 function sync(){
@@ -108,7 +114,7 @@ function smartProcess(){
  if(!source)return;
  var strength=+$("strength").value/100;
  var b=+$("brightness").value, c=+$("contrast").value, sat=+$("saturation").value, sh=+$("sharpness").value, warm=+$("warmth").value;
- var scale=2, maxSide=4096;
+ var scale=qualityScale, maxSide=4096;
  if(Math.max(source.width,source.height)*scale>maxSide) scale=maxSide/Math.max(source.width,source.height);
  scale=Math.max(1,scale);
  var base=document.createElement("canvas"); base.width=Math.round(source.width*scale); base.height=Math.round(source.height*scale);
@@ -145,7 +151,8 @@ function smartProcess(){
  result=base;
  after.src=base.toDataURL("image/jpeg",.94);
  after.onload=sync;
- $("outputInfo").textContent="HD Output: "+base.width+"×"+base.height;
+ $("outputInfo").textContent=(qualityScale===2?"2× HD":"Original Size")+": "+base.width+"×"+base.height;
+ base.toBlob(function(blob){if(blob)$("sizeInfo").textContent="Enhanced: "+(blob.size/1048576).toFixed(2)+" MB";},"image/jpeg",.95);
  $("status").textContent="✨ Enhancement ready.";
 }
 
@@ -179,6 +186,14 @@ function resetValues(doRender){
  document.querySelectorAll(".presetBtn").forEach(function(x){x.classList.remove("on")});
  if(doRender)render();
 }
+$("showOriginal").onclick=function(){compare.value=0;sync()};
+$("showEnhanced").onclick=function(){compare.value=100;sync()};
+$("qualityOriginal").onclick=function(){
+ qualityScale=1;this.classList.add("on");$("quality2x").classList.remove("on");render();
+};
+$("quality2x").onclick=function(){
+ qualityScale=2;this.classList.add("on");$("qualityOriginal").classList.remove("on");render();
+};
 $("reset").onclick=function(){if(source){resetValues(true);$("status").textContent="🔄 Adjustments reset."}};
 $("download").onclick=function(){
  if(!result)return;
