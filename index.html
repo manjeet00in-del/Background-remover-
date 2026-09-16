@@ -3,16 +3,38 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#172033}header{background:#173b72;color:#fff;text-align:center;padding:13px}header h1{margin:0;font-size:21px}header p{margin:3px 0 0;font-size:12px}
-.wrap{max-width:1180px;margin:auto;padding:12px;display:grid;grid-template-columns:390px 1fr;gap:14px}.panel{background:#fff;border-radius:13px;padding:13px;margin-bottom:11px;box-shadow:0 2px 12px #0001}h3{font-size:15px;margin:0 0 9px}.field{margin:7px 0}.field label{display:block;font-size:11px;font-weight:bold;margin-bottom:4px}.field input,.field textarea,.field select{width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:7px;font:12px Arial}.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.btn{border:0;border-radius:8px;background:#173b72;color:#fff;padding:9px 10px;font-weight:bold;cursor:pointer}.green{background:#16834b}.gray{background:#64748b}.actions{display:flex;gap:7px;flex-wrap:wrap}.actions .btn{flex:1}.upload{display:block;text-align:center;border:2px dashed #aac0dc;border-radius:9px;padding:10px;cursor:pointer}.upload input{display:none}.templates{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.tpl{height:42px;border:2px solid transparent;border-radius:7px;background:#e8eef7;font-size:10px;font-weight:bold}.tpl.active{border-color:#2563eb}.hint{font-size:10px;color:#64748b}
+.wrap{max-width:1180px;margin:auto;padding:12px;display:grid;grid-template-columns:390px 1fr;gap:14px}.panel{background:#fff;border-radius:13px;padding:13px;margin-bottom:11px;box-shadow:0 2px 12px #0001}h3{font-size:15px;margin:0 0 9px}.field{margin:7px 0}.field label{display:block;font-size:11px;font-weight:bold;margin-bottom:4px}.field input,.field textarea,.field select{width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:7px;font:12px Arial}.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.btn{border:0;border-radius:8px;background:#173b72;color:#fff;padding:9px 10px;font-weight:bold;cursor:pointer}.green{background:#16834b}.gray{background:#64748b}.actions{display:flex;gap:7px;flex-wrap:wrap}.actions .btn{flex:1}.upload{display:block;text-align:center;border:2px dashed #aac0dc;border-radius:9px;padding:10px;cursor:pointer}.upload input{display:none}.templates{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.tpl{height:54px;border:2px solid transparent;border-radius:7px;font-size:10px;font-weight:bold;cursor:pointer}.tpl.active{border-color:#2563eb}
+.tpl:nth-child(1){background:linear-gradient(90deg,#173b72 0 30%,#fff 30%)}
+.tpl:nth-child(2){background:linear-gradient(180deg,#173b72 0 35%,#fff 35%)}
+.tpl:nth-child(3){background:linear-gradient(90deg,#1f2937 0 36%,#fff 36%);color:#d4af37}
+.tpl:nth-child(4){background:linear-gradient(135deg,#eef2f7 0 55%,#fff 55%)}.hint{font-size:10px;color:#64748b}
 .preview{position:sticky;top:8px}.page{width:794px;min-height:1123px;background:#fff;box-shadow:0 5px 20px #0002;position:relative;overflow:hidden}.resume{min-height:1123px}.head{padding:45px 50px 28px;display:flex;gap:25px;align-items:center}.photo{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #fff}.headName{font-size:38px;font-weight:800}.headRole{font-size:17px;margin-top:5px}.body{display:grid;grid-template-columns:31% 69%;min-height:930px}.side{padding:30px 25px}.main{padding:30px 35px}.section{margin-bottom:24px}.section h2{font-size:16px;text-transform:uppercase;letter-spacing:1px;margin:0 0 9px;padding-bottom:5px;border-bottom:2px solid currentColor}.section p,.section div{font-size:13px;line-height:1.55;white-space:pre-line}.skill{display:inline-block;padding:5px 8px;border-radius:5px;background:#e8eef7;margin:2px;font-size:11px}.dragSec{touch-action:none;cursor:move}.dragSec.dragging{outline:2px dashed #2563eb}.mobileLive{display:none}
-.t2 .head{text-align:center;justify-content:center;flex-direction:column}.t2 .body{grid-template-columns:1fr}.t2 .side,.t2 .main{padding:22px 55px}.t3 .head{background:#111!important}.t3 .side{background:#f0f0f0!important}.t4 .body{grid-template-columns:35% 65%}.t4 .head{padding-left:70px}
+
+/* Template 2: centered modern, single-column content */
+.t2 .head{text-align:center;justify-content:center;flex-direction:column;padding:38px 50px 25px;border-radius:0 0 55% 55%/0 0 22% 22%}
+.t2 .photo{width:105px;height:105px}.t2 .body{display:flex;flex-direction:column}.t2 .side,.t2 .main{padding:18px 65px;background:#fff!important}
+.t2 .side{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px}.t2 .section h2{text-align:center;border-bottom:0}.t2 .main .section{border-left:4px solid currentColor;padding-left:16px}
+
+/* Template 3: executive dark left rail */
+.t3 .head{background:#111!important;border-bottom:10px solid #d4af37;padding-left:300px}.t3 .headName{letter-spacing:2px}
+.t3 .body{grid-template-columns:36% 64%}.t3 .side{background:#1f2937!important;color:#fff;padding:38px 28px}.t3 .main{padding:38px 42px}
+.t3 .side .section h2{color:#d4af37;border-bottom:1px solid #6b7280}.t3 .side .skill{display:block;background:#374151;color:#fff;margin:5px 0}
+.t3 .main .section h2{color:#111;border-color:#d4af37}
+
+/* Template 4: clean boxed/corporate with right sidebar */
+.t4 .head{margin:28px 35px 0;padding:28px 35px;border-radius:14px}.t4 .photo{border-radius:12px}
+.t4 .body{display:grid;grid-template-columns:65% 35%;padding:20px 35px;gap:20px}.t4 .main{grid-column:1;grid-row:1;padding:15px 10px}
+.t4 .side{grid-column:2;grid-row:1;padding:20px;background:#f3f4f6!important;border-radius:14px}
+.t4 .section{background:#fff;padding:13px;border:1px solid #e5e7eb;border-radius:10px}.t4 .section h2{border:0;margin-bottom:6px}
+
 @media(max-width:760px){.wrap{grid-template-columns:1fr}.desktop{display:none}.mobileLive{display:block;position:sticky;top:0;z-index:50;background:#f1f5f9f5;margin:0 -12px 9px;padding:5px;border-bottom:1px solid #ddd}.mobileLive b{display:block;text-align:center;font-size:11px;margin-bottom:4px}.mini{height:210px;overflow:hidden;display:flex;justify-content:center}.mini .page{transform:scale(.18);transform-origin:top center;flex:none}.templates{grid-template-columns:repeat(4,1fr)}}
 @media print{body>*{display:none!important}#printArea{display:block!important;position:absolute;left:0;top:0;width:210mm}#printArea img{display:block;width:210mm;height:297mm;object-fit:contain}}
 </style></head><body>
 <header><h1>📄 Resume Maker</h1><p>Manjeet Digital Hub • Professional Resume • PDF • Print</p></header>
 <div class="wrap"><div>
 <div class="mobileLive"><b>Live Resume Preview</b><div class="mini" id="mobilePreview"></div></div>
-<div class="panel"><h3>1. Template & Style</h3><div class="templates" id="templates"></div><div class="grid"><div class="field"><label>Accent Color</label><input type="color" id="accent" value="#173b72"></div><div class="field"><label>Text Color</label><input type="color" id="textColor" value="#172033"></div></div></div>
+<div class="panel"><h3>1. Template & Style</h3><div class="templates" id="templates"></div><div class="grid"><div class="field"><label>Accent Color</label><input type="color" id="accent" value="#173b72"></div><div class="field"><label>Body Text Color</label><input type="color" id="textColor" value="#172033"></div></div>
+<div class="field"><label>Name / Top Header Text Color</label><input type="color" id="headerTextColor" value="#ffffff"></div></div>
 <div class="panel"><h3>2. Personal Details</h3><div class="grid"><div class="field"><label>Full Name</label><input id="name" value="Your Name"></div><div class="field"><label>Job Title</label><input id="role" value="Professional Title"></div></div>
 <div class="grid"><div class="field"><label>Phone</label><input id="phone" value="+91 98765 43210"></div><div class="field"><label>Email</label><input id="email" value="name@email.com"></div></div>
 <div class="field"><label>Address</label><input id="address" value="Lucknow, Uttar Pradesh"></div>
@@ -40,12 +62,12 @@ Add result or specialization.</textarea></div>
 <div id="printArea" style="display:none"><img id="printImg"></div>
 <script>
 var $=function(x){return document.getElementById(x)},tpl=1,photo='',pos={};
-var ts=$('templates');for(var i=1;i<=4;i++){(function(n){var b=document.createElement('button');b.className='tpl'+(n===1?' active':'');b.innerHTML='Template '+n;b.onclick=function(){tpl=n;var z=ts.children;for(var j=0;j<z.length;j++)z[j].classList.remove('active');b.classList.add('active');render()};ts.appendChild(b)})(i)}
+var ts=$('templates');for(var i=1;i<=4;i++){(function(n){var b=document.createElement('button');b.className='tpl'+(n===1?' active':'');b.innerHTML=n===1?'Classic':n===2?'Modern':n===3?'Executive':'Corporate';b.onclick=function(){tpl=n;var z=ts.children;for(var j=0;j<z.length;j++)z[j].classList.remove('active');b.classList.add('active');render()};ts.appendChild(b)})(i)}
 function e(s){return String(s||'').replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
 function sec(k,title,content){if(!content)return '';return '<div class="section dragSec" data-key="'+k+'"><h2>'+e(title)+'</h2><div>'+e(content)+'</div></div>'}
 function html(id){
- var a=$('accent').value,t=$('textColor').value,skills=$('skills').value.split(',').filter(Boolean).map(function(x){return '<span class="skill">'+e(x.trim())+'</span>'}).join('');
- return '<div class="page resume t'+tpl+'" id="'+id+'" style="color:'+t+'"><div class="head" style="background:'+a+';color:#fff">'+
+ var a=$('accent').value,t=$('textColor').value,ht=$('headerTextColor').value,skills=$('skills').value.split(',').filter(Boolean).map(function(x){return '<span class="skill">'+e(x.trim())+'</span>'}).join('');
+ return '<div class="page resume t'+tpl+'" id="'+id+'" style="color:'+t+'"><div class="head" style="background:'+(tpl===3?'#111111':a)+';color:'+ht+'">'+
  (($('showPhoto').checked&&photo)?'<img class="photo" src="'+photo+'">':'')+'<div><div class="headName">'+e($('name').value)+'</div><div class="headRole">'+e($('role').value)+'</div></div></div>'+
  '<div class="body"><aside class="side" style="background:'+a+'12">'+
  sec('contact','CONTACT',$('phone').value+'\n'+$('email').value+'\n'+$('address').value+'\n'+$('web').value)+
@@ -65,7 +87,7 @@ $('photoFile').onchange=function(){var f=this.files[0];if(!f)return;var r=new Fi
 $('resetOrder').onclick=function(){pos={};render()};
 function resumeCanvas(){
  var p=$('resumeDesk')||$('resumeMob'),c=document.createElement('canvas');c.width=1240;c.height=1754;var x=c.getContext('2d'),a=$('accent').value;
- x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle=a;x.fillRect(0,0,c.width,250);x.fillStyle='#fff';x.font='bold 58px Arial';x.fillText($('name').value,80,115);x.font='28px Arial';x.fillText($('role').value,80,165);
+ x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle=a;x.fillRect(0,0,c.width,250);x.fillStyle=$('headerTextColor').value;x.font='bold 58px Arial';x.fillText($('name').value,80,115);x.font='28px Arial';x.fillText($('role').value,80,165);
  x.fillStyle=$('textColor').value;var y=320;
  function block(title,text){if(!text)return;x.font='bold 25px Arial';x.fillText(title,80,y);y+=38;x.font='20px Arial';String(text).split('\n').forEach(function(line){x.fillText(line,80,y);y+=30});y+=30}
  block('CONTACT',$('phone').value+' | '+$('email').value+' | '+$('address').value+' | '+$('web').value);
