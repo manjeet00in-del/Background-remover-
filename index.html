@@ -19,7 +19,7 @@ textarea{min-height:60px;resize:vertical}.btn{min-height:39px;border:0;backgroun
 .check{display:flex;align-items:center;gap:7px;font-size:11px;margin-top:8px}.check input{width:auto}.note{font-size:10px;line-height:1.45;color:#64748b;background:#f8fafc;border-radius:8px;padding:8px;margin-top:8px}
 .previewWrap{position:sticky;top:70px}.previewOuter{background:#dbe2ea;border-radius:12px;padding:8px;display:flex;justify-content:center;overflow:auto;max-height:80vh}
 .bio{position:relative;width:794px;height:1123px;background:#fff;overflow:hidden;flex:none;transform-origin:top center;color:#292524}
-.inner{position:absolute;inset:48px 55px}.orn{position:absolute;pointer-events:none}.title{text-align:center;font-family:Georgia,serif;font-weight:bold;font-size:31px;letter-spacing:1px}.subtitle{text-align:center;font-size:13px;margin-top:6px}.photo{position:absolute;width:128px;height:154px;object-fit:cover;border:4px solid white;box-shadow:0 1px 8px #0003;background:#f1f5f9}.name{font-family:Georgia,serif;font-size:27px;font-weight:bold}.section{margin-top:18px}.section h2{font-family:Georgia,serif;font-size:16px;margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid currentColor}.rows{font-size:13px;line-height:1.55}.row{display:grid;grid-template-columns:150px 12px 1fr;gap:2px}.key{font-weight:bold}.about{white-space:pre-wrap;font-size:12px;line-height:1.5}.footer{text-align:center;font-size:10px;position:absolute;left:55px;right:55px;bottom:30px}
+.inner{position:absolute;inset:48px 55px}.orn{position:absolute;pointer-events:none}.title{text-align:center;font-family:Georgia,serif;font-weight:bold;font-size:31px;letter-spacing:1px}.subtitle{text-align:center;font-size:13px;margin-top:6px}.photo{position:absolute;width:128px;height:154px;object-fit:cover;border:4px solid white;box-shadow:0 1px 8px #0003;background:#f1f5f9;cursor:move;touch-action:none}.moveText{position:relative;cursor:move;touch-action:none}.name{font-family:Georgia,serif;font-size:27px;font-weight:bold}.section{margin-top:18px}.section h2{font-family:Georgia,serif;font-size:16px;margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid currentColor}.rows{font-size:13px;line-height:1.55}.row{display:grid;grid-template-columns:150px 12px 1fr;gap:2px}.key{font-weight:bold}.about{white-space:pre-wrap;font-size:12px;line-height:1.5}.footer{text-align:center;font-size:10px;position:absolute;left:55px;right:55px;bottom:30px}
 .t1{border:13px double var(--accent)}.t1 .orn{inset:25px;border:2px solid var(--accent)}.t1 .title,.t1 .name,.t1 .section h2{color:var(--accent)}
 .t2:before{content:"";position:absolute;left:0;top:0;bottom:0;width:150px;background:var(--accent)}.t2 .inner{left:185px}.t2 .title{text-align:left;color:var(--accent)}.t2 .photo{left:-155px;top:90px;width:120px;height:145px;border-radius:60px}.t2 .name{color:var(--accent)}
 .t3{background:#fffaf5}.t3:before,.t3:after{content:"";position:absolute;width:220px;height:220px;background:var(--accent);transform:rotate(45deg)}.t3:before{left:-150px;top:-150px}.t3:after{right:-150px;bottom:-150px}.t3 .title,.t3 .name,.t3 .section h2{color:var(--accent)}.t3 .photo{right:0;top:70px;border-radius:12px}
@@ -101,10 +101,28 @@ function render(){
  var contact=row("Address",$("address").value)+row("Mobile",$("mobile").value)+row("Email",$("email").value);
  var about="";if($("about").value.trim())about+='<div class="section"><h2>About Me</h2><div class="about">'+esc($("about").value)+'</div></div>';if($("partner").value.trim())about+='<div class="section"><h2>Partner Preference</h2><div class="about">'+esc($("partner").value)+'</div></div>';
  var img=photo&&$("showPhoto").checked?'<img class="photo" src="'+photo+'">':"";
- $("inner").innerHTML='<div class="title">Marriage Biodata</div><div class="subtitle">॥ शुभ विवाह ॥</div>'+img+'<div class="name" style="margin-top:38px">'+esc($("name").value||"Your Name")+'</div>'+
- ($("showPersonal").checked?section("Personal Details",personal):"")+($("showCareer").checked?section("Education & Profession",career):"")+($("showFamily").checked?section("Family Details",family):"")+($("showContact").checked?section("Contact Details",contact):"")+($("showAbout").checked?about:"");
- fit();
+ $("inner").innerHTML='<div class="title">Marriage Biodata</div><div class="subtitle">॥ शुभ विवाह ॥</div>'+img+'<div id="moveText" class="moveText"><div class="name" style="margin-top:38px">'+esc($("name").value||"Your Name")+'</div>'+
+ ($("showPersonal").checked?section("Personal Details",personal):"")+($("showCareer").checked?section("Education & Profession",career):"")+($("showFamily").checked?section("Family Details",family):"")+($("showContact").checked?section("Contact Details",contact):"")+($("showAbout").checked?about:"")+'</div>';
+ applyPositions();bindDrag();fit();
 }
+
+var pos={photoX:0,photoY:0,textX:0,textY:0};
+function applyPositions(){
+ var im=document.querySelector("#inner .photo"),mt=$("moveText");
+ if(im)im.style.transform="translate("+pos.photoX+"px,"+pos.photoY+"px)";
+ if(mt)mt.style.transform="translate("+pos.textX+"px,"+pos.textY+"px)";
+}
+function makeDrag(el,type){
+ if(!el)return;
+ var active=false,sx=0,sy=0,bx=0,by=0;
+ function point(e){var q=e.touches&&e.touches[0]?e.touches[0]:e;return{x:q.clientX,y:q.clientY}}
+ function start(e){var q=point(e);active=true;sx=q.x;sy=q.y;bx=type==="photo"?pos.photoX:pos.textX;by=type==="photo"?pos.photoY:pos.textY;if(e.cancelable)e.preventDefault()}
+ function move(e){if(!active)return;var q=point(e),nx=bx+(q.x-sx),ny=by+(q.y-sy);if(type==="photo"){pos.photoX=nx;pos.photoY=ny}else{pos.textX=nx;pos.textY=ny}applyPositions();if(e.cancelable)e.preventDefault()}
+ function end(){active=false}
+ el.addEventListener("mousedown",start);document.addEventListener("mousemove",move);document.addEventListener("mouseup",end);
+ el.addEventListener("touchstart",start,{passive:false});document.addEventListener("touchmove",move,{passive:false});document.addEventListener("touchend",end);
+}
+function bindDrag(){makeDrag(document.querySelector("#inner .photo"),"photo");makeDrag($("moveText"),"text")}
 function fit(){var outer=document.querySelector(".previewOuter"),b=$("bio"),scale=Math.min(1,(outer.clientWidth-10)/794,(outer.clientHeight>200?(outer.clientHeight-10)/1123:1));b.style.transform="scale("+scale+")";b.style.marginBottom=-(1123*(1-scale))+"px"}
 var ids=["name","dob","height","complexion","religion","caste","gotra","status","education","job","company","income","father","fatherJob","mother","motherJob","siblings","address","mobile","email","about","partner","template","accent","textColor","showPhoto","showPersonal","showCareer","showFamily","showContact","showAbout"];
 ids.forEach(function(id){$(id).oninput=render;$(id).onchange=render});
@@ -114,7 +132,7 @@ $("png").onclick=function(){capture().then(function(c){dl(c.toDataURL("image/png
 $("jpg").onclick=function(){capture().then(function(c){dl(c.toDataURL("image/jpeg",.95),"marriage-biodata.jpg")})};
 $("pdf").onclick=function(){capture().then(function(c){var jsPDF=window.jspdf.jsPDF,p=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});p.addImage(c.toDataURL("image/jpeg",.96),"JPEG",0,0,210,297);p.save("marriage-biodata.pdf")})};
 $("print").onclick=function(){capture().then(function(c){var w=window.open("","_blank");if(!w)return alert("Please allow pop-ups.");w.document.write('<html><head><style>@page{size:A4;margin:0}html,body{margin:0}img{width:210mm;height:297mm;display:block}</style></head><body><img src="'+c.toDataURL("image/png")+'"></body></html>');w.document.close();setTimeout(function(){w.focus();w.print()},700)})};
-$("reset").onclick=function(){location.reload()};
+$("reset").onclick=function(){pos={photoX:0,photoY:0,textX:0,textY:0};location.reload()};
 window.addEventListener("resize",fit);render();
 })();
 </script>
