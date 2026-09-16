@@ -38,6 +38,14 @@ body *{visibility:hidden!important}
 #sheet img{display:block!important;width:100%!important;height:auto!important}
 header,.controlsPrint,.mobileStickyPreview{display:none!important}
 }
+
+.finalQueueActions{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:8px}
+.finalQueueActions .btn{width:100%}
+@media(max-width:480px){
+ .finalQueueActions{grid-template-columns:1fr 1fr}
+ .finalQueueActions .btn{padding:10px 7px;font-size:13px}
+}
+
 </style>
 </head>
 <body>
@@ -126,11 +134,6 @@ header,.controlsPrint,.mobileStickyPreview{display:none!important}
   <div class="row"><label>Border</label><input id="border" type="range" min="0" max="50" value="0"></div>
   <div class="actions"><button id="resetTune" class="btn gray">↻ Reset Enhance</button><button id="download" class="btn green" disabled>⬇ Download Photo</button></div>
  </div>
- <div class="panel controlsPrint">
-  <h3>3. Photo Sheet</h3>
-  <div class="row"><label>Copies</label><input id="copies" type="number" min="1" max="24" value="8"></div>
-  <div class="actions"><button id="makeSheet" class="btn" disabled>🖼 Make Sheet</button><button id="print" class="btn green" disabled>🖨 Print Sheet</button></div>
- </div>
 </div>
 <div>
  <div id="editor" class="editor" style="position:absolute;left:-99999px;top:-99999px;width:350px;height:450px"><canvas id="canvas" width="700" height="900"></canvas><div class="guide"></div></div>
@@ -147,8 +150,11 @@ header,.controlsPrint,.mobileStickyPreview{display:none!important}
  </div>
  <div id="ql" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"></div>
  <div id="qi" style="font-weight:800;margin:10px 0">0 Person • 0 Photos</div>
+ <div class="actions finalQueueActions">
+  <button type="button" id="qfinal" class="btn green">🖼️ Create Final Queue Sheet</button>
+  <button type="button" id="print" class="btn green" disabled>🖨️ Print Sheet</button>
+ </div>
  <div class="actions">
-  <button type="button" id="qfinal" class="btn green">🖨️ Create Final Queue Sheet</button>
   <button type="button" id="qclear" class="btn gray">Clear Queue</button>
  </div>
 </div>
@@ -162,12 +168,12 @@ header,.controlsPrint,.mobileStickyPreview{display:none!important}
 const file=document.getElementById('file'),canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
 const editor=document.getElementById('editor'),remove=document.getElementById('remove'),statusEl=document.getElementById('status');
 const zoom=document.getElementById('zoom'),xpos=document.getElementById('xpos'),ypos=document.getElementById('ypos'),sizeSel=document.getElementById('size');
-const finalPreview=document.getElementById('finalPreview'),mobilePreview=document.getElementById('mobilePreview'),download=document.getElementById('download'),makeSheet=document.getElementById('makeSheet'),printBtn=document.getElementById('print'),sheet=document.getElementById('sheet');
+const finalPreview=document.getElementById('finalPreview'),mobilePreview=document.getElementById('mobilePreview'),download=document.getElementById('download'),printBtn=document.getElementById('print'),sheet=document.getElementById('sheet');
 const brightness=document.getElementById('brightness'),contrast=document.getElementById('contrast'),saturation=document.getElementById('saturation'),border=document.getElementById('border'),customSize=document.getElementById('customSize'),customW=document.getElementById('customW'),customH=document.getElementById('customH');
 let original=null,working=null,bg='#ffffff',drag=false,lastX=0,lastY=0,seg=null,busy=false;
 
 function loadImg(src,cb){const i=new Image();i.onload=()=>cb(i);i.src=src}
-file.onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);loadImg(u,i=>{original=i;working=i;zoom.value=100;xpos.value=0;ypos.value=0;remove.disabled=false;download.disabled=false;makeSheet.disabled=false;statusEl.textContent='✅ Photo loaded. जरूरत हो तो Remove Background दबाएँ।';draw();URL.revokeObjectURL(u)})};
+file.onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);loadImg(u,i=>{original=i;working=i;zoom.value=100;xpos.value=0;ypos.value=0;remove.disabled=false;download.disabled=false;statusEl.textContent='✅ Photo loaded. जरूरत हो तो Remove Background दबाएँ।';draw();URL.revokeObjectURL(u)})};
 
 function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);if(!working)return;
@@ -199,9 +205,8 @@ function initSeg(){
 remove.onclick=async()=>{if(!original||busy||!initSeg())return;busy=true;remove.disabled=true;remove.textContent='⏳ Removing...';statusEl.textContent='⏳ Background remove हो रहा है...';try{await seg.send({image:original})}catch(e){console.error(e);busy=false;remove.disabled=false;remove.textContent='✨ Remove Background';statusEl.textContent='❌ Background removal failed. फिर try करें।'}};
 
 download.onclick=()=>{const a=document.createElement('a');a.href=makeFinal();a.download='passport-photo.jpg';a.click()};
-makeSheet.onclick=()=>{const d=makeFinal();if(!d)return;sheet.innerHTML='';let n=Math.max(1,Math.min(24,+document.getElementById('copies').value||8));for(let i=0;i<n;i++){const im=new Image();im.src=d;sheet.appendChild(im)}sheet.style.display='grid';printBtn.disabled=false;sheet.scrollIntoView({behavior:'smooth'})};
 printBtn.onclick=()=>window.print();
-document.getElementById('reset').onclick=()=>{file.value='';original=working=null;ctx.clearRect(0,0,canvas.width,canvas.height);finalPreview.removeAttribute('src');if(mobilePreview)mobilePreview.removeAttribute('src');sheet.innerHTML='';sheet.style.display='none';remove.disabled=download.disabled=makeSheet.disabled=printBtn.disabled=true;zoom.value=100;xpos.value=0;ypos.value=0;statusEl.textContent='पहले photo select करें।'};
+document.getElementById('reset').onclick=()=>{file.value='';original=working=null;ctx.clearRect(0,0,canvas.width,canvas.height);finalPreview.removeAttribute('src');if(mobilePreview)mobilePreview.removeAttribute('src');sheet.innerHTML='';sheet.style.display='none';remove.disabled=download.disabled=true;printBtn.disabled=true;zoom.value=100;xpos.value=0;ypos.value=0;statusEl.textContent='पहले photo select करें।'};
 
 // ---- Clean Print Queue (independent of MediaPipe/background-removal logic) ----
 const printQueue=[];
