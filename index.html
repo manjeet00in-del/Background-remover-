@@ -12,7 +12,7 @@ h3{font-size:16px;margin:0 0 11px}.upload{display:block;border:2px dashed #8aa4c
 .btn{border:0;border-radius:9px;padding:10px 12px;font-weight:700;background:#173b72;color:#fff;cursor:pointer}.green{background:#16834b}.gray{background:#64748b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.actions .btn{flex:1}
 .row{display:flex;gap:9px;align-items:center;margin:11px 0}.row label{font-size:13px;font-weight:700;min-width:90px}.row select{width:100%;padding:9px;border:1px solid #ccd5e1;border-radius:8px}input[type=range]{width:100%}
 .stage{background:#dbe4ef;border-radius:12px;min-height:470px;display:flex;align-items:center;justify-content:center;padding:10px;overflow:auto}
-.cw{position:relative;display:inline-block;touch-action:none}.cw canvas{display:block;max-width:100%;max-height:70vh;background:#fff}
+.cw{position:relative;display:inline-block;touch-action:none;transform-origin:top left}.cw canvas{display:block;background:#fff}
 .crop{position:absolute;border:2px dashed #1976d2;background:#1976d216;touch-action:none;cursor:move}.handle{position:absolute;width:24px;height:24px;border-radius:50%;background:#1976d2;border:3px solid white}
 .tl{left:-12px;top:-12px}.tr{right:-12px;top:-12px}.bl{left:-12px;bottom:-12px}.br{right:-12px;bottom:-12px}.hide{display:none}.hint{font-size:11px;color:#64748b;line-height:1.4}
 .mobilePreview{display:none}.mobilePreview canvas{max-width:100%;max-height:125px;display:block;margin:auto;background:#fff}
@@ -38,10 +38,9 @@ h3{font-size:16px;margin:0 0 11px}.upload{display:block;border:2px dashed #8aa4c
   <div class="row"><label>Brightness</label><input id="brightness" type="range" min="50" max="170" value="100"></div>
   <div class="row"><label>Contrast</label><input id="contrast" type="range" min="50" max="220" value="100"></div>
   <div class="row"><label>Mode</label><select id="mode"><option value="color">Color</option><option value="clean">Clean Document</option><option value="gray">Grayscale</option><option value="bw">Black & White</option></select></div>
-  <button class="btn green" id="autoCrop" style="width:100%;margin-top:4px">✨ Auto Detect Document</button>
   <div class="actions"><button class="btn gray" id="resetCrop">Full Page Crop</button><button class="btn" id="applyCrop">Apply Crop</button></div>
   <button class="btn gray" id="resetAll" style="width:100%;margin-top:8px">↻ Reset All</button>
-  <p class="hint">Blue box को finger से move करें। चार blue circles से crop area resize करें।</p>
+  <p class="hint">Photo load होते ही scanner document को automatically detect करेगा। जरूरत हो तो blue box/corners से manually adjust करें।</p>
  </div>
  <div class="panel">
   <h3>3. Download / Print</h3>
@@ -65,15 +64,30 @@ function filters(){
  if(m==='bw')x+=' grayscale(1) contrast(2.2)';
  return x
 }
-function loadFile(f){if(!f)return;let r=new FileReader();r.onload=()=>{let i=new Image();i.onload=()=>{original=i;img=i;angle=0;draw();resetCrop()};i.src=r.result};r.readAsDataURL(f)}
+function loadFile(f){if(!f)return;let r=new FileReader();r.onload=()=>{let i=new Image();i.onload=()=>{original=i;img=i;angle=0;draw();setTimeout(autoDetect,80)};i.src=r.result};r.readAsDataURL(f)}
 $('file').onchange=e=>loadFile(e.target.files[0]);
+
+function fitEditor(){
+ if(!img)return;
+ const cw=$('cw'),stage=cw.parentElement;
+ // Reset before measuring available space.
+ cw.style.transform='none';cw.style.marginRight='0px';cw.style.marginBottom='0px';
+ let aw=Math.max(1,stage.clientWidth-20);
+ let ah=Math.max(320,window.innerHeight*.68);
+ let scale=Math.min(1,aw/can.width,ah/can.height);
+ cw.style.transform=`scale(${scale})`;
+ cw.style.marginRight=(can.width*(scale-1))+'px';
+ cw.style.marginBottom=(can.height*(scale-1))+'px';
+}
+window.addEventListener('resize',fitEditor);
+
 function draw(){
  if(!img)return;
  let swap=Math.abs(angle%180)===90,w=swap?img.naturalHeight:img.naturalWidth,h=swap?img.naturalWidth:img.naturalHeight;
  let s=Math.min(1,1000/Math.max(w,h));can.width=Math.round(w*s);can.height=Math.round(h*s);
  ctx.clearRect(0,0,can.width,can.height);ctx.save();ctx.filter=filters();ctx.translate(can.width/2,can.height/2);ctx.rotate(angle*Math.PI/180);
  ctx.drawImage(img,-img.naturalWidth*s/2,-img.naturalHeight*s/2,img.naturalWidth*s,img.naturalHeight*s);ctx.restore();
- $('cw').style.width=can.width+'px';$('cw').style.height=can.height+'px';updateMobile()
+ $('cw').style.width=can.width+'px';$('cw').style.height=can.height+'px';fitEditor();updateMobile()
 }
 function updateMobile(){
  if(!img)return;let fc=finalCanvas();if(!fc)return;
@@ -144,7 +158,6 @@ function autoDetect(){
  cr={x:l/tw*W,y:top/th*H,w:(r-l+1)/tw*W,h:(bot-top+1)/th*H};
  positionCrop();updateMobile();
 }
-$('autoCrop').onclick=autoDetect;
 
 $('applyCrop').onclick=()=>{let o=finalCanvas();if(!o)return alert('पहले document photo upload करें।');let i=new Image();i.onload=()=>{img=i;angle=0;draw();resetCrop()};i.src=o.toDataURL('image/png')};
 $('resetAll').onclick=()=>{if(!original)return;img=original;angle=0;$('brightness').value=100;$('contrast').value=100;$('mode').value='color';draw();resetCrop()};
