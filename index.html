@@ -1,85 +1,192 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AI Photo Enhancer - Manjeet Digital Hub</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Smart Photo Enhancer - Manjeet Digital Hub</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0e1830;color:#fff}.top{padding:15px;background:#111d38;border-bottom:1px solid #31405e}.top b{font-size:20px}.top small{display:block;color:#9fb0cf;margin-top:4px}.wrap{max-width:760px;margin:auto;padding:12px}.card{background:#182640;border:1px solid #344360;border-radius:17px;padding:14px;margin-bottom:13px}.upload{display:block;text-align:center;border:2px dashed #6684b7;border-radius:14px;padding:22px;cursor:pointer}.upload input{display:none}.upload span{display:block;font-size:34px}.muted{color:#a9b8d2;font-size:12px}.status{margin-top:10px;padding:10px;background:#101c33;border-radius:10px;color:#c5d8fa;font-size:13px}.progress{height:8px;background:#091327;border-radius:8px;overflow:hidden;margin-top:9px}.bar{height:100%;width:0;background:#4ca5ff}.hidden{display:none!important}.stage{position:relative;overflow:hidden;border-radius:14px;background:#080f1e;min-height:260px;display:flex;align-items:center;justify-content:center}.stage img{display:block;max-width:100%;max-height:65vh}.afterWrap{position:absolute;left:0;top:0;width:50%;height:100%;overflow:hidden;border-right:3px solid #fff}.afterWrap img{position:absolute;left:0;top:0;max-width:none}.handle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;color:#111;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold}.range{width:100%}.info{display:flex;justify-content:space-between;gap:8px;color:#aebbd3;font-size:12px;margin-top:9px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.btn{border:0;border-radius:11px;padding:13px 9px;font-weight:bold;font-size:15px;color:#fff;background:#3b4964}.btn.ai{background:linear-gradient(90deg,#7757ee,#159fe0)}.btn.white{background:#fff;color:#17223a}.btn:disabled{opacity:.5}.note{font-size:11px;line-height:1.45;color:#aab8d0;margin-top:10px}
-</style></head><body>
-<div class="top"><b>✨ AI Photo Enhancer</b><small>Manjeet Digital Hub • Real AI 2× Super Resolution</small></div>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0d1830;color:#fff}
+header{padding:15px;background:#111e39;border-bottom:1px solid #30415f}
+header b{font-size:20px}header small{display:block;color:#9fb1cf;margin-top:4px}
+.wrap{max-width:760px;margin:auto;padding:12px}.card{background:#182641;border:1px solid #344563;border-radius:17px;padding:14px;margin-bottom:13px}
+.upload{display:block;text-align:center;border:2px dashed #6885b6;border-radius:14px;padding:22px;cursor:pointer}.upload input{display:none}.upload .ico{font-size:36px}
+.muted,.note{color:#aab9d2;font-size:12px;line-height:1.45}.status{margin-top:10px;padding:10px;border-radius:10px;background:#101c33;color:#c7d9f8;font-size:13px}
+.stage{position:relative;overflow:hidden;border-radius:14px;background:#070f1f;min-height:260px;display:flex;align-items:center;justify-content:center}
+.stage img{display:block;max-width:100%;max-height:65vh}.afterWrap{position:absolute;left:0;top:0;width:50%;height:100%;overflow:hidden;border-right:3px solid #fff}
+.afterWrap img{position:absolute;left:0;top:0;max-width:none}.handle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;color:#101828;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.range{width:100%;accent-color:#6b7cff}.info{display:flex;justify-content:space-between;gap:8px;color:#aab9d2;font-size:12px;margin-top:8px;flex-wrap:wrap}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.btn{border:0;border-radius:11px;padding:13px 9px;font-size:14px;font-weight:bold;color:#fff;background:#3b4a66}
+.btn.main{background:linear-gradient(90deg,#6e5be8,#159ee0)}.btn.white{background:#fff;color:#17223a}.btn.on{outline:2px solid #7db7ff;background:#244a79}
+label.ctrl{display:block;margin-top:12px;font-size:13px;color:#d6e0f1}.val{float:right;color:#9fc7ff}
+.hidden{display:none!important}h3{margin:0 0 8px;font-size:16px}.preset{grid-template-columns:repeat(2,1fr)}
+@media(max-width:420px){.wrap{padding:8px}.card{padding:11px}.stage{min-height:230px}}
+</style>
+</head>
+<body>
+<header><b>✨ Smart Photo Enhancer</b><small>Manjeet Digital Hub • Fast browser enhancement</small></header>
 <div class="wrap">
-<div class="card"><label class="upload"><input id="file" type="file" accept="image/*"><span>📷</span><b>Choose Photo</b><div class="muted">JPG / PNG / WebP</div></label><div id="status" class="status">Choose a photo to start.</div><div id="progress" class="progress hidden"><div id="bar" class="bar"></div></div></div>
-<div id="preview" class="card hidden"><div id="stage" class="stage"><img id="before"><div id="aw" class="afterWrap"><img id="after"></div><div id="handle" class="handle">↔</div></div><input id="compare" class="range" type="range" min="0" max="100" value="50"><div class="info"><span id="inInfo"></span><span id="outInfo"></span></div><div class="row"><button id="reset" class="btn">Reset</button><button id="download" class="btn white">Download</button></div></div>
-<div id="controls" class="card hidden"><button id="ai" class="btn ai" style="width:100%">🧠 Real AI Enhance 2×</button><div class="note">Uses Real-ESRGAN x2 ONNX. It does not use face restoration or face generation. For compatibility, AI runs through ONNX Runtime Web using WebAssembly (CPU), which is supported across iPhone Safari, Android Chrome and desktop browsers. First run downloads the AI model (~64 MB), so Wi-Fi is recommended.</div></div>
+<div class="card">
+<label class="upload"><input id="file" type="file" accept="image/*"><div class="ico">📷</div><b>Choose Photo</b><div class="muted">JPG / PNG / WebP • Processing stays in your browser</div></label>
+<div id="status" class="status">Choose a photo to start.</div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.min.js"></script>
+
+<div id="previewCard" class="card hidden">
+<div id="stage" class="stage">
+<img id="before">
+<div id="afterWrap" class="afterWrap"><img id="after"></div>
+<div id="handle" class="handle">↔</div>
+</div>
+<input id="compare" class="range" type="range" min="0" max="100" value="50">
+<div class="info"><span id="originalInfo"></span><span id="outputInfo"></span></div>
+<div class="row"><button id="reset" class="btn">Reset All</button><button id="download" class="btn white">Download HD</button></div>
+</div>
+
+<div id="controls" class="card hidden">
+<h3>One-Tap Enhance</h3>
+<button id="auto" class="btn main" style="width:100%">✨ Smart Auto Enhance</button>
+<label class="ctrl">Enhancement Strength <span id="strengthV" class="val">70%</span></label>
+<input id="strength" class="range" type="range" min="0" max="100" value="70">
+
+<div class="row preset">
+<button class="btn presetBtn" data-preset="clear">Clear & Sharp</button>
+<button class="btn presetBtn" data-preset="vivid">Vivid</button>
+<button class="btn presetBtn" data-preset="soft">Soft Glow</button>
+<button class="btn presetBtn" data-preset="natural">Natural</button>
+</div>
+
+<h3 style="margin-top:18px">Manual Adjustments</h3>
+<label class="ctrl">Brightness <span id="brightnessV" class="val">0</span></label>
+<input id="brightness" class="range manual" type="range" min="-25" max="25" value="0">
+<label class="ctrl">Contrast <span id="contrastV" class="val">0</span></label>
+<input id="contrast" class="range manual" type="range" min="-25" max="30" value="0">
+<label class="ctrl">Color <span id="saturationV" class="val">0</span></label>
+<input id="saturation" class="range manual" type="range" min="-20" max="30" value="0">
+<label class="ctrl">Sharpness <span id="sharpnessV" class="val">20</span></label>
+<input id="sharpness" class="range manual" type="range" min="0" max="60" value="20">
+<label class="ctrl">Warmth <span id="warmthV" class="val">0</span></label>
+<input id="warmth" class="range manual" type="range" min="-20" max="20" value="0">
+<div class="note" style="margin-top:12px">No AI model is used. The tool improves tone, color, clarity and resolution locally, so it is fast and does not intentionally alter facial identity.</div>
+</div>
+</div>
+
 <script>
 (function(){
 "use strict";
-var MODEL="https://raw.githubusercontent.com/net2cn/Real-ESRGAN_GUI/master/Real-ESRGAN_GUI/models/realesrgan_x2plus.onnx";
-var file=document.getElementById("file"),before=document.getElementById("before"),after=document.getElementById("after"),aw=document.getElementById("aw"),handle=document.getElementById("handle"),compare=document.getElementById("compare"),status=document.getElementById("status"),progress=document.getElementById("progress"),bar=document.getElementById("bar");
-var original=null,result=null,session=null,url="";
-ort.env.wasm.numThreads=1;
-ort.env.wasm.simd=true;
+var $=function(id){return document.getElementById(id)};
+var file=$("file"),before=$("before"),after=$("after"),stage=$("stage"),aw=$("afterWrap"),handle=$("handle"),compare=$("compare");
+var source=null,result=null,objUrl="",timer=null;
+var controls=["brightness","contrast","saturation","sharpness","warmth"];
 
 function sync(){
- var p=Number(compare.value);aw.style.width=p+"%";handle.style.left=p+"%";
- if(after.naturalWidth){var s=document.getElementById("stage"),r=before.getBoundingClientRect();after.style.width=r.width+"px";after.style.height=r.height+"px";after.style.objectFit="contain";}
+ var p=+compare.value; aw.style.width=p+"%"; handle.style.left=p+"%";
+ if(before.naturalWidth && after.naturalWidth){
+   var r=before.getBoundingClientRect();
+   after.style.width=r.width+"px"; after.style.height=r.height+"px"; after.style.objectFit="contain";
+ }
 }
-compare.oninput=sync;window.addEventListener("resize",sync);
+compare.oninput=sync; window.addEventListener("resize",sync);
 
 file.onchange=function(){
- var f=this.files&&this.files[0];if(!f)return;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(f);
- var im=new Image();im.onload=function(){
-   original=document.createElement("canvas");original.width=im.naturalWidth;original.height=im.naturalHeight;original.getContext("2d").drawImage(im,0,0);
-   before.src=url;setResult(original);
-   document.getElementById("preview").classList.remove("hidden");document.getElementById("controls").classList.remove("hidden");
-   document.getElementById("inInfo").textContent="Original: "+(f.size/1048576).toFixed(2)+" MB • "+im.naturalWidth+"×"+im.naturalHeight;
-   status.textContent="✅ Photo ready. Tap Real AI Enhance 2×.";
- };im.src=url;
+ var f=this.files&&this.files[0]; if(!f)return;
+ if(objUrl)URL.revokeObjectURL(objUrl); objUrl=URL.createObjectURL(f);
+ var im=new Image();
+ im.onload=function(){
+   source=document.createElement("canvas"); source.width=im.naturalWidth; source.height=im.naturalHeight;
+   source.getContext("2d").drawImage(im,0,0);
+   before.src=objUrl;
+   resetValues(false);
+   render();
+   $("previewCard").classList.remove("hidden"); $("controls").classList.remove("hidden");
+   $("originalInfo").textContent="Original: "+(f.size/1048576).toFixed(2)+" MB • "+im.naturalWidth+"×"+im.naturalHeight;
+   $("status").textContent="✅ Photo ready. Tap Smart Auto Enhance.";
+ };
+ im.src=objUrl;
 };
-function setResult(c){
- result=c;after.src=c.toDataURL("image/jpeg",.92);after.onload=function(){sync()};
- document.getElementById("outInfo").textContent="Output: "+c.width+"×"+c.height;
-}
-document.getElementById("reset").onclick=function(){if(original){setResult(original);status.textContent="🔄 Original restored."}};
-document.getElementById("download").onclick=function(){if(!result)return;result.toBlob(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="manjeet-ai-enhanced.png";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1500)},"image/png")};
 
-async function getSession(){
- if(session)return session;
- progress.classList.remove("hidden");bar.style.width="10%";status.textContent="⬇️ Loading AI model (~64 MB). First time may take a while…";
- session=await ort.InferenceSession.create(MODEL,{executionProviders:["wasm"],graphOptimizationLevel:"all"});
- bar.style.width="35%";return session;
-}
-function tileTensor(canvas,x,y,w,h,size){
- var tc=document.createElement("canvas");tc.width=size;tc.height=size;var cx=tc.getContext("2d");
- cx.drawImage(canvas,x,y,w,h,0,0,w,h);
- var d=cx.getImageData(0,0,size,size).data,n=size*size,arr=new Float32Array(3*n);
- for(var i=0;i<n;i++){arr[i]=d[i*4]/255;arr[n+i]=d[i*4+1]/255;arr[2*n+i]=d[i*4+2]/255}
- return new ort.Tensor("float32",arr,[1,3,size,size]);
-}
-function tensorCanvas(t){
- var dims=t.dims,h=dims[dims.length-2],w=dims[dims.length-1],n=w*h,d=t.data,oc=document.createElement("canvas");oc.width=w;oc.height=h;
- var id=oc.getContext("2d").createImageData(w,h);
- for(var i=0;i<n;i++){id.data[i*4]=Math.max(0,Math.min(255,d[i]*255));id.data[i*4+1]=Math.max(0,Math.min(255,d[n+i]*255));id.data[i*4+2]=Math.max(0,Math.min(255,d[2*n+i]*255));id.data[i*4+3]=255}
- oc.getContext("2d").putImageData(id,0,0);return oc;
-}
-document.getElementById("ai").onclick=async function(){
- if(!original)return;var btn=this;btn.disabled=true;
- try{
-  var s=await getSession(),size=128,scale=2,out=document.createElement("canvas");out.width=original.width*scale;out.height=original.height*scale;var ox=out.getContext("2d");
-  var nx=Math.ceil(original.width/size),ny=Math.ceil(original.height/size),total=nx*ny,done=0,inputName=s.inputNames[0],outputName=s.outputNames[0];
-  status.textContent="🧠 Real AI enhancing…"; 
-  for(var y=0;y<original.height;y+=size){for(var x=0;x<original.width;x+=size){
-    var w=Math.min(size,original.width-x),h=Math.min(size,original.height-y),input=tileTensor(original,x,y,w,h,size);
-    var feeds={};feeds[inputName]=input;var outputs=await s.run(feeds),tc=tensorCanvas(outputs[outputName]);
-    ox.drawImage(tc,0,0,w*scale,h*scale,x*scale,y*scale,w*scale,h*scale);
-    done++;bar.style.width=(35+65*done/total)+"%";status.textContent="🧠 Real AI enhancing… "+Math.round(done/total*100)+"%";
-    await new Promise(function(r){setTimeout(r,0)});
-  }}
-  setResult(out);bar.style.width="100%";status.textContent="✅ Real AI enhancement complete — 2× image ready.";
- }catch(e){
-  console.error(e);session=null;status.textContent="❌ AI could not start. Check internet/model loading, then try again.";bar.style.width="0%";
+function clamp(v){return v<0?0:v>255?255:v}
+function smartProcess(){
+ if(!source)return;
+ var strength=+$("strength").value/100;
+ var b=+$("brightness").value, c=+$("contrast").value, sat=+$("saturation").value, sh=+$("sharpness").value, warm=+$("warmth").value;
+ var scale=2, maxSide=4096;
+ if(Math.max(source.width,source.height)*scale>maxSide) scale=maxSide/Math.max(source.width,source.height);
+ scale=Math.max(1,scale);
+ var base=document.createElement("canvas"); base.width=Math.round(source.width*scale); base.height=Math.round(source.height*scale);
+ var bx=base.getContext("2d"); bx.imageSmoothingEnabled=true; bx.imageSmoothingQuality="high";
+ bx.drawImage(source,0,0,base.width,base.height);
+
+ var ctx=base.getContext("2d"), img=ctx.getImageData(0,0,base.width,base.height), d=img.data;
+ var cf=(259*((c*strength)+255))/(255*(259-(c*strength)));
+ var sv=1+(sat*strength/100), bv=b*strength*2.0, wv=warm*strength*0.8;
+ for(var i=0;i<d.length;i+=4){
+   var r=cf*(d[i]-128)+128+bv+wv;
+   var g=cf*(d[i+1]-128)+128+bv;
+   var bl=cf*(d[i+2]-128)+128+bv-wv;
+   var lum=.299*r+.587*g+.114*bl;
+   d[i]=clamp(lum+(r-lum)*sv); d[i+1]=clamp(lum+(g-lum)*sv); d[i+2]=clamp(lum+(bl-lum)*sv);
  }
- btn.disabled=false;
+ ctx.putImageData(img,0,0);
+
+ if(sh>0){
+   var original=ctx.getImageData(0,0,base.width,base.height), src=original.data, out=ctx.createImageData(base.width,base.height), od=out.data;
+   od.set(src); var amount=(sh/100)*strength*0.75, w=base.width,h=base.height;
+   for(var y=1;y<h-1;y++){
+     for(var x=1;x<w-1;x++){
+       var k=(y*w+x)*4;
+       for(var ch=0;ch<3;ch++){
+         var blur=(src[k-4+ch]+src[k+4+ch]+src[k-w*4+ch]+src[k+w*4+ch])/4;
+         od[k+ch]=clamp(src[k+ch]+(src[k+ch]-blur)*amount);
+       }
+       od[k+3]=src[k+3];
+     }
+   }
+   ctx.putImageData(out,0,0);
+ }
+ result=base;
+ after.src=base.toDataURL("image/jpeg",.94);
+ after.onload=sync;
+ $("outputInfo").textContent="HD Output: "+base.width+"×"+base.height;
+ $("status").textContent="✨ Enhancement ready.";
+}
+
+function render(){clearTimeout(timer);timer=setTimeout(smartProcess,80)}
+controls.forEach(function(id){
+ $(id).oninput=function(){ $(id+"V").textContent=this.value; render(); };
+});
+$("strength").oninput=function(){$("strengthV").textContent=this.value+"%";render()};
+
+$("auto").onclick=function(){
+ $("strength").value=70;$("strengthV").textContent="70%";
+ setVals(4,14,10,28,2); render(); $("status").textContent="✨ Smart Auto Enhance applied.";
+};
+function setVals(b,c,s,sh,w){
+ var a={brightness:b,contrast:c,saturation:s,sharpness:sh,warmth:w};
+ controls.forEach(function(id){$(id).value=a[id];$(id+"V").textContent=a[id]});
+}
+document.querySelectorAll(".presetBtn").forEach(function(btn){
+ btn.onclick=function(){
+  document.querySelectorAll(".presetBtn").forEach(function(x){x.classList.remove("on")});this.classList.add("on");
+  var p=this.getAttribute("data-preset");
+  if(p==="clear")setVals(2,16,4,42,0);
+  if(p==="vivid")setVals(3,15,22,28,3);
+  if(p==="soft")setVals(6,5,7,8,4);
+  if(p==="natural")setVals(2,8,5,20,1);
+  render();
+ };
+});
+function resetValues(doRender){
+ $("strength").value=70;$("strengthV").textContent="70%";setVals(0,0,0,20,0);
+ document.querySelectorAll(".presetBtn").forEach(function(x){x.classList.remove("on")});
+ if(doRender)render();
+}
+$("reset").onclick=function(){if(source){resetValues(true);$("status").textContent="🔄 Adjustments reset."}};
+$("download").onclick=function(){
+ if(!result)return;
+ result.toBlob(function(blob){
+   var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="manjeet-smart-enhanced.jpg";a.click();
+   setTimeout(function(){URL.revokeObjectURL(u)},2000);
+ },"image/jpeg",.95);
 };
 })();
-</script></body></html>
+</script>
+</body></html>
