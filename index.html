@@ -1,155 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Manjeet Digital Hub – Free Online Digital Tools</title>
-  <meta name="description" content="Manjeet Digital Hub – Free online image, PDF, ID & print and finance tools.">
-  <meta name="keywords" content="Manjeet Digital Hub, online tools, image tools, PDF tools, ID card maker, photo tools, finance calculator">
-  <meta name="theme-color" content="#2563eb">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-<header class="site-header"><div class="header-inner">
-<a href="./" class="logo"><span class="logo-icon">MDH</span><span class="logo-text"><strong>Manjeet</strong><span>Digital Hub</span></span></a>
-<nav class="nav"><a href="#tools">Tools</a><a href="#portals">Portals</a><a href="#about">About</a></nav>
-<a href="#tools" class="header-cta">Explore Tools</a>
-</div></header>
-<main>
-<section class="hero"><div class="hero-glow glow-one"></div><div class="hero-glow glow-two"></div><div class="container hero-inner">
-<div class="hero-badge"><span class="status-dot"></span>Free Digital Tools</div>
-<h1>Manjeet Digital Hub</h1><p>Smart Digital Tools. Simple Solutions.</p>
-<div class="search-container"><span class="search-icon">🔍</span><input type="search" id="toolSearch" placeholder="Search tools..." autocomplete="off"><span class="search-shortcut">Ctrl K</span></div>
-<div class="hero-pills"><span>✓ Free to use</span><span>✓ Mobile friendly</span><span>✓ No login required</span></div>
-</div></section>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Photo Enhancer - Manjeet Digital Hub</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0e1830;color:#fff}.top{padding:15px 16px;background:#111d38;position:sticky;top:0;z-index:20;border-bottom:1px solid #2b3958}.top b{font-size:20px}.top small{display:block;color:#9fb0cf;margin-top:3px}.wrap{max-width:780px;margin:auto;padding:14px}.card{background:#182640;border:1px solid #344360;border-radius:18px;padding:15px;margin-bottom:14px}.upload{display:block;text-align:center;border:2px dashed #5673a6;border-radius:15px;padding:22px;background:#14213a;cursor:pointer}.upload input{display:none}.upload .ico{font-size:35px}.upload b,.upload small{display:block;margin-top:5px}.upload small,.muted{color:#9fb0cf}.status{margin-top:10px;padding:10px;border-radius:10px;background:#101c33;color:#b9d4ff;font-size:13px}.stage{position:relative;overflow:hidden;border-radius:16px;background:#0a1020;min-height:270px;display:flex;align-items:center;justify-content:center}.stage img{display:block;max-width:100%;max-height:65vh}.afterWrap{position:absolute;left:0;top:0;height:100%;width:50%;overflow:hidden;border-right:3px solid white}.afterWrap img{position:absolute;left:0;top:0;max-width:none}.handle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:4;box-shadow:0 3px 12px #0008}.range{width:100%}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:12px;padding:13px 10px;font-weight:700;font-size:15px;color:#fff;background:#2563eb;cursor:pointer}.ai{background:linear-gradient(90deg,#7656ed,#16a5e8)}.orange{background:#ee8c00}.gray{background:#3a4863}.white{background:#fff;color:#162139}.green{background:#16a36a}.btn:disabled{opacity:.5}.sectionTitle{color:#9fb0cf;font-weight:700;letter-spacing:1px;margin:3px 0 12px}.presets{display:grid;grid-template-columns:1fr 1fr;gap:9px}.presets button{background:#18243d;border:1px solid #43516b;color:#fff;padding:11px;border-radius:10px}.line{display:flex;justify-content:space-between;margin-top:12px;color:#c9d4e8}.info{display:flex;justify-content:space-between;gap:8px;color:#aebbd3;font-size:13px;margin-top:10px}.progress{height:8px;background:#0c1528;border-radius:8px;overflow:hidden;margin-top:8px}.bar{height:100%;width:0;background:#4aa3ff;transition:.2s}.hidden{display:none!important}
+@media(max-width:600px){.wrap{padding:9px}.card{padding:12px}.stage{min-height:250px}}
+</style></head><body>
+<div class="top"><b>✨ AI Photo Enhancer</b><small>Manjeet Digital Hub • Real AI Super Resolution</small></div>
+<div class="wrap">
+<div class="card"><label class="upload"><input id="file" type="file" accept="image/*"><div class="ico">📷</div><b>Choose Photo</b><small>Photo stays on your device</small></label><div id="status" class="status">Choose a photo. AI model loads only when you tap AI Deep Enhance.</div><div class="progress hidden" id="progress"><div class="bar" id="bar"></div></div></div>
 
-<section class="tools-section" id="tools"><div class="container">
-<div class="section-heading"><div><span class="section-label">TOOLS</span><h2>All Digital Tools</h2><p>Useful tools for your everyday digital work.</p></div></div>
+<div class="card hidden" id="previewCard"><div class="stage" id="stage"><img id="before"><div class="afterWrap" id="afterWrap"><img id="after"></div><div class="handle" id="handle">↔</div></div><input class="range" id="compare" type="range" min="0" max="100" value="50"><div class="info"><span id="origInfo"></span><span id="outInfo"></span></div><div class="row" style="margin-top:12px"><button class="btn gray" id="reset">Reset All</button><button class="btn white" id="download">Download</button></div></div>
 
-<!-- ESSENTIAL & SERVICES -->
-<div class="tool-category">
-<div class="category-heading"><div class="category-title"><span class="category-icon image-icon">⚡</span><div><h3>Essential &amp; Services</h3><p>Quick access to essential digital services</p></div></div><span class="tool-count">7 Tools</span></div>
-<div class="tools-grid">
-<div class="tool-card" data-tool="aienhancer" data-name="AI Photo Enhancer"><div class="tool-icon">✨</div><h4>AI Photo Enhancer</h4><p>Enhance photo quality</p></div>
-<div class="tool-card" data-tool="idprint" data-name="ID Card Print"><div class="tool-icon">🪪</div><h4>ID Card Print</h4><p>Print ID cards on sheet</p></div>
-<div class="tool-card" data-tool="pvcautocrop" data-name="PVC Auto Crop"><div class="tool-icon">✂️</div><h4>PVC Auto Crop</h4><p>Auto crop PVC card</p></div>
-<div class="tool-card" data-tool="passport" data-name="Passport Photo Maker"><div class="tool-icon">📸</div><h4>Passport Photo</h4><p>Make passport photo</p></div>
-<div class="tool-card" data-tool="photocropresize" data-name="Photo Crop And Resize"><div class="tool-icon">📐</div><h4>Photo Crop And Resize</h4><p>Crop and resize photos</p></div>
-<div class="tool-card" data-tool="resume" data-name="Resume Maker"><div class="tool-icon">📋</div><h4>Resume Maker</h4><p>Create professional resume</p></div>
-<div class="tool-card" data-tool="bgremover" data-name="BG Remover"><div class="tool-icon">🪄</div><h4>BG Remover</h4><p>Remove photo background</p></div>
-</div></div>
+<div class="card hidden" id="controls">
+<button class="btn orange" id="lighting" style="width:100%">✨ Fix Lighting & Tone</button>
+<button class="btn ai" id="ai" style="width:100%;margin-top:10px">🧠 AI Deep Enhance 4×</button>
+<button class="btn gray" id="quick" style="width:100%;margin-top:10px">⚡ Quick Auto Preset</button>
+<p class="muted" style="font-size:12px">AI Deep Enhance uses a real Real-ESRGAN TensorFlow.js model. First use downloads the model; later runs can use browser cache.</p>
+</div>
 
-<!-- IMAGE & PDF TOOLS -->
-<div class="tool-category">
-<div class="category-heading"><div class="category-title"><span class="category-icon pdf-icon">🖼️</span><div><h3>Image &amp; PDF Tools</h3><p>Convert and manage image &amp; PDF files</p></div></div><span class="tool-count">7 Tools</span></div>
-<div class="tools-grid">
-<div class="tool-card" data-tool="jpgpdf" data-name="JPG to PDF"><div class="tool-icon">🖼️</div><h4>JPG → PDF</h4><p>Convert JPG to PDF</p></div>
-<div class="tool-card" data-tool="pngpdf" data-name="PNG to PDF"><div class="tool-icon">📄</div><h4>PNG → PDF</h4><p>Convert PNG to PDF</p></div>
-<div class="tool-card" data-tool="pdfjpg" data-name="PDF to JPG"><div class="tool-icon">🖼️</div><h4>PDF → JPG</h4><p>Convert PDF pages to JPG</p></div>
-<div class="tool-card" data-tool="pdfpng" data-name="PDF to PNG"><div class="tool-icon">🖼️</div><h4>PDF → PNG</h4><p>Convert PDF pages to PNG</p></div>
-<div class="tool-card" data-tool="splitpdf" data-name="Split PDF"><div class="tool-icon">✂️</div><h4>Split PDF</h4><p>Split PDF pages</p></div>
-<div class="tool-card" data-tool="pdfcompressor" data-name="PDF Compressor"><div class="tool-icon">🗜️</div><h4>PDF Compressor</h4><p>Reduce PDF size</p></div>
-<div class="tool-card" data-tool="pdfextractor" data-name="PDF Page Extractor"><div class="tool-icon">📤</div><h4>Page Extractor</h4><p>Extract PDF pages</p></div>
-</div></div>
+<div class="card hidden" id="filters"><div class="sectionTitle">FILTER PRESETS</div><div class="presets"><button data-filter="contrast(1.22) saturate(1.3)">HDR</button><button data-filter="contrast(1.08) saturate(1.35)">Vivid</button><button data-filter="brightness(1.08) contrast(.95) saturate(.95)">Soft Glow</button><button data-filter="sepia(.28) contrast(1.05) saturate(.85)">Vintage</button></div><div class="sectionTitle" style="margin-top:20px">MANUAL ADJUSTMENTS</div>
+<div class="line"><span>Brightness</span><span id="bv">100%</span></div><input class="range" id="brightness" type="range" min="60" max="150" value="100">
+<div class="line"><span>Contrast</span><span id="cv">100%</span></div><input class="range" id="contrast" type="range" min="60" max="160" value="100">
+<div class="line"><span>Saturation</span><span id="sv">100%</span></div><input class="range" id="saturation" type="range" min="0" max="180" value="100"></div>
+</div>
 
-<!-- ID & PRINT -->
-<div class="tool-category">
-<div class="category-heading"><div class="category-title"><span class="category-icon id-icon">🪪</span><div><h3>ID &amp; Print</h3><p>ID card, biodata and printing tools</p></div></div><span class="tool-count">10 Tools</span></div>
-<div class="tools-grid">
-<div class="tool-card" data-tool="schoolid" data-name="School ID Card Maker" onclick="event.stopPropagation(); window.location.href='tools/school-id-card-maker.html';"><div class="tool-icon">🎓</div><h4>School ID Card</h4><p>Create student ID</p></div>
-<div class="tool-card" data-tool="employeeid" data-name="Employee ID Card Maker"><div class="tool-icon">💼</div><h4>Employee ID Card</h4><p>Create office ID</p></div>
-<div class="tool-card" data-tool="marriagebio" data-name="Marriage Biodata Maker"><div class="tool-icon">💍</div><h4>Marriage Biodata</h4><p>Create marriage biodata</p></div>
-<div class="tool-card" data-tool="document" data-name="Document Photo Maker"><div class="tool-icon">📑</div><h4>Document Photo</h4><p>Prepare document photos</p></div>
-<div class="tool-card" data-tool="visiting" data-name="Visiting Card Maker"><div class="tool-icon">💳</div><h4>Visiting Card</h4><p>Create business card</p></div>
-<div class="tool-card" data-tool="resume" data-name="Resume Maker"><div class="tool-icon">📋</div><h4>Resume Maker</h4><p>Create resume</p></div>
-<div class="tool-card" data-tool="certificate" data-name="Certificate Maker"><div class="tool-icon">🏆</div><h4>Certificate Maker</h4><p>Create certificate</p></div>
-<div class="tool-card" data-tool="signature" data-name="Signature Maker"><div class="tool-icon">✍️</div><h4>Signature Maker</h4><p>Resize signature</p></div>
-<div class="tool-card" data-tool="idprint" data-name="ID Card Print Sheet"><div class="tool-icon">🪪</div><h4>ID Card Print Sheet</h4><p>Arrange ID cards</p></div>
-<div class="tool-card" data-tool="label" data-name="Label Sticker Maker"><div class="tool-icon">🏷️</div><h4>Label / Sticker</h4><p>Create printable labels</p></div>
-</div></div>
-
-<!-- FINANCE -->
-<div class="tool-category">
-<div class="category-heading"><div class="category-title"><span class="category-icon finance-icon">💰</span><div><h3>Finance</h3><p>Useful financial calculators</p></div></div><span class="tool-count">13 Tools</span></div>
-<div class="tools-grid">
-<div class="tool-card" data-tool="emi" data-name="EMI Calculator"><div class="tool-icon">🏦</div><h4>EMI Calculator</h4><p>Calculate loan EMI</p></div>
-<div class="tool-card" data-tool="gst" data-name="GST Calculator"><div class="tool-icon">🧾</div><h4>GST Calculator</h4><p>Calculate GST</p></div>
-<div class="tool-card" data-tool="percentage" data-name="Percentage Calculator"><div class="tool-icon">％</div><h4>Percentage</h4><p>Calculate percentage</p></div>
-<div class="tool-card" data-tool="sip" data-name="SIP Calculator"><div class="tool-icon">📈</div><h4>SIP Calculator</h4><p>Calculate SIP returns</p></div>
-<div class="tool-card" data-tool="fd" data-name="FD Calculator"><div class="tool-icon">🏦</div><h4>FD Calculator</h4><p>Calculate FD returns</p></div>
-<div class="tool-card" data-tool="rd" data-name="RD Calculator"><div class="tool-icon">💰</div><h4>RD Calculator</h4><p>Calculate RD returns</p></div>
-<div class="tool-card" data-tool="loaninterest" data-name="Loan Interest Calculator"><div class="tool-icon">📊</div><h4>Loan Interest</h4><p>Calculate loan interest</p></div>
-<div class="tool-card" data-tool="interest" data-name="Simple Interest Calculator"><div class="tool-icon">📊</div><h4>Simple Interest</h4><p>Calculate interest</p></div>
-<div class="tool-card" data-tool="compound" data-name="Compound Interest Calculator"><div class="tool-icon">📈</div><h4>Compound Interest</h4><p>Calculate compound returns</p></div>
-<div class="tool-card" data-tool="discount" data-name="Discount Calculator"><div class="tool-icon">🏷️</div><h4>Discount Calculator</h4><p>Calculate discount</p></div>
-<div class="tool-card" data-tool="profit" data-name="Profit and Loss Calculator"><div class="tool-icon">💹</div><h4>Profit &amp; Loss</h4><p>Calculate profit or loss</p></div>
-<div class="tool-card" data-tool="age" data-name="Age Calculator"><div class="tool-icon">🎂</div><h4>Age Calculator</h4><p>Calculate exact age</p></div>
-<div class="tool-card" data-tool="insurance" data-name="Insurance Policy Return Calculator"><div class="tool-icon">🛡️</div><h4>Insurance Return</h4><p>Estimate policy returns</p></div>
-</div></div>
-
-<!-- GOVERNMENT PORTALS -->
-<section class="portal-section" id="portals">
-<div class="category-heading"><div class="category-title"><span class="category-icon portal-icon">🇮🇳</span><div><h3>Government &amp; Useful Portals</h3><p>Quick access to important official websites</p></div></div></div>
-<div class="portal-grid">
-<a class="portal-card" href="https://www.digilocker.gov.in/" target="_blank" rel="noopener noreferrer"><span>🇮🇳</span><strong>DigiLocker</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://uidai.gov.in/" target="_blank" rel="noopener noreferrer"><span>🪪</span><strong>Aadhaar</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://www.pan.utiitsl.com/" target="_blank" rel="noopener noreferrer"><span>💳</span><strong>PAN</strong><small>Portal ↗</small></a>
-<a class="portal-card" href="https://www.incometax.gov.in/" target="_blank" rel="noopener noreferrer"><span>🧾</span><strong>Income Tax</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://www.epfindia.gov.in/" target="_blank" rel="noopener noreferrer"><span>🏦</span><strong>EPFO</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://unifiedportal-mem.epfindia.gov.in/" target="_blank" rel="noopener noreferrer"><span>🔐</span><strong>UAN</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://www.irctc.co.in/" target="_blank" rel="noopener noreferrer"><span>🚆</span><strong>IRCTC</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://www.umang.gov.in/" target="_blank" rel="noopener noreferrer"><span>📱</span><strong>UMANG</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://www.myscheme.gov.in/" target="_blank" rel="noopener noreferrer"><span>🏛️</span><strong>MyScheme</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://scholarships.gov.in/" target="_blank" rel="noopener noreferrer"><span>🎓</span><strong>Scholarships</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://www.ayushmanbharat.gov.in/" target="_blank" rel="noopener noreferrer"><span>🏥</span><strong>Ayushman Bharat</strong><small>Official Portal ↗</small></a>
-<a class="portal-card" href="https://www.gov.in/" target="_blank" rel="noopener noreferrer"><span>🇮🇳</span><strong>Government Jobs</strong><small>India.gov.in ↗</small></a>
-</div></section>
-
-<div id="noResults" class="no-results" hidden><div class="no-results-icon">🔍</div><h3>No tool found</h3><p>Try searching with another keyword.</p></div>
-</div></section>
-
-<section class="trust-section"><div class="container"><div class="trust-grid">
-<div class="trust-item"><strong>Free</strong><span>Tools for everyone</span></div>
-<div class="trust-item"><strong>Fast</strong><span>Simple browser tools</span></div>
-<div class="trust-item"><strong>Mobile</strong><span>Made for phones</span></div>
-<div class="trust-item"><strong>Easy</strong><span>No complicated steps</span></div>
-</div></div></section>
-
-<section class="about-section" id="about"><div class="container"><div class="about-box">
-<span class="section-label">ABOUT</span><h2>Welcome to Manjeet Digital Hub</h2>
-<p>Manjeet Digital Hub is a collection of simple and useful digital tools designed for everyday work, image editing, documents, calculations and online services.</p>
-<p>Our goal is to make common digital tasks faster, easier and accessible from mobile and desktop devices.</p>
-</div></div></section>
-</main>
-
-<div class="modal" id="toolModal" aria-hidden="true"><div class="modal-overlay" id="modalOverlay"></div><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-<div class="modal-header"><div class="modal-title-area"><span id="modalIcon" class="modal-icon">🛠️</span><h2 id="modalTitle">Tool</h2></div><button id="closeTool" class="close-button" type="button" aria-label="Close">✕</button></div>
-<div id="toolContent" class="tool-content"></div></div></div>
-
-<footer class="site-footer"><div class="container footer-inner">
-<div><strong>Manjeet Digital Hub</strong><p>Smart Digital Tools. Simple Solutions.</p></div>
-<div class="footer-links"><a href="#tools">Tools</a><a href="#portals">Portals</a><a href="#about">About</a></div>
-<div class="footer-copy">© <span id="currentYear"></span> Manjeet Digital Hub</div>
-</div></footer>
-
-<script src="./app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
 <script>
-document.addEventListener("keydown",function(event){
- if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="k"){
-  event.preventDefault();const search=document.getElementById("toolSearch");
-  if(search){search.focus();search.select();}
- }
-});
-if("serviceWorker"in navigator){
- window.addEventListener("load",function(){
-  navigator.serviceWorker.register("./service-worker.js").catch(function(){});
- });
+(function(){
+var file=document.getElementById('file'),before=document.getElementById('before'),after=document.getElementById('after'),wrap=document.getElementById('afterWrap'),handle=document.getElementById('handle'),cmp=document.getElementById('compare'),status=document.getElementById('status'),bar=document.getElementById('bar'),prog=document.getElementById('progress');
+var srcURL='',outputCanvas=null,baseCanvas=null,model=null;
+var MODEL='https://raw.githubusercontent.com/xororz/web-realesrgan/master/public/models/RealESRGAN/general_fast/64/model.json';
+
+function sync(){var p=cmp.value;wrap.style.width=p+'%';handle.style.left=p+'%';if(after.naturalWidth){after.style.width=document.getElementById('stage').clientWidth+'px';after.style.height='100%';after.style.objectFit='contain';}}
+cmp.oninput=sync;window.addEventListener('resize',sync);
+function show(){['previewCard','controls','filters'].forEach(x=>document.getElementById(x).classList.remove('hidden'))}
+function canvasFromImage(img){var c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);return c}
+function setAfter(c){outputCanvas=c;after.src=c.toDataURL('image/jpeg',.94);after.onload=sync;document.getElementById('outInfo').textContent='Output: '+c.width+'×'+c.height}
+file.onchange=function(){var f=this.files[0];if(!f)return;if(srcURL)URL.revokeObjectURL(srcURL);srcURL=URL.createObjectURL(f);before.src=srcURL;before.onload=function(){baseCanvas=canvasFromImage(before);setAfter(baseCanvas);show();document.getElementById('origInfo').textContent='Original: '+(f.size/1048576).toFixed(2)+' MB • '+before.naturalWidth+'×'+before.naturalHeight;status.textContent='✅ Photo ready. Tap AI Deep Enhance for real AI upscaling.'}};
+function filtered(filter){var c=document.createElement('canvas'),src=outputCanvas||baseCanvas;c.width=src.width;c.height=src.height;var x=c.getContext('2d');x.filter=filter;x.drawImage(src,0,0);x.filter='none';setAfter(c)}
+document.getElementById('lighting').onclick=function(){filtered('brightness(1.10) contrast(1.08) saturate(1.12)')};
+document.getElementById('quick').onclick=function(){filtered('brightness(1.05) contrast(1.13) saturate(1.16)')};
+document.querySelectorAll('[data-filter]').forEach(function(b){b.onclick=function(){filtered(this.dataset.filter)}});
+function manual(){document.getElementById('bv').textContent=brightness.value+'%';document.getElementById('cv').textContent=contrast.value+'%';document.getElementById('sv').textContent=saturation.value+'%';filtered('brightness('+(brightness.value/100)+') contrast('+(contrast.value/100)+') saturate('+(saturation.value/100)+')')}
+['brightness','contrast','saturation'].forEach(function(id){document.getElementById(id).onchange=manual});
+document.getElementById('reset').onclick=function(){setAfter(baseCanvas);brightness.value=contrast.value=saturation.value=100;status.textContent='🔄 Reset to original.'};
+document.getElementById('download').onclick=function(){if(!outputCanvas)return;outputCanvas.toBlob(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='manjeet-ai-enhanced.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)},'image/png')};
+
+async function loadModel(){
+ if(model)return model;
+ status.textContent='⬇️ Loading real AI model for first use...';prog.classList.remove('hidden');bar.style.width='15%';
+ await tf.setBackend('webgl');await tf.ready();bar.style.width='30%';
+ model=await tf.loadGraphModel(MODEL,{onProgress:function(x){bar.style.width=(30+x*60)+'%'}});
+ bar.style.width='100%';return model;
 }
-</script>
-</body>
-</html>
+document.getElementById('ai').onclick=async function(){
+ if(!baseCanvas)return;var btn=this;btn.disabled=true;
+ try{
+  await loadModel();status.textContent='🧠 AI enhancing… this may take time on phone/old laptop.';
+  /* model is fixed-tile; use 64px tiles, overlap-free simple stitch for broad compatibility */
+  var tile=64,scale=4,src=baseCanvas, out=document.createElement('canvas');out.width=src.width*scale;out.height=src.height*scale;var ox=out.getContext('2d');
+  var temp=document.createElement('canvas');temp.width=tile;temp.height=tile;var tx=temp.getContext('2d');
+  var total=Math.ceil(src.width/tile)*Math.ceil(src.height/tile),done=0;
+  for(var y=0;y<src.height;y+=tile){for(var x=0;x<src.width;x+=tile){
+   tx.clearRect(0,0,tile,tile);tx.drawImage(src,x,y,Math.min(tile,src.width-x),Math.min(tile,src.height-y),0,0,Math.min(tile,src.width-x),Math.min(tile,src.height-y));
+   var input=tf.tidy(()=>tf.browser.fromPixels(temp).toFloat().div(255).expandDims(0));
+   var pred=await model.executeAsync(input);var tensor=Array.isArray(pred)?pred[0]:pred;
+   var oc=document.createElement('canvas');oc.width=tile*scale;oc.height=tile*scale;
+   await tf.browser.toPixels(tf.tidy(()=>tensor.squeeze().clipByValue(0,1)),oc);
+   ox.drawImage(oc,0,0,Math.min(tile,src.width-x)*scale,Math.min(tile,src.height-y)*scale,x*scale,y*scale,Math.min(tile,src.width-x)*scale,Math.min(tile,src.height-y)*scale);
+   input.dispose();if(Array.isArray(pred))pred.forEach(t=>t.dispose());else pred.dispose();
+   done++;bar.style.width=(done/total*100)+'%';status.textContent='🧠 AI enhancing… '+Math.round(done/total*100)+'%';
+   await new Promise(r=>setTimeout(r,0));
+  }}
+  setAfter(out);status.textContent='✅ Real AI enhancement complete — 4× output ready.';
+ }catch(e){console.error(e);status.textContent='❌ AI model could not run on this browser/device. Try a smaller photo or newer browser.'}
+ btn.disabled=false;
+};
+})();
+</script></body></html>
