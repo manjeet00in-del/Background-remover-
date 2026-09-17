@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro PVC Card Maker - Premium</title>
+    <title>Pro PVC Card Maker - Ultimate</title>
     <!-- Cropper.js CSS & JS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -14,13 +14,14 @@
             --warning: #f59e0b;
             --bg-color: #f3f4f6;
             --card-bg: #ffffff;
+            --text-dark: #1f2937;
         }
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             padding: 0;
-            color: #333;
+            color: var(--text-dark);
         }
         /* Top Navigation */
         .navbar {
@@ -47,7 +48,7 @@
         /* Left Panel - Workspace */
         .editor-panel {
             flex: 1;
-            min-width: 300px;
+            min-width: 320px;
             background: var(--card-bg);
             border-radius: 12px;
             padding: 20px;
@@ -69,14 +70,40 @@
         
         .img-container {
             width: 100%;
-            height: 400px;
+            height: 380px;
             background-color: #e2e8f0;
             border-radius: 8px;
             overflow: hidden;
             display: none;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .img-container img { max-width: 100%; }
+
+        /* Enhancement Controls */
+        .enhancement-panel {
+            display: none;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+        .slider-group label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .slider-group input[type=range] {
+            width: 100%;
+            accent-color: var(--primary);
+        }
 
         /* Action Buttons */
         .controls { display: none; gap: 10px; justify-content: center; }
@@ -170,7 +197,6 @@
             @page { margin: 0; size: A4 portrait; }
         }
         
-        /* Mobile Responsive */
         @media (max-width: 768px) {
             .preview-panel { width: 100%; }
         }
@@ -178,17 +204,16 @@
 </head>
 <body>
 
-    <!-- Top Navbar -->
     <div class="navbar">
         <h2>💳 Pro PVC Maker</h2>
-        <span style="font-size: 14px; color: #666;">Smart Crop Mode</span>
+        <span style="font-size: 14px; color: #666;">Ultimate Edition</span>
     </div>
 
     <div class="main-container">
         
         <!-- Left: Workspace -->
         <div class="editor-panel">
-            <h3 style="margin-top: 0; color: #333;">1. Upload & Crop</h3>
+            <h3 style="margin-top: 0;">1. Upload & Edit</h3>
             
             <input type="file" id="upload" accept="image/*" style="display: none;">
             
@@ -198,8 +223,21 @@
                 <div style="font-size: 13px; color: #666; margin-top: 5px;">Supports JPG, PNG, WEBP</div>
             </div>
 
+            <!-- Cropper Canvas -->
             <div class="img-container" id="img-container">
                 <img id="image" src="">
+            </div>
+
+            <!-- Image Enhancement Tools -->
+            <div class="enhancement-panel" id="enhancement-panel">
+                <div class="slider-group">
+                    <label>Brightness <span id="br-val">100%</span></label>
+                    <input type="range" id="brightness" min="50" max="150" value="100" oninput="applyLiveFilters()">
+                </div>
+                <div class="slider-group">
+                    <label>Contrast <span id="ct-val">100%</span></label>
+                    <input type="range" id="contrast" min="50" max="150" value="100" oninput="applyLiveFilters()">
+                </div>
             </div>
 
             <div class="controls" id="controls">
@@ -217,12 +255,10 @@
             
             <div class="a4-wrapper">
                 <div class="a4-sheet">
-                    <!-- Front Side -->
                     <div class="pvc-slot">
                         <span id="text-front">Front Side (85.6 x 54)</span>
                         <img id="img-front" src="">
                     </div>
-                    <!-- Back Side -->
                     <div class="pvc-slot" style="margin-top: 0;">
                         <span id="text-back">Back Side (85.6 x 54)</span>
                         <img id="img-back" src="">
@@ -238,54 +274,92 @@
         const uploadInput = document.getElementById('upload');
         const uploadBox = document.getElementById('upload-box');
         const imgContainer = document.getElementById('img-container');
-        const image = document.getElementById('image');
+        const enhancementPanel = document.getElementById('enhancement-panel');
         const controls = document.getElementById('controls');
+        const image = document.getElementById('image');
 
+        // File Upload Handler
         uploadInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 const url = URL.createObjectURL(file);
                 image.src = url;
                 
-                // UI बदलाव
+                // Show UI elements
                 uploadBox.style.display = 'none';
                 imgContainer.style.display = 'block';
+                enhancementPanel.style.display = 'block';
                 controls.style.display = 'flex';
 
                 if (cropper) { cropper.destroy(); }
 
-                // Professional Cropper Settings
                 cropper = new Cropper(image, {
-                    aspectRatio: 85.6 / 54, // Fixed PVC Ratio
-                    viewMode: 2, // Restricts the crop box to not exceed the canvas
-                    dragMode: 'move', // Allows dragging the image behind the crop box
+                    aspectRatio: 85.6 / 54,
+                    viewMode: 2,
+                    dragMode: 'move',
                     autoCropArea: 0.8,
                     background: true,
                     guides: true,
-                    highlight: true,
+                    ready: function() {
+                        applyLiveFilters(); // Apply default filters on load
+                    }
                 });
             }
         });
 
+        // Live Filter Preview on Cropper
+        function applyLiveFilters() {
+            const br = document.getElementById('brightness').value;
+            const ct = document.getElementById('contrast').value;
+            
+            document.getElementById('br-val').innerText = br + '%';
+            document.getElementById('ct-val').innerText = ct + '%';
+
+            // Select Cropper inner images to apply live CSS filters
+            const cropperImage = document.querySelector('.cropper-canvas img');
+            const cropperViewBox = document.querySelector('.cropper-view-box img');
+            
+            const filterString = `brightness(${br}%) contrast(${ct}%)`;
+            
+            if (cropperImage) cropperImage.style.filter = filterString;
+            if (cropperViewBox) cropperViewBox.style.filter = filterString;
+        }
+
+        // Crop & Apply Filters to Final Image
         function cropSide(side) {
             if (!cropper) return;
 
-            const canvas = cropper.getCroppedCanvas({
-                width: 1011, // High Res for printing
+            // Get cropped area as Canvas
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: 1011,
                 height: 638,
                 imageSmoothingEnabled: true,
                 imageSmoothingQuality: 'high',
             });
 
-            const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+            // Create a temporary canvas to permanently apply the filters
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = croppedCanvas.width;
+            finalCanvas.height = croppedCanvas.height;
+            const ctx = finalCanvas.getContext('2d');
+
+            // Get slider values
+            const br = document.getElementById('brightness').value;
+            const ct = document.getElementById('contrast').value;
+
+            // Apply filters and draw the cropped image
+            ctx.filter = `brightness(${br}%) contrast(${ct}%)`;
+            ctx.drawImage(croppedCanvas, 0, 0);
+
+            // Convert to URL
+            const dataUrl = finalCanvas.toDataURL('image/jpeg', 1.0);
             
             if (side === 'front') {
                 document.getElementById('img-front').src = dataUrl;
                 document.getElementById('img-front').style.display = 'block';
                 document.getElementById('text-front').style.display = 'none';
                 
-                // बैक साइड काटने के लिए बॉक्स को थोड़ा नीचे खिसका देना
-                cropper.move(0, 50); 
+                cropper.move(0, 50); // Auto move down for Back side
             } else {
                 document.getElementById('img-back').src = dataUrl;
                 document.getElementById('img-back').style.display = 'block';
