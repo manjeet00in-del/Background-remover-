@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>PVC Auto Crop V5 - Manjeet Digital Hub</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
@@ -57,6 +59,11 @@ button,input{font:inherit}.top{position:sticky;top:0;z-index:20;background:#fff;
 <button class="act print" onclick="doPrint()">▣<small>PRINT</small></button>
 </div></div>
 
+<div class="modal" id="reliableCrop"><div class="cropbox">
+<div class="crophead"><b>PVC Crop</b><span style="font-size:10px;color:#64748b">Box ko move / resize karein</span></div>
+<div style="height:58vh;min-height:350px;background:#111827;overflow:hidden"><img id="rcImg" style="display:block;max-width:100%"></div>
+<div class="cropactions"><button onclick="resetReliableCrop()">RESET</button><button onclick="rotateReliableCrop()">ROTATE</button><button class="done" onclick="applyReliableCrop()">DONE</button></div>
+</div></div>
 <div class="modal" id="cropModal"><div class="cropbox">
 <div class="crophead"><b>Adjust Card Corners</b><span style="font-size:10px;color:#64748b">4 blue dots ko finger se move karein</span></div>
 <div class="cropstage" id="cropStage"><img id="cropImg"><canvas id="overlay"></canvas></div>
@@ -75,7 +82,7 @@ const file=document.getElementById('file'),cropImg=document.getElementById('crop
 let source=null,points=[],dragPoint=-1,finalCanvas=null,baseCanvas=null,frontCanvas=null,backCanvas=null,currentSide='front',cardScale=1,finalRotation=0;
 file.onchange=e=>loadFile(e.target.files[0]);
 async function loadFile(f){if(!f)return;status.textContent="Loading file...";if(f.type==="application/pdf"){let pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,p=await pdf.getPage(1),v=p.getViewport({scale:2}),c=document.createElement('canvas');c.width=v.width;c.height=v.height;await p.render({canvasContext:c.getContext('2d'),viewport:v}).promise;loadURL(c.toDataURL('image/jpeg',.97))}else{let r=new FileReader;r.onload=()=>loadURL(r.result);r.readAsDataURL(f)}}
-function loadURL(u){let im=new Image;im.onload=()=>{source=im;currentSide='front';sideBar.style.display='flex';cropImg.src=u;cropModal.classList.add('show');cropImg.onload=()=>setTimeout(detectEdges,80);status.textContent="Auto detecting card..."};im.src=u}
+function loadURL(u){let im=new Image;im.onload=()=>{source=im;currentSide='front';sideBar.style.display='flex';cropImg.src=u;openReliableCrop();status.textContent="PVC crop ready • box ko card par set karein"};im.src=u}
 function stageBox(){let a=cropImg.getBoundingClientRect(),b=cropStage.getBoundingClientRect();return{x:a.left-b.left,y:a.top-b.top,w:a.width,h:a.height}}
 function sizeOv(){overlay.width=cropStage.clientWidth;overlay.height=cropStage.clientHeight}
 function defaultPoints(){let b=stageBox(),m=Math.min(15,b.w*.04);points=[[b.x+m,b.y+m],[b.x+b.w-m,b.y+m],[b.x+b.w-m,b.y+b.h-m],[b.x+m,b.y+b.h-m]];drawOverlay()}
@@ -104,11 +111,61 @@ function chooseSide(side){
  frontBtn.style.opacity=side==='front'?'1':'.55';
  backBtn.style.opacity=side==='back'?'1':'.55';
  if(!source){file.click();return}
- cropImg.src=source.src;cropModal.classList.add('show');
- setTimeout(detectEdges,60);
- status.textContent=(side==='front'?'Front':'Back')+" side auto detecting...";
+ openReliableCrop();
+ status.textContent=(side==='front'?'Front':'Back')+" crop ready";
 }
-function openCrop(){if(!source)return;cropModal.classList.add('show');setTimeout(detectEdges,50)}
+function openCrop(){if(!source)return;openReliableCrop()}
+
+let reliableCropper=null;
+function openReliableCrop(){
+ if(!source)return;
+ reliableCrop.classList.add('show');
+ rcImg.src=source.src;
+ setTimeout(()=>{
+   if(reliableCropper) reliableCropper.destroy();
+   reliableCropper=new Cropper(rcImg,{
+     aspectRatio:85.6/54,
+     viewMode:1,
+     dragMode:'move',
+     autoCropArea:.88,
+     responsive:true,
+     restore:false,
+     guides:true,
+     center:true,
+     highlight:true,
+     background:false,
+     movable:true,
+     zoomable:true,
+     rotatable:true,
+     scalable:false,
+     cropBoxMovable:true,
+     cropBoxResizable:true,
+     toggleDragModeOnDblclick:false
+   });
+ },80);
+}
+function resetReliableCrop(){if(reliableCropper) reliableCropper.reset()}
+function rotateReliableCrop(){if(reliableCropper) reliableCropper.rotate(90)}
+function applyReliableCrop(){
+ if(!reliableCropper)return;
+ let c=reliableCropper.getCroppedCanvas({
+   width:1011,height:638,
+   fillColor:'#fff',
+   imageSmoothingEnabled:true,
+   imageSmoothingQuality:'high'
+ });
+ if(!c)return;
+ baseCanvas=cloneCanvas(c);
+ if(currentSide==='front') frontCanvas=cloneCanvas(c); else backCanvas=cloneCanvas(c);
+ finalCanvas=cloneCanvas(c);
+ finalImg.src=finalCanvas.toDataURL('image/png');
+ reliableCropper.destroy();reliableCropper=null;
+ reliableCrop.classList.remove('show');
+ empty.style.display='none';card.style.display='block';card.classList.add('sel');
+ floating.classList.add('show');cardScale=1;finalRotation=0;centerCard();
+ status.textContent=(currentSide==='front'?'Front':'Back')+" crop saved • card ko page par drag kar sakte hain";
+}
+
 let dragging=false,dx=0,dy=0;
 function cardDown(e){let t=e.touches?e.touches[0]:e,r=card.getBoundingClientRect();dragging=true;dx=t.clientX-r.left;dy=t.clientY-r.top;e.preventDefault()}
 function cardMove(e){if(!dragging)return;e.preventDefault();let t=e.touches?e.touches[0]:e,p=paper.getBoundingClientRect(),w=card.offsetWidth,h=card.offsetHeight,x=t.clientX-p.left-dx,y=t.clientY-p.top-dy;x=Math.max(0,Math.min(p.width-w,x));y=Math.max(0,Math.min(p.height-h,y));card.style.left=x+'px';card.style.top=y+'px';card.style.transform=`rotate(${finalRotation}deg) scale(${cardScale})`}
@@ -124,7 +181,7 @@ function saveJPG(){if(!ensure())return;let a=document.createElement('a');a.href=
 function savePNG(){if(!ensure())return;let a=document.createElement('a');a.href=finalCanvas.toDataURL('image/png');a.download='pvc-card.png';a.click()}
 function savePDF(){if(!ensure())return;let {jsPDF}=window.jspdf,p=new jsPDF({unit:'mm',format:'a4'}),land=finalCanvas.width>=finalCanvas.height,w=land?85.6:54,h=land?54:85.6;p.addImage(finalCanvas.toDataURL('image/jpeg',.96),'JPEG',(210-w)/2,20,w,h);p.save('pvc-card.pdf')}
 function doPrint(){if(!ensure())return;let u=finalCanvas.toDataURL('image/png'),w=window.open('','_blank');w.document.write('<style>@page{size:A4;margin:15mm}body{text-align:center}img{width:85.6mm;height:54mm}</style><img src="'+u+'"><script>onload=()=>print()<\/script>');w.document.close()}
-function resetAll(){source=finalCanvas=baseCanvas=frontCanvas=backCanvas=null;points=[];currentSide='front';file.value='';card.style.display='none';floating.classList.remove('show');sideBar.style.display='none';empty.style.display='flex';cropModal.classList.remove('show');adjust.classList.remove('show');status.textContent='Select File → Auto Detect → Crop → Drag anywhere on page'}
+function resetAll(){source=finalCanvas=baseCanvas=frontCanvas=backCanvas=null;points=[];currentSide='front';file.value='';card.style.display='none';floating.classList.remove('show');sideBar.style.display='none';empty.style.display='flex';cropModal.classList.remove('show');reliableCrop.classList.remove('show');adjust.classList.remove('show');if(reliableCropper){reliableCropper.destroy();reliableCropper=null;}status.textContent='Select File → Auto Detect → Crop → Drag anywhere on page'}
 window.addEventListener('resize',()=>{if(cropModal.classList.contains('show')&&source)setTimeout(detectEdges,60)})
 </script>
 </body></html>
