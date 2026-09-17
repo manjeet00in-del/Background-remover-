@@ -1,14 +1,46 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>PVC Auto Crop</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<style>*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#edf2f8;color:#172033}.top{position:sticky;top:0;z-index:5;background:#fff;padding:10px;border-bottom:1px solid #dbe4ef}.bar{max-width:900px;margin:auto;display:flex;gap:8px}.bar button{height:44px;border:1px solid #dbe4ef;border-radius:13px;font-weight:800}.home,.del{width:48px;background:#f8fbff}.del{color:#e11d48}.title{flex:1;background:#2563eb;color:#fff}.wrap{max-width:900px;margin:auto;padding:10px}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:5px 0 12px}.pick{background:#fff;border:1px solid #d6e2ef;border-bottom:4px solid #c5d5e8;border-radius:16px;text-align:center;padding:11px 3px;font-size:10px;font-weight:800;box-shadow:0 5px 10px #64748b1f}.pick span{display:block;font-size:23px;margin-bottom:5px}.pick.on{background:#eff6ff;border-color:#60a5fa;color:#1d4ed8}.pick input{display:none}.box{background:#fff;border:1px solid #dbe4ef;border-radius:18px;padding:9px;box-shadow:0 8px 22px #0f172a12}.stage{position:relative;min-height:410px;background:#f8fafc;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}.stage canvas{max-width:100%;max-height:66vh}.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.empty{text-align:center;color:#94a3b8}.empty b{display:block;color:#475569;font-size:18px;margin-bottom:7px}.status{text-align:center;color:#64748b;font-size:11px;padding:9px}.controls{display:none}.controls.show{display:block}.row{display:flex;gap:7px;margin-top:7px}.btn{flex:1;border:0;border-radius:12px;padding:11px 4px;background:#2563eb;color:#fff;font-weight:800;font-size:11px}.alt{background:#fff;color:#2563eb;border:1px solid #bfdbfe}.green{background:#16a34a}.note{text-align:center;font-size:9px;color:#64748b}.results{display:none;margin-top:12px;background:#fff;border-radius:18px;padding:11px;border:1px solid #dbe4ef}.results.show{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.card{background:#f1f5f9;border-radius:11px;padding:7px;text-align:center}.card img{width:100%;border-radius:6px}.card small{display:block;margin-top:5px}.out{display:flex;gap:7px;margin-top:9px}.out button{flex:1;border:0;border-radius:11px;padding:11px 3px;color:#fff;font-weight:800}.jpg{background:#2563eb}.pdf{background:#ef4444}.print{background:#111827}@media(max-width:480px){.stage{min-height:380px}}</style></head>
+<style>*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#edf2f8;color:#172033}.top{position:sticky;top:0;z-index:5;background:#fff;padding:10px;border-bottom:1px solid #dbe4ef}.bar{max-width:900px;margin:auto;display:flex;gap:8px}.bar button{height:44px;border:1px solid #dbe4ef;border-radius:13px;font-weight:800}.home,.del{width:48px;background:#f8fbff}.del{color:#e11d48}.title{flex:1;background:#2563eb;color:#fff}.wrap{max-width:900px;margin:auto;padding:10px}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:5px 0 12px}.pick{background:#fff;border:1px solid #d6e2ef;border-bottom:4px solid #c5d5e8;border-radius:16px;text-align:center;padding:11px 3px;font-size:10px;font-weight:800;box-shadow:0 5px 10px #64748b1f}.pick span{display:block;font-size:23px;margin-bottom:5px}.pick.on{background:#eff6ff;border-color:#60a5fa;color:#1d4ed8}.pick input{display:none}.box{background:#fff;border:1px solid #dbe4ef;border-radius:18px;padding:9px;box-shadow:0 8px 22px #0f172a12}.stage{position:relative;min-height:410px;background:#f8fafc;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}.stage canvas{max-width:100%;max-height:66vh;display:block}.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#94a3b8;padding:24px;width:100%}.empty b{display:block;color:#475569;font-size:18px;margin-bottom:7px}.status{text-align:center;color:#64748b;font-size:11px;padding:9px}.controls{display:none}.controls.show{display:block}.row{display:flex;gap:7px;margin-top:7px}.btn{flex:1;border:0;border-radius:12px;padding:11px 4px;background:#2563eb;color:#fff;font-weight:800;font-size:11px}.alt{background:#fff;color:#2563eb;border:1px solid #bfdbfe}.green{background:#16a34a}.note{text-align:center;font-size:9px;color:#64748b}.results{display:none;margin-top:12px;background:#fff;border-radius:18px;padding:11px;border:1px solid #dbe4ef}.results.show{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.card{background:#f1f5f9;border-radius:11px;padding:7px;text-align:center}.card img{width:100%;border-radius:6px}.card small{display:block;margin-top:5px}.out{display:flex;gap:7px;margin-top:9px}.out button{flex:1;border:0;border-radius:11px;padding:11px 3px;color:#fff;font-weight:800}.jpg{background:#2563eb}.pdf{background:#ef4444}.print{background:#111827}@media(max-width:480px){.stage{min-height:380px}}
+/* V2.2 compact premium mobile UI */
+body{background:linear-gradient(180deg,#f5f8fd 0,#edf3fa 100%)}
+.top{padding:9px 10px;box-shadow:0 3px 12px rgba(15,23,42,.05)}
+.bar{gap:7px}
+.bar button{height:42px}
+.home,.del{width:44px;border-radius:12px}
+.title{border-radius:13px;background:linear-gradient(135deg,#2563eb,#3159d9);box-shadow:0 4px 0 #b8c9ee;font-size:14px;letter-spacing:.4px}
+.wrap{padding:12px 10px 22px}
+.pick.on{
+ max-width:none!important;margin:4px 0 11px!important;padding:12px 14px!important;
+ display:flex!important;align-items:center;justify-content:flex-start;gap:12px;text-align:left;
+ background:#fff;border:1px solid #d8e4f2;border-bottom:3px solid #b9d0ee;
+ border-radius:15px;box-shadow:0 5px 14px rgba(37,99,235,.08)
+}
+.pick.on span{font-size:27px;margin:0;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#eef5ff}
+.pick.on div{margin-top:2px!important;font-size:9px!important}
+.box{padding:8px;border-radius:17px;box-shadow:0 8px 22px rgba(15,23,42,.07)}
+.stage{min-height:250px;height:42vh;max-height:390px;border-radius:12px;background:linear-gradient(145deg,#f8fbff,#f1f5fa);border:1px dashed #cbd9e9}
+.empty{padding:20px}
+.empty:before{content:"▣";width:52px;height:52px;display:grid;place-items:center;margin-bottom:11px;border-radius:15px;background:#eaf2ff;color:#2563eb;font-size:27px;box-shadow:inset 0 1px 0 #fff}
+.empty b{font-size:16px;margin-bottom:5px;color:#334155}
+.empty{font-size:11px;line-height:1.45}
+.status{padding:8px 5px 3px;font-size:10px}
+.controls{padding:4px 2px 3px}
+.btn{padding:10px 4px;border-radius:10px}
+.note{margin:7px 3px 2px;line-height:1.4}
+.results{border-radius:16px;box-shadow:0 7px 20px rgba(15,23,42,.06)}
+@media(max-width:480px){
+ .stage{min-height:245px;height:40vh;max-height:350px}
+ .wrap{padding-top:10px}
+}
+</style></head>
 <body><div class="top"><div class="bar"><button class="home" onclick="location.href='../index.html'">⌂</button><button class="del" onclick="resetAll()">🗑</button><button class="title">PVC AUTO CROP</button></div></div>
 <div class="wrap">
-<label class="pick on" style="display:block;max-width:420px;margin:6px auto 12px;padding:15px" id="pf">
-<span>📁</span>UPLOAD FILE
-<div style="font-weight:400;color:#64748b;margin-top:4px">JPG, PNG or PDF</div>
+<label class="pick on" style="display:block;max-width:420px;margin:6px auto 12px;padding:14px" id="pf">
+<span>📁</span><div style="font-weight:800;color:#1d4ed8;margin:0">UPLOAD FILE
+<div style="font-weight:500;color:#64748b;margin-top:3px">JPG, PNG or PDF</div></div>
 <input id="full" type="file" accept="image/*,application/pdf">
 </label>
-<div class="box"><div class="stage" id="stage"><div class="empty" id="empty"><b>Select File</b>PDF/full page, front or back image</div><canvas id="src"></canvas><canvas id="ov" class="overlay"></canvas></div><div class="status" id="status">Upload a file — card will auto detect and crop</div>
+<div class="box"><div class="stage" id="stage"><div class="empty" id="empty"><b>No file selected</b>Upload JPG, PNG or PDF above.</div><canvas id="src"></canvas><canvas id="ov" class="overlay"></canvas></div><div class="status" id="status">Select a file to start automatic card detection</div>
 <div class="controls" id="controls"><div class="row"><button class="btn" onclick="autoCrop()">⚡ AUTO CROP</button><button class="btn alt" onclick="ratio()">▭ PVC RATIO</button><button class="btn alt" onclick="rotate()">↻ ROTATE</button></div><div class="row"><button class="btn green" onclick="addCard()">✓ CROP CARD</button><button class="btn alt" onclick="corners()">RESET</button></div><div class="note">Card is detected automatically. Drag blue corners only if correction is needed.</div></div></div>
 <div class="results" id="results"><b>Cropped PVC Cards</b><div class="grid" id="grid"></div><div class="out"><button class="jpg" onclick="download()">⬇ CARD</button><button class="pdf" onclick="pdfOut()">PDF</button><button class="jpg" onclick="pngOut()">PNG</button><button class="print" onclick="printOut()">🖨 PRINT</button></div></div></div>
 <script>
@@ -32,5 +64,5 @@ function download(){cards.forEach((c,i)=>{let a=document.createElement("a");a.hr
 function pngOut(){if(!cards.length)return;cards.forEach((c,i)=>{let im=new Image();im.onload=()=>{let cv=document.createElement("canvas");cv.width=im.width;cv.height=im.height;cv.getContext("2d").drawImage(im,0,0);let a=document.createElement("a");a.href=cv.toDataURL("image/png");a.download="pvc-card-"+(i+1)+".png";a.click()};im.src=c.url})}
 function pdfOut(){if(!cards.length)return;let {jsPDF}=window.jspdf,p=new jsPDF({unit:"mm",format:"a4"});cards.forEach((c,i)=>{if(i)p.addPage();p.addImage(c.url,"JPEG",62.2,25,85.6,54)});p.save("pvc-cards.pdf")}
 function printOut(){if(!cards.length)return;let w=window.open("","_blank");w.document.write('<style>@page{size:A4;margin:15mm}body{text-align:center}img{width:85.6mm;height:54mm;margin:8mm}</style>'+cards.map(c=>'<img src="'+c.url+'">').join("")+'<script>onload=()=>print()<\/script>');w.document.close()}
-function resetAll(){img=null;cards=[];src.width=src.height=1;empty.style.display="block";controls.classList.remove("show");results.classList.remove("show");grid.innerHTML="";status.textContent="Upload a file — card will auto detect and crop";full.value=""}
+function resetAll(){img=null;cards=[];src.width=src.height=1;empty.style.display="flex";controls.classList.remove("show");results.classList.remove("show");grid.innerHTML="";status.textContent="Upload a file — card will auto detect and crop";full.value=""}
 </script></body></html>
