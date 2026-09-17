@@ -1,207 +1,36 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Smart Photo Enhancer - Manjeet Digital Hub</title>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0d1830;color:#fff}
-header{padding:15px;background:#111e39;border-bottom:1px solid #30415f}
-header b{font-size:20px}header small{display:block;color:#9fb1cf;margin-top:4px}
-.wrap{max-width:760px;margin:auto;padding:12px}.card{background:#182641;border:1px solid #344563;border-radius:17px;padding:14px;margin-bottom:13px}
-.upload{display:block;text-align:center;border:2px dashed #6885b6;border-radius:14px;padding:22px;cursor:pointer}.upload input{display:none}.upload .ico{font-size:36px}
-.muted,.note{color:#aab9d2;font-size:12px;line-height:1.45}.status{margin-top:10px;padding:10px;border-radius:10px;background:#101c33;color:#c7d9f8;font-size:13px}
-.stage{position:relative;overflow:hidden;border-radius:14px;background:#070f1f;min-height:260px;display:flex;align-items:center;justify-content:center}
-.stage img{display:block;max-width:100%;max-height:65vh}.afterWrap{position:absolute;left:0;top:0;width:50%;height:100%;overflow:hidden;border-right:3px solid #fff}
-.afterWrap img{position:absolute;left:0;top:0;max-width:none}.handle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;color:#101828;display:flex;align-items:center;justify-content:center;font-weight:bold}
-.range{width:100%;accent-color:#6b7cff}.info{display:flex;justify-content:space-between;gap:8px;color:#aab9d2;font-size:12px;margin-top:8px;flex-wrap:wrap}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.btn{border:0;border-radius:11px;padding:13px 9px;font-size:14px;font-weight:bold;color:#fff;background:#3b4a66}
-.btn.main{background:linear-gradient(90deg,#6e5be8,#159ee0)}.btn.white{background:#fff;color:#17223a}.btn.on{outline:2px solid #7db7ff;background:#244a79}
-label.ctrl{display:block;margin-top:12px;font-size:13px;color:#d6e0f1}.val{float:right;color:#9fc7ff}
-.hidden{display:none!important}h3{margin:0 0 8px;font-size:16px}.preset{grid-template-columns:repeat(2,1fr)}
-@media(max-width:420px){.wrap{padding:8px}.card{padding:11px}.stage{min-height:230px}}
-</style>
-</head>
-<body>
-<header><b>✨ Smart Photo Enhancer</b><small>Manjeet Digital Hub • Fast browser enhancement</small></header>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>PVC Auto Crop</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#edf2f8;color:#172033}.top{position:sticky;top:0;z-index:5;background:#fff;padding:10px;border-bottom:1px solid #dbe4ef}.bar{max-width:900px;margin:auto;display:flex;gap:8px}.bar button{height:44px;border:1px solid #dbe4ef;border-radius:13px;font-weight:800}.home,.del{width:48px;background:#f8fbff}.del{color:#e11d48}.title{flex:1;background:#2563eb;color:#fff}.wrap{max-width:900px;margin:auto;padding:10px}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:5px 0 12px}.pick{background:#fff;border:1px solid #d6e2ef;border-bottom:4px solid #c5d5e8;border-radius:16px;text-align:center;padding:11px 3px;font-size:10px;font-weight:800;box-shadow:0 5px 10px #64748b1f}.pick span{display:block;font-size:23px;margin-bottom:5px}.pick.on{background:#eff6ff;border-color:#60a5fa;color:#1d4ed8}.pick input{display:none}.box{background:#fff;border:1px solid #dbe4ef;border-radius:18px;padding:9px;box-shadow:0 8px 22px #0f172a12}.stage{position:relative;min-height:410px;background:#f8fafc;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}.stage canvas{max-width:100%;max-height:66vh}.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.empty{text-align:center;color:#94a3b8}.empty b{display:block;color:#475569;font-size:18px;margin-bottom:7px}.status{text-align:center;color:#64748b;font-size:11px;padding:9px}.controls{display:none}.controls.show{display:block}.row{display:flex;gap:7px;margin-top:7px}.btn{flex:1;border:0;border-radius:12px;padding:11px 4px;background:#2563eb;color:#fff;font-weight:800;font-size:11px}.alt{background:#fff;color:#2563eb;border:1px solid #bfdbfe}.green{background:#16a34a}.note{text-align:center;font-size:9px;color:#64748b}.results{display:none;margin-top:12px;background:#fff;border-radius:18px;padding:11px;border:1px solid #dbe4ef}.results.show{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.card{background:#f1f5f9;border-radius:11px;padding:7px;text-align:center}.card img{width:100%;border-radius:6px}.card small{display:block;margin-top:5px}.out{display:flex;gap:7px;margin-top:9px}.out button{flex:1;border:0;border-radius:11px;padding:11px 3px;color:#fff;font-weight:800}.jpg{background:#2563eb}.pdf{background:#ef4444}.print{background:#111827}@media(max-width:480px){.stage{min-height:380px}}</style></head>
+<body><div class="top"><div class="bar"><button class="home" onclick="location.href='../index.html'">⌂</button><button class="del" onclick="resetAll()">🗑</button><button class="title">PVC AUTO CROP</button></div></div>
 <div class="wrap">
-<div class="card">
-<label class="upload"><input id="file" type="file" accept="image/*"><div class="ico">📷</div><b>Choose Photo</b><div class="muted">JPG / PNG / WebP • Processing stays in your browser</div></label>
-<div id="status" class="status">Choose a photo to start.</div>
-</div>
-
-<div id="previewCard" class="card hidden">
-<div id="stage" class="stage">
-<img id="before">
-<div id="afterWrap" class="afterWrap"><img id="after"></div>
-<div id="handle" class="handle">↔</div>
-</div>
-<input id="compare" class="range" type="range" min="0" max="100" value="50">
-<div class="row"><button id="showOriginal" class="btn">Original</button><button id="showEnhanced" class="btn">Enhanced</button></div>
-<div class="info"><span id="originalInfo"></span><span id="outputInfo"></span><span id="sizeInfo"></span></div>
-<div class="row"><button id="reset" class="btn">Reset All</button><button id="download" class="btn white">Download HD</button></div>
-</div>
-
-<div id="controls" class="card hidden">
-<h3>One-Tap Enhance</h3>
-<button id="auto" class="btn main" style="width:100%">✨ Smart Auto Enhance</button>
-<label class="ctrl">Enhancement Strength <span id="strengthV" class="val">70%</span></label>
-<input id="strength" class="range" type="range" min="0" max="100" value="70">
-
-<div class="row preset">
-<button class="btn presetBtn" data-preset="clear">Clear & Sharp</button>
-<button class="btn presetBtn" data-preset="vivid">Vivid</button>
-<button class="btn presetBtn" data-preset="soft">Soft Glow</button>
-<button class="btn presetBtn" data-preset="natural">Natural</button>
-</div>
-
-<h3 style="margin-top:18px">Output Quality</h3>
-<div class="row">
-<button id="qualityOriginal" class="btn">Original Size</button>
-<button id="quality2x" class="btn on">2× HD</button>
-</div>
-<h3 style="margin-top:18px">Manual Adjustments</h3>
-<label class="ctrl">Brightness <span id="brightnessV" class="val">0</span></label>
-<input id="brightness" class="range manual" type="range" min="-25" max="25" value="0">
-<label class="ctrl">Contrast <span id="contrastV" class="val">0</span></label>
-<input id="contrast" class="range manual" type="range" min="-25" max="30" value="0">
-<label class="ctrl">Color <span id="saturationV" class="val">0</span></label>
-<input id="saturation" class="range manual" type="range" min="-20" max="30" value="0">
-<label class="ctrl">Sharpness <span id="sharpnessV" class="val">20</span></label>
-<input id="sharpness" class="range manual" type="range" min="0" max="60" value="20">
-<label class="ctrl">Warmth <span id="warmthV" class="val">0</span></label>
-<input id="warmth" class="range manual" type="range" min="-20" max="20" value="0">
-<div class="note" style="margin-top:12px">No AI model is used. The tool improves tone, color, clarity and resolution locally, so it is fast and does not intentionally alter facial identity.</div>
-</div>
-</div>
-
+<label class="pick on" style="display:block;max-width:420px;margin:6px auto 12px;padding:15px" id="pf">
+<span>📁</span>UPLOAD FILE
+<div style="font-weight:400;color:#64748b;margin-top:4px">JPG, PNG or PDF</div>
+<input id="full" type="file" accept="image/*,application/pdf">
+</label>
+<div class="box"><div class="stage" id="stage"><div class="empty" id="empty"><b>Select File</b>PDF/full page, front or back image</div><canvas id="src"></canvas><canvas id="ov" class="overlay"></canvas></div><div class="status" id="status">Upload a file — card will auto detect and crop</div>
+<div class="controls" id="controls"><div class="row"><button class="btn" onclick="autoCrop()">⚡ AUTO CROP</button><button class="btn alt" onclick="ratio()">▭ PVC RATIO</button><button class="btn alt" onclick="rotate()">↻ ROTATE</button></div><div class="row"><button class="btn green" onclick="addCard()">✓ CROP CARD</button><button class="btn alt" onclick="corners()">RESET</button></div><div class="note">Card is detected automatically. Drag blue corners only if correction is needed.</div></div></div>
+<div class="results" id="results"><b>Cropped PVC Cards</b><div class="grid" id="grid"></div><div class="out"><button class="jpg" onclick="download()">⬇ CARD</button><button class="pdf" onclick="pdfOut()">PDF</button><button class="jpg" onclick="pngOut()">PNG</button><button class="print" onclick="printOut()">🖨 PRINT</button></div></div></div>
 <script>
-(function(){
-"use strict";
-var $=function(id){return document.getElementById(id)};
-var file=$("file"),before=$("before"),after=$("after"),stage=$("stage"),aw=$("afterWrap"),handle=$("handle"),compare=$("compare");
-var source=null,result=null,objUrl="",timer=null,qualityScale=2;
-var controls=["brightness","contrast","saturation","sharpness","warmth"];
-
-function sync(){
- var p=+compare.value; aw.style.width=p+"%"; handle.style.left=p+"%";
- if(before.naturalWidth && after.naturalWidth){
-   var r=before.getBoundingClientRect();
-   after.style.width=r.width+"px"; after.style.height=r.height+"px"; after.style.objectFit="contain";
- }
-}
-compare.oninput=sync; window.addEventListener("resize",sync);
-
-file.onchange=function(){
- var f=this.files&&this.files[0]; if(!f)return;
- if(objUrl)URL.revokeObjectURL(objUrl); objUrl=URL.createObjectURL(f);
- var im=new Image();
- im.onload=function(){
-   source=document.createElement("canvas"); source.width=im.naturalWidth; source.height=im.naturalHeight;
-   source.getContext("2d").drawImage(im,0,0);
-   before.src=objUrl;
-   resetValues(false);
-   render();
-   $("previewCard").classList.remove("hidden"); $("controls").classList.remove("hidden");
-   $("originalInfo").textContent="Original: "+(f.size/1048576).toFixed(2)+" MB • "+im.naturalWidth+"×"+im.naturalHeight;
-   $("status").textContent="✅ Photo ready. Tap Smart Auto Enhance.";
- };
- im.src=objUrl;
-};
-
-function clamp(v){return v<0?0:v>255?255:v}
-function smartProcess(){
- if(!source)return;
- var strength=+$("strength").value/100;
- var b=+$("brightness").value, c=+$("contrast").value, sat=+$("saturation").value, sh=+$("sharpness").value, warm=+$("warmth").value;
- var scale=qualityScale, maxSide=4096;
- if(Math.max(source.width,source.height)*scale>maxSide) scale=maxSide/Math.max(source.width,source.height);
- scale=Math.max(1,scale);
- var base=document.createElement("canvas"); base.width=Math.round(source.width*scale); base.height=Math.round(source.height*scale);
- var bx=base.getContext("2d"); bx.imageSmoothingEnabled=true; bx.imageSmoothingQuality="high";
- bx.drawImage(source,0,0,base.width,base.height);
-
- var ctx=base.getContext("2d"), img=ctx.getImageData(0,0,base.width,base.height), d=img.data;
- var cf=(259*((c*strength)+255))/(255*(259-(c*strength)));
- var sv=1+(sat*strength/100), bv=b*strength*2.0, wv=warm*strength*0.8;
- for(var i=0;i<d.length;i+=4){
-   var r=cf*(d[i]-128)+128+bv+wv;
-   var g=cf*(d[i+1]-128)+128+bv;
-   var bl=cf*(d[i+2]-128)+128+bv-wv;
-   var lum=.299*r+.587*g+.114*bl;
-   d[i]=clamp(lum+(r-lum)*sv); d[i+1]=clamp(lum+(g-lum)*sv); d[i+2]=clamp(lum+(bl-lum)*sv);
- }
- ctx.putImageData(img,0,0);
-
- if(sh>0){
-   var original=ctx.getImageData(0,0,base.width,base.height), src=original.data, out=ctx.createImageData(base.width,base.height), od=out.data;
-   od.set(src); var amount=(sh/100)*strength*0.75, w=base.width,h=base.height;
-   for(var y=1;y<h-1;y++){
-     for(var x=1;x<w-1;x++){
-       var k=(y*w+x)*4;
-       for(var ch=0;ch<3;ch++){
-         var blur=(src[k-4+ch]+src[k+4+ch]+src[k-w*4+ch]+src[k+w*4+ch])/4;
-         od[k+ch]=clamp(src[k+ch]+(src[k+ch]-blur)*amount);
-       }
-       od[k+3]=src[k+3];
-     }
-   }
-   ctx.putImageData(out,0,0);
- }
- result=base;
- after.src=base.toDataURL("image/jpeg",.94);
- after.onload=sync;
- $("outputInfo").textContent=(qualityScale===2?"2× HD":"Original Size")+": "+base.width+"×"+base.height;
- base.toBlob(function(blob){if(blob)$("sizeInfo").textContent="Enhanced: "+(blob.size/1048576).toFixed(2)+" MB";},"image/jpeg",.95);
- $("status").textContent="✨ Enhancement ready.";
-}
-
-function render(){clearTimeout(timer);timer=setTimeout(smartProcess,80)}
-controls.forEach(function(id){
- $(id).oninput=function(){ $(id+"V").textContent=this.value; render(); };
-});
-$("strength").oninput=function(){$("strengthV").textContent=this.value+"%";render()};
-
-$("auto").onclick=function(){
- $("strength").value=70;$("strengthV").textContent="70%";
- setVals(4,14,10,28,2); render(); $("status").textContent="✨ Smart Auto Enhance applied.";
-};
-function setVals(b,c,s,sh,w){
- var a={brightness:b,contrast:c,saturation:s,sharpness:sh,warmth:w};
- controls.forEach(function(id){$(id).value=a[id];$(id+"V").textContent=a[id]});
-}
-document.querySelectorAll(".presetBtn").forEach(function(btn){
- btn.onclick=function(){
-  document.querySelectorAll(".presetBtn").forEach(function(x){x.classList.remove("on")});this.classList.add("on");
-  var p=this.getAttribute("data-preset");
-  if(p==="clear")setVals(2,16,4,42,0);
-  if(p==="vivid")setVals(3,15,22,28,3);
-  if(p==="soft")setVals(6,5,7,8,4);
-  if(p==="natural")setVals(2,8,5,20,1);
-  render();
- };
-});
-function resetValues(doRender){
- $("strength").value=70;$("strengthV").textContent="70%";setVals(0,0,0,20,0);
- document.querySelectorAll(".presetBtn").forEach(function(x){x.classList.remove("on")});
- if(doRender)render();
-}
-$("showOriginal").onclick=function(){compare.value=0;sync()};
-$("showEnhanced").onclick=function(){compare.value=100;sync()};
-$("qualityOriginal").onclick=function(){
- qualityScale=1;this.classList.add("on");$("quality2x").classList.remove("on");render();
-};
-$("quality2x").onclick=function(){
- qualityScale=2;this.classList.add("on");$("qualityOriginal").classList.remove("on");render();
-};
-$("reset").onclick=function(){if(source){resetValues(true);$("status").textContent="🔄 Adjustments reset."}};
-$("download").onclick=function(){
- if(!result)return;
- result.toBlob(function(blob){
-   var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="manjeet-smart-enhanced.jpg";a.click();
-   setTimeout(function(){URL.revokeObjectURL(u)},2000);
- },"image/jpeg",.95);
-};
-})();
-</script>
-</body></html>
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const src=document.getElementById("src"),ctx=src.getContext("2d"),ov=document.getElementById("ov"),ox=ov.getContext("2d"),stage=document.getElementById("stage");let img=null,rot=0,pts=[],drag=-1,label="Full Page",cards=[];
+full.onchange=e=>{label="PVC Card";load(e.target.files[0])};
+async function load(f){if(!f)return;if(f.type==="application/pdf"){let p=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,page=await p.getPage(1),v=page.getViewport({scale:2}),c=document.createElement("canvas");c.width=v.width;c.height=v.height;await page.render({canvasContext:c.getContext("2d"),viewport:v}).promise;loadUrl(c.toDataURL("image/jpeg",.96))}else{let r=new FileReader;r.onload=()=>loadUrl(r.result);r.readAsDataURL(f)}}
+function loadUrl(u){let i=new Image;i.onload=()=>{img=i;rot=0;draw();corners();empty.style.display="none";controls.classList.add("show");status.textContent="Detecting card...";setTimeout(autoCrop,80)};i.src=u}
+function draw(){let w=img.width,h=img.height;if(rot%180)[w,h]=[h,w];let sc=Math.min(1,1600/Math.max(w,h));src.width=w*sc;src.height=h*sc;ctx.save();ctx.translate(src.width/2,src.height/2);ctx.rotate(rot*Math.PI/180);ctx.drawImage(img,-img.width*sc/2,-img.height*sc/2,img.width*sc,img.height*sc);ctx.restore();ov.width=stage.clientWidth;ov.height=stage.clientHeight}
+function box(){let a=src.getBoundingClientRect(),b=stage.getBoundingClientRect();return{x:a.left-b.left,y:a.top-b.top,w:a.width,h:a.height}}
+function corners(){let b=box(),m=Math.min(18,b.w*.04);pts=[[b.x+m,b.y+m],[b.x+b.w-m,b.y+m],[b.x+b.w-m,b.y+b.h-m],[b.x+m,b.y+b.h-m]];paint()}
+function paint(){ov.width=stage.clientWidth;ov.height=stage.clientHeight;ox.clearRect(0,0,ov.width,ov.height);if(!pts.length)return;ox.fillStyle="#0f172a66";ox.fillRect(0,0,ov.width,ov.height);ox.save();ox.globalCompositeOperation="destination-out";ox.beginPath();ox.moveTo(...pts[0]);pts.slice(1).forEach(p=>ox.lineTo(...p));ox.closePath();ox.fill();ox.restore();ox.strokeStyle="#2563eb";ox.lineWidth=3;ox.beginPath();ox.moveTo(...pts[0]);pts.slice(1).forEach(p=>ox.lineTo(...p));ox.closePath();ox.stroke();pts.forEach(p=>{ox.beginPath();ox.arc(p[0],p[1],10,0,7);ox.fillStyle="#fff";ox.fill();ox.lineWidth=4;ox.strokeStyle="#2563eb";ox.stroke()})}
+function xy(e){let r=stage.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return[t.clientX-r.left,t.clientY-r.top]}function down(e){let p=xy(e),d=99;drag=-1;pts.forEach((q,i)=>{let n=Math.hypot(p[0]-q[0],p[1]-q[1]);if(n<35&&n<d){d=n;drag=i}});if(drag>=0)e.preventDefault()}function move(e){if(drag<0)return;e.preventDefault();let p=xy(e),b=box();pts[drag]=[Math.max(b.x,Math.min(b.x+b.w,p[0])),Math.max(b.y,Math.min(b.y+b.h,p[1]))];paint()}function up(){drag=-1}stage.addEventListener("touchstart",down,{passive:false});stage.addEventListener("touchmove",move,{passive:false});stage.addEventListener("touchend",up);stage.addEventListener("mousedown",down);window.addEventListener("mousemove",move);window.addEventListener("mouseup",up);
+function autoCrop(){let b=box(),D=ctx.getImageData(0,0,src.width,src.height).data,w=src.width,h=src.height,cs=[[2,2],[w-3,2],[2,h-3],[w-3,h-3]].map(q=>{let i=(q[1]*w+q[0])*4;return[D[i],D[i+1],D[i+2]]}),bg=[0,1,2].map(k=>cs.reduce((a,c)=>a+c[k],0)/4),mnx=w,mny=h,mxx=0,mxy=0,n=0,st=Math.max(1,Math.floor(Math.max(w,h)/650));for(let y=0;y<h;y+=st)for(let x=0;x<w;x+=st){let i=(y*w+x)*4,z=Math.abs(D[i]-bg[0])+Math.abs(D[i+1]-bg[1])+Math.abs(D[i+2]-bg[2]);if(z>80){mnx=Math.min(mnx,x);mxx=Math.max(mxx,x);mny=Math.min(mny,y);mxy=Math.max(mxy,y);n++}}if(n<30){status.textContent="Edge not clear - adjust corners manually";return}let sx=b.w/w,sy=b.h/h;pts=[[b.x+mnx*sx,b.y+mny*sy],[b.x+mxx*sx,b.y+mny*sy],[b.x+mxx*sx,b.y+mxy*sy],[b.x+mnx*sx,b.y+mxy*sy]];paint();status.textContent="Auto crop ready - check corners"}
+function ratio(){let b=box(),r=85.6/54,W=b.w*.88,H=W/r;if(H>b.h*.88){H=b.h*.88;W=H*r}let x=b.x+b.w/2,y=b.y+b.h/2;pts=[[x-W/2,y-H/2],[x+W/2,y-H/2],[x+W/2,y+H/2],[x-W/2,y+H/2]];paint()}
+function rotate(){rot=(rot+90)%360;draw();corners()}
+function crop(){let b=box(),sx=src.width/b.w,sy=src.height/b.h,p=pts.map(q=>[(q[0]-b.x)*sx,(q[1]-b.y)*sy]),x=Math.max(0,Math.min(...p.map(q=>q[0]))),X=Math.min(src.width,Math.max(...p.map(q=>q[0]))),y=Math.max(0,Math.min(...p.map(q=>q[1]))),Y=Math.min(src.height,Math.max(...p.map(q=>q[1]))),W=X-x,H=Y-y,land=W>=H,c=document.createElement("canvas");c.width=land?1011:638;c.height=land?638:1011;c.getContext("2d").drawImage(src,x,y,W,H,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.96)}
+function addCard(){if(!img)return;cards.push({label,url:crop()});render();status.textContent=label+" added"}
+function render(){grid.innerHTML="";cards.forEach((c,i)=>{let d=document.createElement("div");d.className="card";d.innerHTML='<img src="'+c.url+'"><small>'+c.label+' · <a href="#" onclick="cards.splice('+i+',1);render();return false">Remove</a></small>';grid.appendChild(d)});results.classList.toggle("show",cards.length>0)}
+function download(){cards.forEach((c,i)=>{let a=document.createElement("a");a.href=c.url;a.download="pvc-"+c.label.toLowerCase().replace(" ","-")+"-"+(i+1)+".jpg";a.click()})}
+function pngOut(){if(!cards.length)return;cards.forEach((c,i)=>{let im=new Image();im.onload=()=>{let cv=document.createElement("canvas");cv.width=im.width;cv.height=im.height;cv.getContext("2d").drawImage(im,0,0);let a=document.createElement("a");a.href=cv.toDataURL("image/png");a.download="pvc-card-"+(i+1)+".png";a.click()};im.src=c.url})}
+function pdfOut(){if(!cards.length)return;let {jsPDF}=window.jspdf,p=new jsPDF({unit:"mm",format:"a4"});cards.forEach((c,i)=>{if(i)p.addPage();p.addImage(c.url,"JPEG",62.2,25,85.6,54)});p.save("pvc-cards.pdf")}
+function printOut(){if(!cards.length)return;let w=window.open("","_blank");w.document.write('<style>@page{size:A4;margin:15mm}body{text-align:center}img{width:85.6mm;height:54mm;margin:8mm}</style>'+cards.map(c=>'<img src="'+c.url+'">').join("")+'<script>onload=()=>print()<\/script>');w.document.close()}
+function resetAll(){img=null;cards=[];src.width=src.height=1;empty.style.display="block";controls.classList.remove("show");results.classList.remove("show");grid.innerHTML="";status.textContent="Upload a file — card will auto detect and crop";full.value=""}
+</script></body></html>
