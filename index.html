@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Single ID Card Print - Manjeet Digital Hub</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#edf2f8;color:#26364b}
@@ -29,7 +31,7 @@ input[type=file]{display:none}.upload{display:flex;gap:8px;margin-bottom:10px}.u
 .note{text-align:center;font-size:11px;color:#7b899d;margin:10px 0 2px}.status{text-align:center;font-size:11px;color:#64748b;margin-top:7px}
 @media(min-width:760px){.app{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;align-items:start}.workspaceWrap{position:sticky;top:70px}.controls{margin-top:0}}
 @media(max-width:759px){.app{padding:7px}.workspaceWrap{padding:7px}.workspace{max-height:52vh}.controls{padding:9px}.top{padding:7px}.btn{padding:9px 7px}.grid{grid-template-columns:1fr 1fr}}
-@media print{body{background:#fff}.top,.controls{display:none!important}.app,.workspaceWrap{padding:0;margin:0;display:block;background:#fff}.workspace{box-shadow:none;width:210mm;height:297mm;max-height:none}}
+.cropModal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.82);z-index:100;padding:12px}.cropModal.show{display:flex;align-items:center;justify-content:center}.cropBox{width:min(94vw,760px);background:#fff;border-radius:14px;padding:10px}.cropStage{height:min(62vh,520px);background:#111827;overflow:hidden;border-radius:10px}.cropStage img{display:block;max-width:100%}.cropActions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}@media print{body{background:#fff}.top,.controls{display:none!important}.app,.workspaceWrap{padding:0;margin:0;display:block;background:#fff}.workspace{box-shadow:none;width:210mm;height:297mm;max-height:none}}
 </style>
 </head>
 <body>
@@ -57,15 +59,16 @@ input[type=file]{display:none}.upload{display:flex;gap:8px;margin-bottom:10px}.u
 </div>
 
 <div class="range"><label style="font-size:11px;font-weight:700">Image Zoom <span id="zoomVal">100</span>%</label><input id="zoom" type="range" min="100" max="250" value="100"></div>
-<div class="row" style="margin-top:8px"><button id="centerBtn" class="btn">Center</button><button id="swapBtn" class="btn">Front ↔ Back</button><button id="resetBtn" class="btn red">Reset</button></div>
+<div class="row" style="margin-top:8px"><button id="rotateLeft" class="btn">↶ Rotate</button><button id="rotateRight" class="btn">↷ Rotate</button><button id="autoCropBtn" class="btn">✂ Auto Crop</button><button id="recropBtn" class="btn">▣ Re-Crop</button></div><div class="row" style="margin-top:8px"><button id="centerBtn" class="btn">Center</button><button id="swapBtn" class="btn">Front ↔ Back</button><button id="resetBtn" class="btn red">Reset</button></div>
 <div class="bottom"><button id="cardBtn" class="big">⬇ CARD</button><button id="pdfBtn" class="big pdf">📄 PDF</button><button id="printBtn" class="big print">🖨 PRINT</button></div>
 <div class="note">Front & Back • Exact-size card • A4 print-ready export</div>
 </div></div>
 
+<div id="cropModal" class="cropModal"><div class="cropBox"><div class="cropStage"><img id="cropImage" alt="Crop"></div><div class="cropActions"><button id="cropCancel" class="btn">Cancel</button><button id="cropFree" class="btn">Free Crop</button><button id="cropApply" class="btn primary">Apply Crop</button></div><div class="note">Drag corners/edges freely. Move and zoom the image as needed.</div></div></div>
 <script>
 (function(){
 "use strict";
-var mode="id",single=false,frontSrc="",backSrc="",activeSide="front",drag=null;
+var mode="id",single=false,frontSrc="",backSrc="",activeSide="front",drag=null,cropper=null;
 var ws=document.getElementById("workspace"),front=document.getElementById("frontCard"),back=document.getElementById("backCard");
 var orient=document.getElementById("orientation"),fit=document.getElementById("fit"),zoom=document.getElementById("zoom");
 var customW=document.getElementById("customW"),customH=document.getElementById("customH"),status=document.getElementById("status");
@@ -102,6 +105,52 @@ document.querySelectorAll(".tab").forEach(function(b){b.onclick=function(){docum
 document.getElementById("singleSwitch").onclick=function(){single=!single;this.classList.toggle("on",single);apply()};
 orient.onchange=apply;fit.onchange=apply;customW.oninput=apply;customH.oninput=apply;
 zoom.oninput=function(){zooms[activeSide]=+this.value;document.getElementById("zoomVal").textContent=this.value;apply()};
+
+function currentSrc(){return activeSide==="front"?frontSrc:backSrc}
+function setCurrentSrc(v){if(activeSide==="front"){frontSrc=v;setImg(front,v)}else{backSrc=v;setImg(back,v)}apply()}
+function rotateCurrent(deg){
+ var src=currentSrc();if(!src)return alert("Please upload a card first.");
+ var im=new Image();im.onload=function(){
+  var c=document.createElement("canvas"),ctx=c.getContext("2d"),swap=Math.abs(deg)%180===90;
+  c.width=swap?im.height:im.width;c.height=swap?im.width:im.height;
+  ctx.translate(c.width/2,c.height/2);ctx.rotate(deg*Math.PI/180);ctx.drawImage(im,-im.width/2,-im.height/2);
+  setCurrentSrc(c.toDataURL("image/jpeg",.96));
+ };im.src=src;
+}
+document.getElementById("rotateLeft").onclick=function(){rotateCurrent(-90)};
+document.getElementById("rotateRight").onclick=function(){rotateCurrent(90)};
+
+function openCrop(autoMode){
+ var src=currentSrc();if(!src)return alert("Please upload Front or Back card first.");
+ if(!window.Cropper)return alert("Crop tool could not load. Please check internet connection.");
+ var modal=document.getElementById("cropModal"),img=document.getElementById("cropImage");
+ modal.classList.add("show");img.src=src;
+ setTimeout(function(){
+  if(cropper)cropper.destroy();
+  var z=sizeMM();
+  cropper=new Cropper(img,{
+   viewMode:1,dragMode:"move",autoCropArea:autoMode?.94:.82,
+   aspectRatio:autoMode?(z.w/z.h):NaN,
+   cropBoxMovable:true,cropBoxResizable:true,movable:true,zoomable:true,
+   rotatable:true,scalable:true,responsive:true
+  });
+ },80);
+}
+document.getElementById("autoCropBtn").onclick=function(){openCrop(true)};
+document.getElementById("recropBtn").onclick=function(){openCrop(false)};
+document.getElementById("cropFree").onclick=function(){if(cropper)cropper.setAspectRatio(NaN)};
+document.getElementById("cropCancel").onclick=function(){
+ if(cropper){cropper.destroy();cropper=null}
+ document.getElementById("cropModal").classList.remove("show");
+};
+document.getElementById("cropApply").onclick=function(){
+ if(!cropper)return;
+ var c=cropper.getCroppedCanvas({maxWidth:2400,maxHeight:2400,imageSmoothingEnabled:true,imageSmoothingQuality:"high"});
+ if(!c)return;
+ setCurrentSrc(c.toDataURL("image/jpeg",.96));
+ cropper.destroy();cropper=null;
+ document.getElementById("cropModal").classList.remove("show");
+};
 document.getElementById("centerBtn").onclick=function(){pos[activeSide]={x:50,y:activeSide==="front"?42:58};apply()};
 document.getElementById("swapBtn").onclick=function(){var t=frontSrc;frontSrc=backSrc;backSrc=t;setImg(front,frontSrc);setImg(back,backSrc);apply()};
 document.getElementById("resetBtn").onclick=function(){frontSrc=backSrc="";setImg(front,"");setImg(back,"");pos={front:{x:50,y:42},back:{x:50,y:58}};zooms={front:100,back:100};zoom.value=100;document.getElementById("zoomVal").textContent=100;apply()};
