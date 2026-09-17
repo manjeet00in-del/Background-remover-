@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>PVC Auto Crop Final - Manjeet Digital Hub</title>
+<title>PVC Auto Crop Final V2 - Manjeet Digital Hub</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -149,111 +149,122 @@ let reliableCropper=null, autoItems=[], selectedItem=-1, mirrorOn=false;
 
 function autoProcessSource(im){
  try{
-  let c=document.createElement('canvas'),max=1600,sc=Math.min(1,max/Math.max(im.width,im.height));
+  let c=document.createElement('canvas'),max=1700,sc=Math.min(1,max/Math.max(im.width,im.height));
   c.width=Math.max(1,Math.round(im.width*sc));c.height=Math.max(1,Math.round(im.height*sc));
-  let x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
-  let id=x.getImageData(0,0,c.width,c.height),d=id.data,w=c.width,h=c.height;
-  let step=Math.max(2,Math.floor(Math.max(w,h)/850));
+  let ctx=c.getContext('2d');ctx.drawImage(im,0,0,c.width,c.height);
+  let w=c.width,h=c.height,img=ctx.getImageData(0,0,w,h),d=img.data;
+  let step=Math.max(2,Math.floor(Math.max(w,h)/900));
 
-  // Estimate page/background from outer border.
-  let S=[];
-  for(let xx=0;xx<w;xx+=Math.max(5,Math.floor(w/100)))for(let yy of [2,h-3]){
-   let i=(yy*w+xx)*4;S.push([d[i],d[i+1],d[i+2]]);
+  // Estimate page/background from corners and outside border.
+  let ss=[];
+  function sample(xx,yy){let i=(yy*w+xx)*4;ss.push([d[i],d[i+1],d[i+2]])}
+  for(let xx=2;xx<w-2;xx+=Math.max(6,Math.floor(w/90))){sample(xx,2);sample(xx,h-3)}
+  for(let yy=2;yy<h-2;yy+=Math.max(6,Math.floor(h/90))){sample(2,yy);sample(w-3,yy)}
+  let bg=[0,1,2].map(k=>ss.reduce((a,q)=>a+q[k],0)/Math.max(1,ss.length));
+
+  function isInk(xx,yy){
+   let i=(yy*w+xx)*4,r=d[i],g=d[i+1],b=d[i+2];
+   let dist=Math.abs(r-bg[0])+Math.abs(g-bg[1])+Math.abs(b-bg[2]);
+   let chroma=Math.max(r,g,b)-Math.min(r,g,b);
+   let dark=(r+g+b)/3<205;
+   return dist>58 || chroma>32 || dark;
   }
-  for(let yy=0;yy<h;yy+=Math.max(5,Math.floor(h/100)))for(let xx of [2,w-3]){
-   let i=(yy*w+xx)*4;S.push([d[i],d[i+1],d[i+2]]);
-  }
-  let bg=[0,1,2].map(k=>S.reduce((a,q)=>a+q[k],0)/S.length);
 
-  // Foreground occupancy by rows and columns.
-  let rows=new Array(h).fill(0),cols=new Array(w).fill(0);
-  function fg(xx,yy){
-   let i=(yy*w+xx)*4;
-   let dist=Math.abs(d[i]-bg[0])+Math.abs(d[i+1]-bg[1])+Math.abs(d[i+2]-bg[2]);
-   let mx=Math.max(d[i],d[i+1],d[i+2]),mn=Math.min(d[i],d[i+1],d[i+2]);
-   return dist>55 || (mx-mn)>30;
-  }
-  for(let yy=0;yy<h;yy+=step)for(let xx=0;xx<w;xx+=step)if(fg(xx,yy)){rows[yy]++;cols[xx]++}
-
-  // Dense horizontal content bands anywhere on the page.
-  let rowThr=Math.max(5,(w/step)*.045),bands=[],active=false,a=0,last=0;
-  for(let yy=0;yy<h;yy+=step){
-   if(rows[yy]>=rowThr){if(!active){active=true;a=yy}last=yy}
-   else if(active && yy-last>step*8){if(last-a>h*.035)bands.push([a,last]);active=false}
-  }
-  if(active&&last-a>h*.035)bands.push([a,last]);
-
-  // Merge nearby lines into larger card-like blocks.
-  let merged=[];
-  bands.forEach(b=>{
-   if(!merged.length || b[0]-merged[merged.length-1][1]>h*.055)merged.push(b.slice());
-   else merged[merged.length-1][1]=b[1];
-  });
-
-  function bounds(y0,y1){
-   let extra=Math.round((y1-y0)*.45);y0=Math.max(0,y0-extra);y1=Math.min(h,y1+extra);
-   let minx=w,maxx=0,miny=h,maxy=0,n=0;
-   for(let yy=y0;yy<y1;yy+=step)for(let xx=0;xx<w;xx+=step)if(fg(xx,yy)){
-    minx=Math.min(minx,xx);maxx=Math.max(maxx,xx);miny=Math.min(miny,yy);maxy=Math.max(maxy,yy);n++;
+  // Sliding PVC-ratio windows over the WHOLE page.
+  // This avoids mistaking a letter heading for a card just because it has lots of text.
+  let target=85.6/54, wins=[];
+  let sizes=[.24,.30,.36,.42,.48,.54,.60];
+  for(let wf of sizes){
+   let W=w*wf,H=W/target;
+   if(H>h*.55)continue;
+   let sx=Math.max(step*8,W*.10),sy=Math.max(step*8,H*.12);
+   for(let y=0;y+H<=h;y+=sy)for(let x=0;x+W<=w;x+=sx){
+    let ink=0,total=0,edge=0,edgeTotal=0,thirds=[0,0,0];
+    for(let yy=Math.floor(y);yy<y+H;yy+=step*3){
+     for(let xx=Math.floor(x);xx<x+W;xx+=step*3){
+      total++;
+      if(isInk(xx,yy)){
+       ink++;
+       thirds[Math.min(2,Math.floor(((xx-x)/W)*3))]++;
+      }
+     }
+    }
+    // Edge activity helps favour a complete card rectangle over a small text paragraph.
+    for(let xx=Math.floor(x);xx<x+W;xx+=step*2){
+     edgeTotal+=2;if(isInk(xx,Math.floor(y+2)))edge++;if(isInk(xx,Math.floor(y+H-3)))edge++;
+    }
+    for(let yy=Math.floor(y);yy<y+H;yy+=step*2){
+     edgeTotal+=2;if(isInk(Math.floor(x+2),yy))edge++;if(isInk(Math.floor(x+W-3),yy))edge++;
+    }
+    let density=ink/Math.max(1,total),edgeRate=edge/Math.max(1,edgeTotal);
+    let spread=Math.min(...thirds)/Math.max(1,Math.max(...thirds));
+    // ID cards usually contain content across width, not just one central letter column.
+    let score=density*.50+edgeRate*.20+spread*.30;
+    if(density>.07 && spread>.12)wins.push({x,y,w:W,h:H,score,density,spread});
    }
-   return n>35?{x:minx,y:miny,w:maxx-minx,h:maxy-miny,n}:null;
   }
 
-  let candidates=merged.map(b=>bounds(b[0],b[1])).filter(Boolean);
-
-  // Generic ID-card scoring: landscape/portrait PVC-like rectangles,
-  // enough area, but not almost the whole page.
-  candidates=candidates.map(b=>{
-   let r=b.w/b.h,landScore=1-Math.min(1,Math.abs(r-1.585)/1.585),
-       portScore=1-Math.min(1,Math.abs(r-(1/1.585))/(1/1.585)),
-       ratioScore=Math.max(landScore,portScore),
-       area=(b.w*b.h)/(w*h),
-       areaScore=area>.015&&area<.55?1:0,
-       density=Math.min(1,b.n/Math.max(1,(b.w/step)*(b.h/step))/.18);
-   b.score=ratioScore*.55+areaScore*.25+density*.20;return b;
-  }).filter(b=>b.score>.38);
-
-  // Remove near-duplicate overlapping candidates.
-  candidates.sort((a,b)=>b.score-a.score || b.w*b.h-a.w*a.h);
-  let picked=[];
-  function overlap(a,b){
+  wins.sort((a,b)=>b.score-a.score);
+  function ov(a,b){
    let x1=Math.max(a.x,b.x),y1=Math.max(a.y,b.y),x2=Math.min(a.x+a.w,b.x+b.w),y2=Math.min(a.y+a.h,b.y+b.h);
    let inter=Math.max(0,x2-x1)*Math.max(0,y2-y1);
    return inter/Math.min(a.w*a.h,b.w*b.h);
   }
-  for(let q of candidates){if(!picked.some(p=>overlap(p,q)>.60))picked.push(q);if(picked.length===2)break}
 
-  // If detector found nothing usable, use full foreground bounds as one candidate.
-  if(!picked.length){
-   let all=bounds(0,h);
-   if(all&&all.w>w*.2&&all.h>h*.05)picked=[all];else throw new Error('detect');
+  // Prefer a PAIR of similar-sized, non-overlapping PVC windows.
+  // Front/back may be anywhere: top, bottom, left/right, or separate rows.
+  let bestPair=null,bestPairScore=-1;
+  let top=wins.slice(0,80);
+  for(let i=0;i<top.length;i++)for(let j=i+1;j<top.length;j++){
+   let a=top[i],b=top[j];
+   if(ov(a,b)>.20)continue;
+   let sizeSim=Math.min(a.w,b.w)/Math.max(a.w,b.w);
+   if(sizeSim<.72)continue;
+   let pairScore=a.score+b.score+sizeSim*.22;
+   // Small preference for lower regions on e-Aadhaar style pages, but NEVER a hard rule.
+   let lower=((a.y+a.h/2)+(b.y+b.h/2))/(2*h);
+   pairScore+=Math.max(0,lower-.45)*.08;
+   if(pairScore>bestPairScore){bestPairScore=pairScore;bestPair=[a,b]}
   }
 
-  // Expand OUTWARD to include physical card edges; preserve orientation.
-  let ratio=85.6/54;
-  picked=picked.map(b=>{
-   let cx=b.x+b.w/2,cy=b.y+b.h/2,land=b.w>=b.h,W=b.w*1.10,H=b.h*1.12,target=land?ratio:1/ratio;
+  let picked=bestPair || (wins.length?[wins[0]]:[]);
+  if(!picked.length)throw new Error("no card candidate");
+
+  // Refine each selected window by looking for ink near its perimeter,
+  // then add a small safe margin instead of cropping through card content.
+  function refine(q){
+   let x0=Math.max(0,Math.floor(q.x)),y0=Math.max(0,Math.floor(q.y));
+   let x1=Math.min(w-1,Math.ceil(q.x+q.w)),y1=Math.min(h-1,Math.ceil(q.y+q.h));
+   let minx=x1,maxx=x0,miny=y1,maxy=y0,n=0;
+   for(let yy=y0;yy<=y1;yy+=step)for(let xx=x0;xx<=x1;xx+=step)if(isInk(xx,yy)){
+    minx=Math.min(minx,xx);maxx=Math.max(maxx,xx);miny=Math.min(miny,yy);maxy=Math.max(maxy,yy);n++;
+   }
+   if(n<30)return q;
+   let cx=(minx+maxx)/2,cy=(miny+maxy)/2,W=(maxx-minx)*1.10,H=(maxy-miny)*1.13;
+   // EXPAND to PVC ratio; never shrink detected content.
    if(W/H<target)W=H*target;else H=W/target;
-   W=Math.min(W,w*.96);H=Math.min(H,h*.80);
-   return{x:Math.max(0,Math.min(w-W,cx-W/2)),y:Math.max(0,Math.min(h-H,cy-H/2)),w:W,h:H,land};
-  }).sort((a,b)=>a.y-b.y||a.x-b.x);
+   W=Math.min(W,w*.72);H=W/target;
+   if(H>h*.55){H=h*.55;W=H*target}
+   return{x:Math.max(0,Math.min(w-W,cx-W/2)),y:Math.max(0,Math.min(h-H,cy-H/2)),w:W,h:H};
+  }
+
+  picked=picked.map(refine).sort((a,b)=>a.y-b.y||a.x-b.x);
 
   clearAutoItems();
   picked.forEach((b,i)=>{
-   let out=document.createElement('canvas');
-   out.width=b.land?1011:638;out.height=b.land?638:1011;
-   out.getContext('2d').drawImage(c,b.x,b.y,b.w,b.h,0,0,out.width,out.height);
+   let out=document.createElement('canvas');out.width=1011;out.height=638;
+   out.getContext('2d').drawImage(c,b.x,b.y,b.w,b.h,0,0,1011,638);
    addAutoCard(out,picked.length===2?(i===0?'Front':'Back'):'Card',i);
   });
 
   processing.classList.remove('show');empty.style.display='none';autoBadge.style.display='block';
   topTools.classList.add('show');floating.classList.remove('show');
   status.textContent=picked.length===2
-   ?"2 card sides auto detected • galat crop ho to card select karke RE-CROP"
-   :"Card auto detected • galat crop ho to RE-CROP";
+    ?"Front + Back card regions detected • galat ho to card select karke RE-CROP"
+    :"Card region detected • galat ho to RE-CROP";
  }catch(e){
   processing.classList.remove('show');
-  status.textContent="Automatic boundary clear nahi mili • manual Re-Crop khul raha hai";
+  status.textContent="Card boundary clear nahi mili • manual Re-Crop khul raha hai";
   openReliableCrop();
  }
 }
