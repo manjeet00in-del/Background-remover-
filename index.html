@@ -35,6 +35,10 @@ button,input{font:inherit}.top{position:sticky;top:0;z-index:20;background:#fff;
 <div class="empty" id="empty"><span>🪪</span><b>Select PVC / ID Card</b><small>Auto crop ke baad card yahan aa jayega</small></div>
 <div class="card" id="card"><img id="finalImg"></div>
 </div></div>
+<div id="sideBar" style="max-width:920px;margin:auto;background:#fff;padding:8px 10px;display:none;gap:8px">
+<button onclick="chooseSide('front')" id="frontBtn" style="flex:1;padding:11px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:800">✂ CROP FRONT</button>
+<button onclick="chooseSide('back')" id="backBtn" style="flex:1;padding:11px;border:0;border-radius:10px;background:#f59e0b;color:#111827;font-weight:800">✂ CROP BACK</button>
+</div>
 <div class="floating" id="floating">
 <button class="tool green" onclick="openCrop()" title="Re-Crop">⌗</button>
 <button class="tool blue" onclick="rotateFinal()" title="Rotate">↻</button>
@@ -56,7 +60,7 @@ button,input{font:inherit}.top{position:sticky;top:0;z-index:20;background:#fff;
 <div class="modal" id="cropModal"><div class="cropbox">
 <div class="crophead"><b>Adjust Card Corners</b><span style="font-size:10px;color:#64748b">4 blue dots ko finger se move karein</span></div>
 <div class="cropstage" id="cropStage"><img id="cropImg"><canvas id="overlay"></canvas></div>
-<div class="cropactions"><button onclick="detectEdges()">AUTO DETECT</button><button onclick="setPVCRatio()">PVC RATIO</button><button class="done" onclick="applyCrop()">DONE</button></div>
+<div class="cropactions"><button onclick="detectEdges()">AUTO DETECT</button><button onclick="setPVCRatio()">PVC RATIO</button><button class="done" onclick="applyCrop()">DONE / SAVE SIDE</button></div>
 </div></div>
 
 <div class="adjust" id="adjust"><div class="sheet"><b>Enhance Card</b>
@@ -68,10 +72,10 @@ button,input{font:inherit}.top{position:sticky;top:0;z-index:20;background:#fff;
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 const file=document.getElementById('file'),cropImg=document.getElementById('cropImg'),cropStage=document.getElementById('cropStage'),overlay=document.getElementById('overlay'),octx=overlay.getContext('2d'),card=document.getElementById('card'),finalImg=document.getElementById('finalImg'),paper=document.getElementById('paper');
-let source=null,points=[],dragPoint=-1,finalCanvas=null,baseCanvas=null,cardScale=1,finalRotation=0;
+let source=null,points=[],dragPoint=-1,finalCanvas=null,baseCanvas=null,frontCanvas=null,backCanvas=null,currentSide='front',cardScale=1,finalRotation=0;
 file.onchange=e=>loadFile(e.target.files[0]);
 async function loadFile(f){if(!f)return;status.textContent="Loading file...";if(f.type==="application/pdf"){let pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,p=await pdf.getPage(1),v=p.getViewport({scale:2}),c=document.createElement('canvas');c.width=v.width;c.height=v.height;await p.render({canvasContext:c.getContext('2d'),viewport:v}).promise;loadURL(c.toDataURL('image/jpeg',.97))}else{let r=new FileReader;r.onload=()=>loadURL(r.result);r.readAsDataURL(f)}}
-function loadURL(u){let im=new Image;im.onload=()=>{source=im;cropImg.src=u;cropModal.classList.add('show');cropImg.onload=()=>setTimeout(detectEdges,80);status.textContent="Auto detecting card..."};im.src=u}
+function loadURL(u){let im=new Image;im.onload=()=>{source=im;currentSide='front';sideBar.style.display='flex';cropImg.src=u;cropModal.classList.add('show');cropImg.onload=()=>setTimeout(detectEdges,80);status.textContent="Auto detecting card..."};im.src=u}
 function stageBox(){let a=cropImg.getBoundingClientRect(),b=cropStage.getBoundingClientRect();return{x:a.left-b.left,y:a.top-b.top,w:a.width,h:a.height}}
 function sizeOv(){overlay.width=cropStage.clientWidth;overlay.height=cropStage.clientHeight}
 function defaultPoints(){let b=stageBox(),m=Math.min(15,b.w*.04);points=[[b.x+m,b.y+m],[b.x+b.w-m,b.y+m],[b.x+b.w-m,b.y+b.h-m],[b.x+m,b.y+b.h-m]];drawOverlay()}
@@ -90,8 +94,20 @@ function pm(e){if(dragPoint<0)return;e.preventDefault();let q=pos(e),b=stageBox(
 function pu(){dragPoint=-1}
 cropStage.addEventListener('touchstart',pd,{passive:false});cropStage.addEventListener('touchmove',pm,{passive:false});cropStage.addEventListener('touchend',pu);cropStage.addEventListener('mousedown',pd);window.addEventListener('mousemove',pm);window.addEventListener('mouseup',pu);
 function applyCrop(){if(points.length!==4)return;let b=stageBox(),sx=source.width/b.w,sy=source.height/b.h,pp=points.map(p=>[(p[0]-b.x)*sx,(p[1]-b.y)*sy]);let minx=Math.max(0,Math.min(...pp.map(p=>p[0]))),maxx=Math.min(source.width,Math.max(...pp.map(p=>p[0]))),miny=Math.max(0,Math.min(...pp.map(p=>p[1]))),maxy=Math.min(source.height,Math.max(...pp.map(p=>p[1]))),w=maxx-minx,h=maxy-miny;if(w<10||h<10)return;
-let land=w>=h;baseCanvas=document.createElement('canvas');baseCanvas.width=land?1011:638;baseCanvas.height=land?638:1011;baseCanvas.getContext('2d').drawImage(source,minx,miny,w,h,0,0,baseCanvas.width,baseCanvas.height);finalCanvas=cloneCanvas(baseCanvas);finalImg.src=finalCanvas.toDataURL('image/png');cropModal.classList.remove('show');empty.style.display='none';card.style.display='block';card.classList.add('sel');floating.classList.add('show');cardScale=1;finalRotation=0;centerCard();status.textContent="Crop complete • card ko finger se page par kahin bhi drag karein"}
+let land=w>=h;baseCanvas=document.createElement('canvas');baseCanvas.width=land?1011:638;baseCanvas.height=land?638:1011;baseCanvas.getContext('2d').drawImage(source,minx,miny,w,h,0,0,baseCanvas.width,baseCanvas.height);
+if(currentSide==='front') frontCanvas=cloneCanvas(baseCanvas); else backCanvas=cloneCanvas(baseCanvas);
+finalCanvas=cloneCanvas(baseCanvas);finalImg.src=finalCanvas.toDataURL('image/png');cropModal.classList.remove('show');empty.style.display='none';card.style.display='block';card.classList.add('sel');floating.classList.add('show');cardScale=1;finalRotation=0;centerCard();
+status.textContent=(currentSide==='front'?'Front':'Back')+" crop saved • card drag kar sakte hain • doosri side ke liye button dabayein"}
 function cloneCanvas(c){let n=document.createElement('canvas');n.width=c.width;n.height=c.height;n.getContext('2d').drawImage(c,0,0);return n}
+function chooseSide(side){
+ currentSide=side;
+ frontBtn.style.opacity=side==='front'?'1':'.55';
+ backBtn.style.opacity=side==='back'?'1':'.55';
+ if(!source){file.click();return}
+ cropImg.src=source.src;cropModal.classList.add('show');
+ setTimeout(detectEdges,60);
+ status.textContent=(side==='front'?'Front':'Back')+" side auto detecting...";
+}
 function openCrop(){if(!source)return;cropModal.classList.add('show');setTimeout(detectEdges,50)}
 let dragging=false,dx=0,dy=0;
 function cardDown(e){let t=e.touches?e.touches[0]:e,r=card.getBoundingClientRect();dragging=true;dx=t.clientX-r.left;dy=t.clientY-r.top;e.preventDefault()}
@@ -108,7 +124,7 @@ function saveJPG(){if(!ensure())return;let a=document.createElement('a');a.href=
 function savePNG(){if(!ensure())return;let a=document.createElement('a');a.href=finalCanvas.toDataURL('image/png');a.download='pvc-card.png';a.click()}
 function savePDF(){if(!ensure())return;let {jsPDF}=window.jspdf,p=new jsPDF({unit:'mm',format:'a4'}),land=finalCanvas.width>=finalCanvas.height,w=land?85.6:54,h=land?54:85.6;p.addImage(finalCanvas.toDataURL('image/jpeg',.96),'JPEG',(210-w)/2,20,w,h);p.save('pvc-card.pdf')}
 function doPrint(){if(!ensure())return;let u=finalCanvas.toDataURL('image/png'),w=window.open('','_blank');w.document.write('<style>@page{size:A4;margin:15mm}body{text-align:center}img{width:85.6mm;height:54mm}</style><img src="'+u+'"><script>onload=()=>print()<\/script>');w.document.close()}
-function resetAll(){source=finalCanvas=baseCanvas=null;points=[];file.value='';card.style.display='none';floating.classList.remove('show');empty.style.display='flex';cropModal.classList.remove('show');adjust.classList.remove('show');status.textContent='Select File → Auto Detect → Crop → Drag anywhere on page'}
+function resetAll(){source=finalCanvas=baseCanvas=frontCanvas=backCanvas=null;points=[];currentSide='front';file.value='';card.style.display='none';floating.classList.remove('show');sideBar.style.display='none';empty.style.display='flex';cropModal.classList.remove('show');adjust.classList.remove('show');status.textContent='Select File → Auto Detect → Crop → Drag anywhere on page'}
 window.addEventListener('resize',()=>{if(cropModal.classList.contains('show')&&source)setTimeout(detectEdges,60)})
 </script>
 </body></html>
