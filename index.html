@@ -80,7 +80,7 @@ padding:7px 10px;border-radius:999px;font-size:10px;font-weight:800;color:#2563e
 
 <div class="processing" id="processing"><div><b>Auto Crop Processing...</b><small>Front / Back detect kiya ja raha hai</small></div></div>
 <div class="modal" id="reliableCrop"><div class="cropbox">
-<div class="crophead"><b>PVC Crop</b><span style="font-size:10px;color:#64748b">Box ko move / resize karein</span></div>
+<div class="crophead"><b>PVC Crop</b><span style="font-size:10px;color:#64748b">Har edge/corner ko independently move karein</span></div>
 <div style="height:58vh;min-height:350px;background:#111827;overflow:hidden"><img id="rcImg" style="display:block;max-width:100%"></div>
 <div class="cropactions"><button onclick="resetReliableCrop()">RESET</button><button onclick="rotateReliableCrop()">ROTATE</button><button class="done" onclick="applyReliableCrop()">DONE</button></div>
 </div></div>
@@ -149,66 +149,83 @@ let reliableCropper=null, autoItems=[], selectedItem=-1, mirrorOn=false;
 
 function autoProcessSource(im){
  try{
-  let c=document.createElement('canvas'), max=1500, sc=Math.min(1,max/Math.max(im.width,im.height));
-  c.width=Math.max(1,Math.round(im.width*sc)); c.height=Math.max(1,Math.round(im.height*sc));
-  let x=c.getContext('2d'); x.drawImage(im,0,0,c.width,c.height);
-  let d=x.getImageData(0,0,c.width,c.height), data=d.data,w=c.width,h=c.height;
-  // Estimate page/background from border pixels.
-  let samples=[];
-  for(let xx=0;xx<w;xx+=Math.max(4,Math.floor(w/100))){
-    for(let yy of [1,h-2]){let i=(yy*w+xx)*4;samples.push([data[i],data[i+1],data[i+2]])}
+  let c=document.createElement('canvas'),max=1600,sc=Math.min(1,max/Math.max(im.width,im.height));
+  c.width=Math.max(1,Math.round(im.width*sc));c.height=Math.max(1,Math.round(im.height*sc));
+  let x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
+  let id=x.getImageData(0,0,c.width,c.height),d=id.data,w=c.width,h=c.height,step=Math.max(2,Math.floor(Math.max(w,h)/900));
+
+  // Border colour estimate.
+  let S=[];
+  for(let xx=0;xx<w;xx+=Math.max(5,Math.floor(w/100)))for(let yy of [2,h-3]){let i=(yy*w+xx)*4;S.push([d[i],d[i+1],d[i+2]])}
+  for(let yy=0;yy<h;yy+=Math.max(5,Math.floor(h/100)))for(let xx of [2,w-3]){let i=(yy*w+xx)*4;S.push([d[i],d[i+1],d[i+2]])}
+  let bg=[0,1,2].map(k=>S.reduce((a,q)=>a+q[k],0)/S.length);
+
+  // Coarse foreground mask; ignore isolated page text by requiring dense rows.
+  let row=new Array(h).fill(0);
+  for(let yy=0;yy<h;yy+=step)for(let xx=0;xx<w;xx+=step){
+   let i=(yy*w+xx)*4,dist=Math.abs(d[i]-bg[0])+Math.abs(d[i+1]-bg[1])+Math.abs(d[i+2]-bg[2]);
+   let chroma=Math.max(d[i],d[i+1],d[i+2])-Math.min(d[i],d[i+1],d[i+2]);
+   if(dist>58||chroma>32)row[yy]++;
   }
-  for(let yy=0;yy<h;yy+=Math.max(4,Math.floor(h/100))){
-    for(let xx of [1,w-2]){let i=(yy*w+xx)*4;samples.push([data[i],data[i+1],data[i+2]])}
+  let threshold=Math.max(5,(w/step)*.055),bands=[],on=false,a=0,last=0;
+  for(let yy=0;yy<h;yy+=step){
+   let active=row[yy]>=threshold;
+   if(active&&!on){on=true;a=yy}
+   if(active)last=yy;
+   if(on&&!active && yy-last>step*7){if(last-a>h*.045)bands.push([a,last]);on=false}
   }
-  let bg=[0,1,2].map(k=>samples.reduce((a,q)=>a+q[k],0)/samples.length);
-  // Build coarse foreground occupancy and find horizontal components.
-  let rows=new Array(h).fill(0), cols=new Array(w).fill(0), step=Math.max(1,Math.floor(Math.max(w,h)/900));
-  for(let yy=0;yy<h;yy+=step) for(let xx=0;xx<w;xx+=step){
-    let i=(yy*w+xx)*4;
-    let dist=Math.abs(data[i]-bg[0])+Math.abs(data[i+1]-bg[1])+Math.abs(data[i+2]-bg[2]);
-    let chroma=Math.max(data[i],data[i+1],data[i+2])-Math.min(data[i],data[i+1],data[i+2]);
-    if(dist>48 || chroma>28){rows[yy]++;cols[xx]++}
-  }
-  function boundsFromRange(y0,y1){
-    let minx=w,maxx=0,miny=h,maxy=0,n=0;
-    for(let yy=y0;yy<y1;yy+=step) for(let xx=0;xx<w;xx+=step){
-      let i=(yy*w+xx)*4,dist=Math.abs(data[i]-bg[0])+Math.abs(data[i+1]-bg[1])+Math.abs(data[i+2]-bg[2]);
-      let chroma=Math.max(data[i],data[i+1],data[i+2])-Math.min(data[i],data[i+1],data[i+2]);
-      if(dist>48||chroma>28){minx=Math.min(minx,xx);maxx=Math.max(maxx,xx);miny=Math.min(miny,yy);maxy=Math.max(maxy,yy);n++}
-    }
-    return n>40?{x:minx,y:miny,w:maxx-minx,h:maxy-miny,n}:null;
-  }
-  // Aadhaar e-PDF commonly has front/back stacked; test upper/lower halves.
-  let upper=boundsFromRange(0,Math.floor(h*.53)), lower=boundsFromRange(Math.floor(h*.47),h);
-  let boxes=[];
-  function valid(b){return b&&b.w>w*.28&&b.h>h*.08}
-  if(valid(upper)&&valid(lower) && Math.abs((upper.y+upper.h/2)-(lower.y+lower.h/2))>h*.18){
-    boxes=[upper,lower];
-  } else {
-    let all=boundsFromRange(0,h);
-    if(valid(all)) boxes=[all];
-  }
-  // Clamp each detected crop to PVC landscape ratio around its detected center.
-  boxes=boxes.slice(0,2).map(b=>{
-    let ratio=85.6/54,cx=b.x+b.w/2,cy=b.y+b.h/2,W=b.w,H=b.h;
-    if(W/H>ratio) W=H*ratio; else H=W/ratio;
-    W=Math.min(w,W*1.04);H=Math.min(h,H*1.04);
-    return {x:Math.max(0,cx-W/2),y:Math.max(0,cy-H/2),w:Math.min(W,w),h:Math.min(H,h)};
+  if(on&&last-a>h*.045)bands.push([a,last]);
+
+  // Merge nearby bands belonging to the same card.
+  let merged=[];
+  bands.forEach(b=>{
+   if(!merged.length||b[0]-merged[merged.length-1][1]>h*.07)merged.push(b.slice());
+   else merged[merged.length-1][1]=b[1];
   });
-  if(!boxes.length) throw new Error('detect');
+
+  function fullBounds(y0,y1){
+   let minx=w,maxx=0,miny=h,maxy=0,n=0;
+   let padY=Math.round((y1-y0)*.35);y0=Math.max(0,y0-padY);y1=Math.min(h,y1+padY);
+   for(let yy=y0;yy<y1;yy+=step)for(let xx=0;xx<w;xx+=step){
+    let i=(yy*w+xx)*4,dist=Math.abs(d[i]-bg[0])+Math.abs(d[i+1]-bg[1])+Math.abs(d[i+2]-bg[2]);
+    let chroma=Math.max(d[i],d[i+1],d[i+2])-Math.min(d[i],d[i+1],d[i+2]);
+    if(dist>48||chroma>26){minx=Math.min(minx,xx);maxx=Math.max(maxx,xx);miny=Math.min(miny,yy);maxy=Math.max(maxy,yy);n++}
+   }
+   return n>50?{x:minx,y:miny,w:maxx-minx,h:maxy-miny}:null;
+  }
+
+  let candidates=merged.map(b=>fullBounds(b[0],b[1])).filter(Boolean)
+   .filter(b=>b.w>w*.25&&b.h>h*.06)
+   .sort((a,b)=>b.w*b.h-a.w*a.h).slice(0,2)
+   .sort((a,b)=>a.y-b.y);
+
+  if(!candidates.length){
+   // fallback: split page into top/bottom and find each card.
+   candidates=[fullBounds(0,Math.floor(h*.52)),fullBounds(Math.floor(h*.48),h)].filter(Boolean);
+  }
+  if(!candidates.length)throw new Error('detect');
+
+  // IMPORTANT: expand around detected content to PVC ratio, don't crop inward.
+  let ratio=85.6/54;
+  candidates=candidates.slice(0,2).map(b=>{
+   let cx=b.x+b.w/2,cy=b.y+b.h/2,W=b.w*1.10,H=b.h*1.12;
+   if(W/H<ratio)W=H*ratio;else H=W/ratio;
+   W=Math.min(W,w*.96);H=Math.min(H,h*.48);
+   let X=Math.max(0,Math.min(w-W,cx-W/2)),Y=Math.max(0,Math.min(h-H,cy-H/2));
+   return{x:X,y:Y,w:W,h:H};
+  });
+
   clearAutoItems();
-  boxes.forEach((b,i)=>{
-    let out=document.createElement('canvas');out.width=1011;out.height=638;
-    out.getContext('2d').drawImage(c,b.x,b.y,b.w,b.h,0,0,1011,638);
-    addAutoCard(out,i===0?'Front':'Back',i);
+  candidates.forEach((b,i)=>{
+   let out=document.createElement('canvas');out.width=1011;out.height=638;
+   out.getContext('2d').drawImage(c,b.x,b.y,b.w,b.h,0,0,1011,638);
+   addAutoCard(out,i===0?'Front':'Back',i);
   });
   processing.classList.remove('show');empty.style.display='none';autoBadge.style.display='block';
   topTools.classList.add('show');floating.classList.remove('show');
-  status.textContent=boxes.length>1?"Front + Back auto cropped • galat ho to card select karke RE-CROP":"Auto crop complete • galat ho to RE-CROP";
+  status.textContent=candidates.length>1?"Front + Back auto cropped • correction ke liye card select karke RE-CROP":"Auto crop complete • correction ke liye RE-CROP";
  }catch(e){
-  processing.classList.remove('show');
-  status.textContent="Auto detect clear nahi hua • manual crop khul raha hai";
+  processing.classList.remove('show');status.textContent="Auto detect clear nahi hua • manual Re-Crop use karein";
   openReliableCrop();
  }
 }
@@ -244,10 +261,10 @@ function openReliableCrop(){
  setTimeout(()=>{
    if(reliableCropper) reliableCropper.destroy();
    reliableCropper=new Cropper(rcImg,{
-     aspectRatio:85.6/54,
+     aspectRatio:NaN,
      viewMode:1,
      dragMode:'move',
-     autoCropArea:.88,
+     autoCropArea:.92,
      responsive:true,
      restore:false,
      guides:true,
@@ -268,13 +285,17 @@ function resetReliableCrop(){if(reliableCropper) reliableCropper.reset()}
 function rotateReliableCrop(){if(reliableCropper) reliableCropper.rotate(90)}
 function applyReliableCrop(){
  if(!reliableCropper)return;
- let c=reliableCropper.getCroppedCanvas({
-   width:1011,height:638,
+ let raw=reliableCropper.getCroppedCanvas({
    fillColor:'#fff',
    imageSmoothingEnabled:true,
    imageSmoothingQuality:'high'
  });
- if(!c)return;
+ if(!raw)return;
+ // Preserve exactly what user selected; no fixed-ratio stretching.
+ let c=document.createElement('canvas');
+ let maxOut=1400,scale=Math.min(1,maxOut/Math.max(raw.width,raw.height));
+ c.width=Math.max(1,Math.round(raw.width*scale));c.height=Math.max(1,Math.round(raw.height*scale));
+ c.getContext('2d').drawImage(raw,0,0,c.width,c.height);
  baseCanvas=cloneCanvas(c);
  if(currentSide==='front') frontCanvas=cloneCanvas(c); else backCanvas=cloneCanvas(c);
  finalCanvas=cloneCanvas(c);
