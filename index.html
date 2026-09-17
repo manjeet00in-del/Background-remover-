@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>PVC Auto Crop V5 - Manjeet Digital Hub</title>
+<title>PVC Auto Crop Final Bottom Fix - Manjeet Digital Hub</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -149,84 +149,61 @@ let reliableCropper=null, autoItems=[], selectedItem=-1, mirrorOn=false;
 
 function autoProcessSource(im){
  try{
-  let c=document.createElement('canvas'),max=1600,sc=Math.min(1,max/Math.max(im.width,im.height));
-  c.width=Math.max(1,Math.round(im.width*sc));c.height=Math.max(1,Math.round(im.height*sc));
-  let x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
-  let id=x.getImageData(0,0,c.width,c.height),d=id.data,w=c.width,h=c.height,step=Math.max(2,Math.floor(Math.max(w,h)/900));
+   let c=document.createElement('canvas'),max=1600,sc=Math.min(1,max/Math.max(im.width,im.height));
+   c.width=Math.max(1,Math.round(im.width*sc));c.height=Math.max(1,Math.round(im.height*sc));
+   let x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
+   let w=c.width,h=c.height;
 
-  // Border colour estimate.
-  let S=[];
-  for(let xx=0;xx<w;xx+=Math.max(5,Math.floor(w/100)))for(let yy of [2,h-3]){let i=(yy*w+xx)*4;S.push([d[i],d[i+1],d[i+2]])}
-  for(let yy=0;yy<h;yy+=Math.max(5,Math.floor(h/100)))for(let xx of [2,w-3]){let i=(yy*w+xx)*4;S.push([d[i],d[i+1],d[i+2]])}
-  let bg=[0,1,2].map(k=>S.reduce((a,q)=>a+q[k],0)/S.length);
+   // Aadhaar/e-Aadhaar full-page layout:
+   // the printable PVC Front + Back are normally the TWO panels in the BOTTOM strip.
+   // Detect/crop that bottom strip first instead of picking the large letter content above.
+   let ratio=85.6/54;
+   let candidates=[];
+   let portraitPage=h>w*1.05;
 
-  // Coarse foreground mask; ignore isolated page text by requiring dense rows.
-  let row=new Array(h).fill(0);
-  for(let yy=0;yy<h;yy+=step)for(let xx=0;xx<w;xx+=step){
-   let i=(yy*w+xx)*4,dist=Math.abs(d[i]-bg[0])+Math.abs(d[i+1]-bg[1])+Math.abs(d[i+2]-bg[2]);
-   let chroma=Math.max(d[i],d[i+1],d[i+2])-Math.min(d[i],d[i+1],d[i+2]);
-   if(dist>58||chroma>32)row[yy]++;
-  }
-  let threshold=Math.max(5,(w/step)*.055),bands=[],on=false,a=0,last=0;
-  for(let yy=0;yy<h;yy+=step){
-   let active=row[yy]>=threshold;
-   if(active&&!on){on=true;a=yy}
-   if(active)last=yy;
-   if(on&&!active && yy-last>step*7){if(last-a>h*.045)bands.push([a,last]);on=false}
-  }
-  if(on&&last-a>h*.045)bands.push([a,last]);
+   if(portraitPage){
+     // Bottom PVC strip usually occupies roughly the last 25-35% of an e-Aadhaar page.
+     // Keep a little extra margin so borders are not cut.
+     let stripTop=Math.round(h*.70), stripBottom=Math.round(h*.985);
+     let stripH=stripBottom-stripTop;
+     let gap=Math.max(2,Math.round(w*.006));
+     let sideMargin=Math.max(2,Math.round(w*.018));
+     let half=(w-gap)/2;
 
-  // Merge nearby bands belonging to the same card.
-  let merged=[];
-  bands.forEach(b=>{
-   if(!merged.length||b[0]-merged[merged.length-1][1]>h*.07)merged.push(b.slice());
-   else merged[merged.length-1][1]=b[1];
-  });
-
-  function fullBounds(y0,y1){
-   let minx=w,maxx=0,miny=h,maxy=0,n=0;
-   let padY=Math.round((y1-y0)*.35);y0=Math.max(0,y0-padY);y1=Math.min(h,y1+padY);
-   for(let yy=y0;yy<y1;yy+=step)for(let xx=0;xx<w;xx+=step){
-    let i=(yy*w+xx)*4,dist=Math.abs(d[i]-bg[0])+Math.abs(d[i+1]-bg[1])+Math.abs(d[i+2]-bg[2]);
-    let chroma=Math.max(d[i],d[i+1],d[i+2])-Math.min(d[i],d[i+1],d[i+2]);
-    if(dist>48||chroma>26){minx=Math.min(minx,xx);maxx=Math.max(maxx,xx);miny=Math.min(miny,yy);maxy=Math.max(maxy,yy);n++}
+     function pvcBox(x0,x1){
+       let availW=x1-x0-2*sideMargin;
+       let H=Math.min(stripH,availW/ratio);
+       let W=H*ratio;
+       if(W>availW){W=availW;H=W/ratio}
+       let X=x0+(x1-x0-W)/2;
+       // Anchor to the BOTTOM of the page so the detachable card is selected,
+       // not the Aadhaar letter/information block above it.
+       let Y=stripBottom-H;
+       return{x:Math.max(0,X),y:Math.max(0,Y),w:Math.min(W,w-X),h:Math.min(H,h-Y)};
+     }
+     candidates=[pvcBox(0,half-gap/2),pvcBox(half+gap/2,w)];
+   }else{
+     // For already-card-like scans/photos keep a simple two-half fallback.
+     let H=Math.min(h*.94,(w*.47)/ratio),W=H*ratio,Y=(h-H)/2;
+     if(w/h>2.25){
+       candidates=[{x:w*.02,y:Y,w:W,h:H},{x:w*.51,y:Y,w:W,h:H}];
+     }else{
+       candidates=[{x:(w-W)/2,y:(h-H)/2,w:W,h:H}];
+     }
    }
-   return n>50?{x:minx,y:miny,w:maxx-minx,h:maxy-miny}:null;
-  }
 
-  let candidates=merged.map(b=>fullBounds(b[0],b[1])).filter(Boolean)
-   .filter(b=>b.w>w*.25&&b.h>h*.06)
-   .sort((a,b)=>b.w*b.h-a.w*a.h).slice(0,2)
-   .sort((a,b)=>a.y-b.y);
-
-  if(!candidates.length){
-   // fallback: split page into top/bottom and find each card.
-   candidates=[fullBounds(0,Math.floor(h*.52)),fullBounds(Math.floor(h*.48),h)].filter(Boolean);
-  }
-  if(!candidates.length)throw new Error('detect');
-
-  // IMPORTANT: expand around detected content to PVC ratio, don't crop inward.
-  let ratio=85.6/54;
-  candidates=candidates.slice(0,2).map(b=>{
-   let cx=b.x+b.w/2,cy=b.y+b.h/2,W=b.w*1.10,H=b.h*1.12;
-   if(W/H<ratio)W=H*ratio;else H=W/ratio;
-   W=Math.min(W,w*.96);H=Math.min(H,h*.48);
-   let X=Math.max(0,Math.min(w-W,cx-W/2)),Y=Math.max(0,Math.min(h-H,cy-H/2));
-   return{x:X,y:Y,w:W,h:H};
-  });
-
-  clearAutoItems();
-  candidates.forEach((b,i)=>{
-   let out=document.createElement('canvas');out.width=1011;out.height=638;
-   out.getContext('2d').drawImage(c,b.x,b.y,b.w,b.h,0,0,1011,638);
-   addAutoCard(out,i===0?'Front':'Back',i);
-  });
-  processing.classList.remove('show');empty.style.display='none';autoBadge.style.display='block';
-  topTools.classList.add('show');floating.classList.remove('show');
-  status.textContent=candidates.length>1?"Front + Back auto cropped • correction ke liye card select karke RE-CROP":"Auto crop complete • correction ke liye RE-CROP";
+   clearAutoItems();
+   candidates.forEach((b,i)=>{
+     let out=document.createElement('canvas');out.width=1011;out.height=638;
+     out.getContext('2d').drawImage(c,b.x,b.y,b.w,b.h,0,0,1011,638);
+     addAutoCard(out,i===0?'Front':'Back',i);
+   });
+   processing.classList.remove('show');empty.style.display='none';autoBadge.style.display='block';
+   topTools.classList.add('show');floating.classList.remove('show');
+   status.textContent=candidates.length>1?"Bottom Front + Back auto cropped • galat ho to card select karke RE-CROP":"Auto crop complete • galat ho to RE-CROP";
  }catch(e){
-  processing.classList.remove('show');status.textContent="Auto detect clear nahi hua • manual Re-Crop use karein";
-  openReliableCrop();
+   processing.classList.remove('show');status.textContent="Auto detect clear nahi hua • manual Re-Crop use karein";
+   openReliableCrop();
  }
 }
 function clearAutoItems(){autoItems.forEach(q=>q.el.remove());autoItems=[];selectedItem=-1}
