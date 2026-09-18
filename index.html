@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Photo + Signature Maker V1.4 - Manjeet Digital Hub</title>
+<title>Photo + Signature Maker V1.5 - Manjeet Digital Hub</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 <style>
@@ -41,14 +41,21 @@
 <button id="applyCrop" class="btn primary" disabled>✂️ Apply Crop</button>
 <button id="zoomPlus" class="btn" disabled>＋ Zoom</button><button id="zoomMinus" class="btn" disabled>− Zoom</button>
 </div>
-<div id="postPhotoOptions" style="display:none"><div class="two">
-<div class="field"><label>Photo Background</label><select id="photoBg"><option value="#ffffff">White</option><option value="#f4b6c2">Pink</option><option value="#b9dcff">Light Blue</option><option value="#eeeeee">Light Gray</option></select></div>
-<div class="field"><label>Custom Background</label><input id="customBg" type="color" value="#ffffff"></div>
-</div>
+<div id="postPhotoOptions" class="box" style="display:none;margin-top:10px">
+<h3>Photo Border</h3>
 <div class="two">
-<div class="field"><label>Photo Border Size: <span id="borderV">0</span> px</label><input id="photoBorder" class="range" type="range" min="0" max="30" value="0"></div>
+<div class="field"><label>Border Size: <span id="borderV">0</span> px</label><input id="photoBorder" class="range" type="range" min="0" max="40" value="0"></div>
 <div class="field"><label>Border Color</label><input id="borderColor" type="color" value="#ffffff"></div>
 </div>
+<div class="row">
+<button type="button" class="btn" data-border="0">No Border</button>
+<button type="button" class="btn" data-border="3">Thin</button>
+<button type="button" class="btn" data-border="7">Medium</button>
+<button type="button" class="btn" data-border="12">Thick</button>
+</div>
+<!-- compatibility values used by existing script -->
+<select id="photoBg" style="display:none"><option value="#ffffff" selected>White</option></select>
+<input id="customBg" type="color" value="#ffffff" style="display:none">
 </div>
 </div>
 
@@ -125,7 +132,7 @@ $("photoInput").onchange=e=>{
 };
 $("ratio").onchange=()=>{if(!cropper)return;const v=$("ratio").value;cropper.setAspectRatio(v==="free"?NaN:(v==="35/45"?35/45:Number(v)))};
 $("zoomPlus").onclick=()=>cropper&&cropper.zoom(.1);$("zoomMinus").onclick=()=>cropper&&cropper.zoom(-.1);
-$("applyCrop").onclick=()=>{if(!cropper)return;const c=cropper.getCroppedCanvas({maxWidth:1600,maxHeight:2000,imageSmoothingQuality:"high"});photoSrc=c.toDataURL("image/jpeg",.95);photoFinal.src=photoSrc;$("cropArea").style.display="none";$("applyCrop").disabled=true;$("zoomPlus").disabled=true;$("zoomMinus").disabled=true;cropper.destroy();cropper=null;$("photoStep").style.display="none";$("livePreview").style.display="block";$("nameStep").style.display="block";$("signatureStep").style.display="block";$("outputStep").style.display="block";status.textContent="Final Photo — add name/signature, move or resize them, then download.";setTimeout(()=>$("livePreview").scrollIntoView({behavior:"smooth",block:"start"}),80)};
+$("applyCrop").onclick=()=>{if(!cropper)return;const c=cropper.getCroppedCanvas({maxWidth:1600,maxHeight:2000,imageSmoothingQuality:"high"});photoSrc=c.toDataURL("image/jpeg",.95);photoFinal.src=photoSrc;$("cropArea").style.display="none";$("applyCrop").disabled=true;$("zoomPlus").disabled=true;$("zoomMinus").disabled=true;cropper.destroy();cropper=null;$("photoStep").style.display="none";$("livePreview").style.display="block";$("postPhotoOptions").style.display="block";$("nameStep").style.display="block";$("signatureStep").style.display="block";$("outputStep").style.display="block";status.textContent="Final Photo — add name/signature, move or resize them, then download.";setTimeout(()=>$("livePreview").scrollIntoView({behavior:"smooth",block:"start"}),80)};
 
 $("nameText").oninput=()=>nameLayer.childNodes[0].nodeValue=$("nameText").value||" ";
 function nameStyle(){nameLayer.style.fontFamily=$("nameFont").value;nameLayer.style.fontSize=$("nameSize").value+"px"}$("nameFont").onchange=nameStyle;$("nameSize").oninput=nameStyle;
@@ -139,6 +146,12 @@ function updatePhotoBorder(){
 }
 $("photoBorder").oninput=updatePhotoBorder;
 $("borderColor").oninput=updatePhotoBorder;
+document.querySelectorAll("[data-border]").forEach(function(btn){
+ btn.addEventListener("click",function(){
+  $("photoBorder").value=this.getAttribute("data-border");
+  updatePhotoBorder();
+ });
+});
 
 
 function loadImageFile(f){return new Promise((res,rej)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=rej;im.src=u})}
