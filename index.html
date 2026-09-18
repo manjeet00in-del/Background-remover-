@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Photo + Signature Maker V1.2 - Manjeet Digital Hub</title>
+<title>Photo + Signature Maker V1.4 - Manjeet Digital Hub</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f5f8ff;color:#172033;font-family:Arial,sans-serif}.wrap{max-width:980px;margin:auto;padding:12px}.back{color:#2563eb;font-weight:700;text-decoration:none}.card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 8px 24px #2563eb12}h1{font-size:22px;margin:0 0 5px}.sub{font-size:12px;color:#64748b;line-height:1.45}.grid{display:grid;grid-template-columns:1fr;gap:12px}.box{border:1px solid #e2e8f0;border-radius:13px;padding:10px;background:#fbfdff}.box h3{font-size:14px;margin:0 0 8px}.upload{display:block;text-align:center;border:2px dashed #9ab7ff;border-radius:11px;padding:12px;cursor:pointer;background:#f8fbff;font-weight:700;font-size:12px}.upload input{display:none}.row{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.btn{border:0;border-radius:9px;padding:9px 10px;font-size:11px;font-weight:700;background:#edf4ff;color:#1d4ed8;cursor:pointer}.btn.primary{background:#2563eb;color:white}.btn.danger{background:#fff1f2;color:#be123c}.btn:disabled{opacity:.45}.field{margin:7px 0}.field label{display:block;font-size:10px;font-weight:700;color:#475569;margin-bottom:4px}.field input,.field select{width:100%;padding:8px;border:1px solid #dbe3ef;border-radius:8px;background:white}.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}.croparea{height:300px;background:#111;border-radius:10px;overflow:hidden;display:none}.croparea img{max-width:100%}.previewWrap{background:#e8edf7;border-radius:12px;padding:12px;overflow:auto}.output{position:relative;margin:auto;background:white;box-shadow:0 3px 15px #0002;overflow:hidden;touch-action:none}.photoLayer,.nameLayer,.signLayer{position:absolute;touch-action:none;user-select:none}.photoLayer img,.signLayer img{width:100%;height:100%;display:block;object-fit:contain;pointer-events:none}.photoLayer img{object-fit:cover}.nameLayer{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;white-space:nowrap}.selected{outline:2px dashed #2563eb}.handle{display:none;position:absolute;right:-8px;bottom:-8px;width:18px;height:18px;border-radius:50%;background:#2563eb}.selected .handle{display:block}.checker{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0/16px 16px}.sigClean{display:none;margin-top:8px}.sigClean canvas{max-width:100%;max-height:150px;border:1px solid #ddd;border-radius:8px}.status{text-align:center;color:#64748b;font-size:11px;margin:8px}.note{font-size:10px;color:#64748b;background:#f8fafc;padding:9px;border-radius:9px}.topPreview{position:sticky;top:6px;z-index:8;margin-bottom:10px}.range{width:100%}
-@media(max-width:720px){.grid{grid-template-columns:1fr}.topPreview{position:sticky;top:4px}.topPreview .box{padding:7px}.topPreview h3{margin-bottom:5px}.topPreview .previewWrap{padding:6px}.topPreview .note{display:none}.croparea{height:270px}}
+*{box-sizing:border-box}body{margin:0;background:#f5f8ff;color:#172033;font-family:Arial,sans-serif}.wrap{max-width:980px;margin:auto;padding:12px}.back{color:#2563eb;font-weight:700;text-decoration:none}.card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 8px 24px #2563eb12}h1{font-size:22px;margin:0 0 5px}.sub{font-size:12px;color:#64748b;line-height:1.45}.grid{display:grid;grid-template-columns:1fr;gap:12px}.box{border:1px solid #e2e8f0;border-radius:13px;padding:10px;background:#fbfdff}.box h3{font-size:14px;margin:0 0 8px}.upload{display:block;text-align:center;border:2px dashed #9ab7ff;border-radius:11px;padding:12px;cursor:pointer;background:#f8fbff;font-weight:700;font-size:12px}.upload input{display:none}.row{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.btn{border:0;border-radius:9px;padding:9px 10px;font-size:11px;font-weight:700;background:#edf4ff;color:#1d4ed8;cursor:pointer}.btn.primary{background:#2563eb;color:white}.btn.danger{background:#fff1f2;color:#be123c}.btn:disabled{opacity:.45}.field{margin:7px 0}.field label{display:block;font-size:10px;font-weight:700;color:#475569;margin-bottom:4px}.field input,.field select{width:100%;padding:8px;border:1px solid #dbe3ef;border-radius:8px;background:white}.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}.croparea{height:300px;background:#111;border-radius:10px;overflow:hidden;display:none}.croparea img{max-width:100%}.previewWrap{background:#e8edf7;border-radius:12px;padding:12px;overflow:auto}.output{position:relative;margin:auto;background:white;box-shadow:0 3px 15px #0002;overflow:hidden;touch-action:none}.photoLayer,.nameLayer,.signLayer{position:absolute;touch-action:none;user-select:none}.photoLayer img,.signLayer img{width:100%;height:100%;display:block;object-fit:contain;pointer-events:none}.photoLayer img{object-fit:cover}.nameLayer{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;white-space:nowrap}.selected{outline:2px dashed #2563eb}.handle{display:none;position:absolute;right:-8px;bottom:-8px;width:18px;height:18px;border-radius:50%;background:#2563eb}.selected .handle{display:block}.checker{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0/16px 16px}.sigClean{display:none;margin-top:8px}.sigClean canvas{max-width:100%;max-height:150px;border:1px solid #ddd;border-radius:8px}.status{text-align:center;color:#64748b;font-size:11px;margin:8px}.note{font-size:10px;color:#64748b;background:#f8fafc;padding:9px;border-radius:9px}.topPreview{position:relative;margin-bottom:10px}.range{width:100%}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.topPreview{position:relative}.topPreview .box{padding:7px}.topPreview h3{margin-bottom:5px}.topPreview .previewWrap{padding:6px}.topPreview .note{display:none}.croparea{height:270px}}
 </style>
 </head>
 <body>
@@ -16,8 +16,8 @@
 <a href="../index.html" class="back">← Back</a>
 <div class="card">
 <h1>📸 Photo + Signature Maker</h1>
-<p class="sub">Crop photo, add name and a cleaned transparent signature. No arrow or extra graphic is added to the final file.</p>
-<div class="topPreview">
+<p class="sub">Select a photo to start.</p>
+<div class="topPreview" id="livePreview" style="display:none">
 <div class="box"><h3>Live Preview</h3>
 <div class="previewWrap">
 <div id="output" class="output">
@@ -32,8 +32,8 @@
 </div>
 <div class="grid">
 <div>
-<div class="box">
-<h3>1. Photo</h3>
+<div class="box" id="photoStep">
+<h3>Photo</h3>
 <label class="upload">📷 Upload Photo<input id="photoInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png"></label>
 <div id="cropArea" class="croparea"><img id="cropImg"></div>
 <div class="row">
@@ -41,7 +41,7 @@
 <button id="applyCrop" class="btn primary" disabled>✂️ Apply Crop</button>
 <button id="zoomPlus" class="btn" disabled>＋ Zoom</button><button id="zoomMinus" class="btn" disabled>− Zoom</button>
 </div>
-<div class="two">
+<div id="postPhotoOptions" style="display:none"><div class="two">
 <div class="field"><label>Photo Background</label><select id="photoBg"><option value="#ffffff">White</option><option value="#f4b6c2">Pink</option><option value="#b9dcff">Light Blue</option><option value="#eeeeee">Light Gray</option></select></div>
 <div class="field"><label>Custom Background</label><input id="customBg" type="color" value="#ffffff"></div>
 </div>
@@ -50,9 +50,10 @@
 <div class="field"><label>Border Color</label><input id="borderColor" type="color" value="#ffffff"></div>
 </div>
 </div>
+</div>
 
-<div class="box">
-<h3>2. Name</h3>
+<div class="box" id="nameStep" style="display:none">
+<h3>Name</h3>
 <div class="field"><label>Name</label><input id="nameText" value="Your Name" placeholder="Enter name"></div>
 <div class="two">
 <div class="field"><label>Font</label><select id="nameFont"><option>Arial</option><option>Georgia</option><option>Times New Roman</option><option>Verdana</option></select></div>
@@ -60,8 +61,8 @@
 </div>
 </div>
 
-<div class="box">
-<h3>3. Signature</h3>
+<div class="box" id="signatureStep" style="display:none">
+<h3>Signature</h3>
 <label class="upload">✍️ Upload Signature<input id="sigInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png"></label>
 <div id="sigClean" class="sigClean checker"><canvas id="sigCanvas"></canvas></div>
 <div class="field"><label>Background Removal / Threshold: <span id="tv">175</span></label><input id="threshold" class="range" type="range" min="60" max="245" value="175"></div>
@@ -69,8 +70,8 @@
 <button id="useSig" class="btn primary" disabled>✓ Use Transparent Signature</button>
 </div>
 
-<div class="box">
-<h3>4. Output</h3>
+<div class="box" id="outputStep" style="display:none">
+<h3>Download</h3>
 <div class="two">
 <div class="field"><label>Width (px)</label><input id="outW" type="number" value="600" min="200" max="3000"></div>
 <div class="field"><label>Height (px)</label><input id="outH" type="number" value="800" min="250" max="4000"></div>
@@ -120,11 +121,11 @@ output.onclick=()=>{[photoLayer,nameLayer,signLayer].forEach(x=>x.classList.remo
 [photoLayer,nameLayer,signLayer].forEach(makeInteractive);
 
 $("photoInput").onchange=e=>{
- const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f),im=$("cropImg");im.onload=()=>{if(cropper)cropper.destroy();$("cropArea").style.display="block";cropper=new Cropper(im,{viewMode:1,dragMode:"move",autoCropArea:.9,background:false,responsive:true,aspectRatio:NaN,cropBoxMovable:true,cropBoxResizable:true});$("applyCrop").disabled=false;$("zoomPlus").disabled=false;$("zoomMinus").disabled=false;status.textContent="Adjust crop with finger, then tap Apply Crop."};im.src=u;
+ const f=e.target.files[0];if(!f)return;$("livePreview").style.display="none";$("nameStep").style.display="none";$("signatureStep").style.display="none";$("outputStep").style.display="none";$("postPhotoOptions").style.display="none";const u=URL.createObjectURL(f),im=$("cropImg");im.onload=()=>{if(cropper)cropper.destroy();$("cropArea").style.display="block";cropper=new Cropper(im,{viewMode:1,dragMode:"move",autoCropArea:.9,background:false,responsive:true,aspectRatio:NaN,cropBoxMovable:true,cropBoxResizable:true});$("applyCrop").disabled=false;$("zoomPlus").disabled=false;$("zoomMinus").disabled=false;status.textContent="Adjust crop with finger, then tap Apply Crop."};im.src=u;
 };
 $("ratio").onchange=()=>{if(!cropper)return;const v=$("ratio").value;cropper.setAspectRatio(v==="free"?NaN:(v==="35/45"?35/45:Number(v)))};
 $("zoomPlus").onclick=()=>cropper&&cropper.zoom(.1);$("zoomMinus").onclick=()=>cropper&&cropper.zoom(-.1);
-$("applyCrop").onclick=()=>{if(!cropper)return;const c=cropper.getCroppedCanvas({maxWidth:1600,maxHeight:2000,imageSmoothingQuality:"high"});photoSrc=c.toDataURL("image/jpeg",.95);photoFinal.src=photoSrc;status.textContent="Photo crop applied. Move or resize it in preview."};
+$("applyCrop").onclick=()=>{if(!cropper)return;const c=cropper.getCroppedCanvas({maxWidth:1600,maxHeight:2000,imageSmoothingQuality:"high"});photoSrc=c.toDataURL("image/jpeg",.95);photoFinal.src=photoSrc;$("cropArea").style.display="none";$("applyCrop").disabled=true;$("zoomPlus").disabled=true;$("zoomMinus").disabled=true;cropper.destroy();cropper=null;$("photoStep").style.display="none";$("livePreview").style.display="block";$("nameStep").style.display="block";$("signatureStep").style.display="block";$("outputStep").style.display="block";status.textContent="Final Photo — add name/signature, move or resize them, then download.";setTimeout(()=>$("livePreview").scrollIntoView({behavior:"smooth",block:"start"}),80)};
 
 $("nameText").oninput=()=>nameLayer.childNodes[0].nodeValue=$("nameText").value||" ";
 function nameStyle(){nameLayer.style.fontFamily=$("nameFont").value;nameLayer.style.fontSize=$("nameSize").value+"px"}$("nameFont").onchange=nameStyle;$("nameSize").oninput=nameStyle;
