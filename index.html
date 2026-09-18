@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Photo + Signature Maker - Manjeet Digital Hub</title>
+<title>Photo + Signature Maker V1.2 - Manjeet Digital Hub</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f5f8ff;color:#172033;font-family:Arial,sans-serif}.wrap{max-width:980px;margin:auto;padding:12px}.back{color:#2563eb;font-weight:700;text-decoration:none}.card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 8px 24px #2563eb12}h1{font-size:22px;margin:0 0 5px}.sub{font-size:12px;color:#64748b;line-height:1.45}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid #e2e8f0;border-radius:13px;padding:10px;background:#fbfdff}.box h3{font-size:14px;margin:0 0 8px}.upload{display:block;text-align:center;border:2px dashed #9ab7ff;border-radius:11px;padding:12px;cursor:pointer;background:#f8fbff;font-weight:700;font-size:12px}.upload input{display:none}.row{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.btn{border:0;border-radius:9px;padding:9px 10px;font-size:11px;font-weight:700;background:#edf4ff;color:#1d4ed8;cursor:pointer}.btn.primary{background:#2563eb;color:white}.btn.danger{background:#fff1f2;color:#be123c}.btn:disabled{opacity:.45}.field{margin:7px 0}.field label{display:block;font-size:10px;font-weight:700;color:#475569;margin-bottom:4px}.field input,.field select{width:100%;padding:8px;border:1px solid #dbe3ef;border-radius:8px;background:white}.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}.croparea{height:300px;background:#111;border-radius:10px;overflow:hidden;display:none}.croparea img{max-width:100%}.previewWrap{background:#e8edf7;border-radius:12px;padding:12px;overflow:auto}.output{position:relative;margin:auto;background:white;box-shadow:0 3px 15px #0002;overflow:hidden;touch-action:none}.photoLayer,.nameLayer,.signLayer{position:absolute;touch-action:none;user-select:none}.photoLayer img,.signLayer img{width:100%;height:100%;display:block;object-fit:contain;pointer-events:none}.photoLayer img{object-fit:cover}.nameLayer{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;white-space:nowrap}.selected{outline:2px dashed #2563eb}.handle{display:none;position:absolute;right:-8px;bottom:-8px;width:18px;height:18px;border-radius:50%;background:#2563eb}.selected .handle{display:block}.checker{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0/16px 16px}.sigClean{display:none;margin-top:8px}.sigClean canvas{max-width:100%;max-height:150px;border:1px solid #ddd;border-radius:8px}.status{text-align:center;color:#64748b;font-size:11px;margin:8px}.note{font-size:10px;color:#64748b;background:#f8fafc;padding:9px;border-radius:9px}.sticky{position:sticky;top:6px}.range{width:100%}
-@media(max-width:720px){.grid{grid-template-columns:1fr}.sticky{position:static}.croparea{height:270px}}
+*{box-sizing:border-box}body{margin:0;background:#f5f8ff;color:#172033;font-family:Arial,sans-serif}.wrap{max-width:980px;margin:auto;padding:12px}.back{color:#2563eb;font-weight:700;text-decoration:none}.card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 8px 24px #2563eb12}h1{font-size:22px;margin:0 0 5px}.sub{font-size:12px;color:#64748b;line-height:1.45}.grid{display:grid;grid-template-columns:1fr;gap:12px}.box{border:1px solid #e2e8f0;border-radius:13px;padding:10px;background:#fbfdff}.box h3{font-size:14px;margin:0 0 8px}.upload{display:block;text-align:center;border:2px dashed #9ab7ff;border-radius:11px;padding:12px;cursor:pointer;background:#f8fbff;font-weight:700;font-size:12px}.upload input{display:none}.row{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.btn{border:0;border-radius:9px;padding:9px 10px;font-size:11px;font-weight:700;background:#edf4ff;color:#1d4ed8;cursor:pointer}.btn.primary{background:#2563eb;color:white}.btn.danger{background:#fff1f2;color:#be123c}.btn:disabled{opacity:.45}.field{margin:7px 0}.field label{display:block;font-size:10px;font-weight:700;color:#475569;margin-bottom:4px}.field input,.field select{width:100%;padding:8px;border:1px solid #dbe3ef;border-radius:8px;background:white}.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}.croparea{height:300px;background:#111;border-radius:10px;overflow:hidden;display:none}.croparea img{max-width:100%}.previewWrap{background:#e8edf7;border-radius:12px;padding:12px;overflow:auto}.output{position:relative;margin:auto;background:white;box-shadow:0 3px 15px #0002;overflow:hidden;touch-action:none}.photoLayer,.nameLayer,.signLayer{position:absolute;touch-action:none;user-select:none}.photoLayer img,.signLayer img{width:100%;height:100%;display:block;object-fit:contain;pointer-events:none}.photoLayer img{object-fit:cover}.nameLayer{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;white-space:nowrap}.selected{outline:2px dashed #2563eb}.handle{display:none;position:absolute;right:-8px;bottom:-8px;width:18px;height:18px;border-radius:50%;background:#2563eb}.selected .handle{display:block}.checker{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0/16px 16px}.sigClean{display:none;margin-top:8px}.sigClean canvas{max-width:100%;max-height:150px;border:1px solid #ddd;border-radius:8px}.status{text-align:center;color:#64748b;font-size:11px;margin:8px}.note{font-size:10px;color:#64748b;background:#f8fafc;padding:9px;border-radius:9px}.topPreview{position:sticky;top:6px;z-index:8;margin-bottom:10px}.range{width:100%}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.topPreview{position:sticky;top:4px}.topPreview .box{padding:7px}.topPreview h3{margin-bottom:5px}.topPreview .previewWrap{padding:6px}.topPreview .note{display:none}.croparea{height:270px}}
 </style>
 </head>
 <body>
@@ -17,6 +17,19 @@
 <div class="card">
 <h1>📸 Photo + Signature Maker</h1>
 <p class="sub">Crop photo, add name and a cleaned transparent signature. No arrow or extra graphic is added to the final file.</p>
+<div class="topPreview">
+<div class="box"><h3>Live Preview</h3>
+<div class="previewWrap">
+<div id="output" class="output">
+<div id="photoLayer" class="photoLayer"><img id="photoFinal"><span class="handle"></span></div>
+<div id="nameLayer" class="nameLayer">Your Name<span class="handle"></span></div>
+<div id="signLayer" class="signLayer" style="display:none"><img id="signFinal"><span class="handle"></span></div>
+</div>
+</div>
+<div class="status" id="status">Upload a photo to begin. Tap an item to move or resize it.</div>
+<div class="note">Photo, name and signature can be moved and resized independently. Final output contains only the card/photo layout—no arrow.</div>
+</div>
+</div>
 <div class="grid">
 <div>
 <div class="box">
@@ -31,6 +44,10 @@
 <div class="two">
 <div class="field"><label>Photo Background</label><select id="photoBg"><option value="#ffffff">White</option><option value="#f4b6c2">Pink</option><option value="#b9dcff">Light Blue</option><option value="#eeeeee">Light Gray</option></select></div>
 <div class="field"><label>Custom Background</label><input id="customBg" type="color" value="#ffffff"></div>
+</div>
+<div class="two">
+<div class="field"><label>Photo Border Size: <span id="borderV">0</span> px</label><input id="photoBorder" class="range" type="range" min="0" max="30" value="0"></div>
+<div class="field"><label>Border Color</label><input id="borderColor" type="color" value="#ffffff"></div>
 </div>
 </div>
 
@@ -66,19 +83,7 @@
 </div>
 </div>
 
-<div class="sticky">
-<div class="box"><h3>Live Preview</h3>
-<div class="previewWrap">
-<div id="output" class="output">
-<div id="photoLayer" class="photoLayer"><img id="photoFinal"><span class="handle"></span></div>
-<div id="nameLayer" class="nameLayer">Your Name<span class="handle"></span></div>
-<div id="signLayer" class="signLayer" style="display:none"><img id="signFinal"><span class="handle"></span></div>
-</div>
-</div>
-<div class="status" id="status">Upload a photo to begin. Tap an item to move or resize it.</div>
-<div class="note">Photo, name and signature can be moved and resized independently. Final output contains only the card/photo layout—no arrow.</div>
-</div>
-</div>
+
 </div>
 </div>
 </div>
@@ -126,6 +131,14 @@ function nameStyle(){nameLayer.style.fontFamily=$("nameFont").value;nameLayer.st
 
 $("photoBg").onchange=()=>{output.style.background=$("photoBg").value;$("customBg").value=$("photoBg").value};
 $("customBg").oninput=()=>output.style.background=$("customBg").value;
+function updatePhotoBorder(){
+ const b=Math.max(0,+$("photoBorder").value||0);
+ photoLayer.style.border=b+"px solid "+$("borderColor").value;
+ $("borderV").textContent=b;
+}
+$("photoBorder").oninput=updatePhotoBorder;
+$("borderColor").oninput=updatePhotoBorder;
+
 
 function loadImageFile(f){return new Promise((res,rej)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=rej;im.src=u})}
 $("sigInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;const im=await loadImageFile(f),max=1200,sc=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));sigOriginal=document.createElement("canvas");sigOriginal.width=Math.round(im.naturalWidth*sc);sigOriginal.height=Math.round(im.naturalHeight*sc);sigOriginal.getContext("2d").drawImage(im,0,0,sigOriginal.width,sigOriginal.height);$("sigClean").style.display="block";renderSig();$("useSig").disabled=false};
@@ -137,12 +150,31 @@ $("useSig").onclick=()=>{const c=trimmedSig();if(!c)return alert("No signature d
 
 async function exportFinal(){
  const W=Math.max(200,+$("outW").value||600),H=Math.max(250,+$("outH").value||800),c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.fillStyle=output.style.backgroundColor||"#fff";x.fillRect(0,0,W,H);
- if(photoFinal.src){const p=photoLayer;x.drawImage(photoFinal,+p.dataset.x*W,+p.dataset.y*H,+p.dataset.w*W,+p.dataset.h*H)}
+ if(photoFinal.src){
+ const p=photoLayer,X=+p.dataset.x*W,Y=+p.dataset.y*H,PW=+p.dataset.w*W,PH=+p.dataset.h*H;
+ const border=Math.max(0,+$("photoBorder").value||0)*(W/output.clientWidth);
+ if(border>0){x.fillStyle=$("borderColor").value;x.fillRect(X,Y,PW,PH);x.drawImage(photoFinal,X+border,Y+border,Math.max(1,PW-border*2),Math.max(1,PH-border*2))}
+ else{x.drawImage(photoFinal,X,Y,PW,PH)}
+}
  x.fillStyle="#111";x.textAlign="center";x.textBaseline="middle";x.font=`700 ${Math.max(10,+$("nameSize").value*(W/output.clientWidth))}px "${$("nameFont").value}"`;const n=nameLayer;x.fillText($("nameText").value||"",(+n.dataset.x+(+n.dataset.w)/2)*W,(+n.dataset.y+(+n.dataset.h)/2)*H);
  if(signLayer.style.display!=="none"&&signFinal.src){const q=signLayer;x.drawImage(signFinal,+q.dataset.x*W,+q.dataset.y*H,+q.dataset.w*W,+q.dataset.h*H)}
  return c;
 }
-$("download").onclick=async()=>{if(!photoFinal.src)return alert("Please upload and crop a photo first.");const c=await exportFinal(),fmt=$("format").value,q=Math.max(.2,Math.min(1,(+$("quality").value||92)/100)),url=c.toDataURL(fmt==="png"?"image/png":"image/jpeg",q),a=document.createElement("a");a.href=url;a.download="photo-name-signature."+(fmt==="png"?"png":"jpg");document.body.appendChild(a);a.click();a.remove()};
+$("download").onclick=async()=>{
+ if(!photoFinal.src)return alert("Please upload and crop a photo first.");
+ status.textContent="Preparing file...";
+ try{
+  const c=await exportFinal(),fmt=$("format").value,q=Math.max(.2,Math.min(1,(+$("quality").value||92)/100)),mime=fmt==="png"?"image/png":"image/jpeg",ext=fmt==="png"?"png":"jpg";
+  c.toBlob(blob=>{
+   if(!blob){status.textContent="Unable to create file.";return}
+   const url=URL.createObjectURL(blob),a=document.createElement("a");
+   a.href=url;a.download="photo-name-signature."+ext;a.style.display="none";
+   document.body.appendChild(a);a.click();a.remove();
+   status.textContent="File ready. Check Downloads / Files.";
+   setTimeout(()=>URL.revokeObjectURL(url),10000);
+  },mime,q);
+ }catch(e){console.error(e);status.textContent="Download failed. Please try again."}
+};
 $("reset").onclick=()=>location.reload();
 layout();nameStyle();window.addEventListener("resize",layout);
 </script>
