@@ -1,1 +1,197 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Smart Application Writer V1</title><style>*{box-sizing:border-box}body{margin:0;background:#f4f7ff;color:#172033;font-family:Arial,sans-serif}.wrap{max-width:900px;margin:auto;padding:14px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:15px;margin:10px 0;box-shadow:0 8px 24px #2563eb12}h1{font-size:23px;margin:0 0 5px}.sub{font-size:12px;color:#64748b}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{margin:8px 0}.field label{display:block;font-size:11px;font-weight:700;color:#475569;margin-bottom:4px}.field input,.field select,.field textarea{width:100%;padding:10px;border:1px solid #dbe3ef;border-radius:9px;font:inherit;font-size:13px}.field textarea{min-height:92px;resize:vertical}.btns{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer;background:#edf4ff;color:#1d4ed8}.primary{background:#2563eb;color:#fff}.green{background:#059669;color:#fff}.paper{background:#fff;border:1px solid #cbd5e1;min-height:520px;padding:34px;white-space:pre-wrap;line-height:1.65;font-family:Georgia,'Times New Roman',serif;font-size:15px;outline:none}.chips{display:flex;gap:6px;overflow:auto;padding-bottom:4px}.chip{white-space:nowrap;border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer}.note{font-size:10px;color:#64748b;background:#f8fafc;padding:9px;border-radius:9px}@media(max-width:650px){.grid{grid-template-columns:1fr}.paper{padding:20px;min-height:450px}.wrap{padding:9px}}@media print{body{background:#fff}.no-print{display:none!important}.wrap{max-width:none;padding:0}.card{border:0;box-shadow:none;margin:0;padding:0}.paper{border:0;padding:18mm;font-size:14pt;min-height:0}}</style></head><body><div class="wrap"><div class="card no-print"><h1>✨ Smart Application Writer</h1><div class="sub">API-free smart application generator • Hindi + English • Works in browser</div><div class="field"><label>Bas apni requirement likhiye</label><textarea id="prompt" placeholder="Example: office leave 3 din family function ke liye&#10;Example: bank me mobile number change karna hai&#10;Example: police complaint for lost mobile"></textarea></div><div class="chips"><button class="chip" data-p="office leave 3 din family function ke liye">Office Leave</button><button class="chip" data-p="school leave due to fever">School Leave</button><button class="chip" data-p="bank account me mobile number change">Bank Mobile Update</button><button class="chip" data-p="bank cheque book request">Cheque Book</button><button class="chip" data-p="lost mobile police complaint">Police Complaint</button><button class="chip" data-p="electricity complaint">Electricity Complaint</button></div><div class="grid"><div class="field"><label>Language</label><select id="lang"><option value="auto">Auto Detect</option><option value="en">English</option><option value="hi">Hindi</option></select></div><div class="field"><label>Style</label><select id="tone"><option value="formal">Formal</option><option value="simple">Simple</option></select></div><div class="field"><label>Your Name</label><input id="name" placeholder="Optional"></div><div class="field"><label>Date</label><input id="date" type="date"></div><div class="field"><label>To / Department</label><input id="to" placeholder="Auto if blank"></div><div class="field"><label>Place / Organization</label><input id="place" placeholder="Optional"></div></div><div class="btns"><button id="generate" class="btn primary">✨ Create Application</button><button id="clear" class="btn">Clear</button></div><div class="note" style="margin-top:10px">This is a browser-side smart template/rule engine. It does not send your text to an AI API or server.</div></div><div class="card" id="resultCard" style="display:none"><div class="no-print btns" style="margin-bottom:10px"><button id="copy" class="btn">📋 Copy</button><button id="print" class="btn green">🖨 Print / Save PDF</button><button id="regen" class="btn">↻ Regenerate</button></div><div id="paper" class="paper" contenteditable="true"></div></div></div><script>(function(){var $=function(i){return document.getElementById(i)};var d=new Date(),iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');$('date').value=iso;document.querySelectorAll('.chip').forEach(function(b){b.onclick=function(){$('prompt').value=this.getAttribute('data-p')}});function hasHindi(s){return /[\u0900-\u097F]/.test(s)}function detect(s){s=s.toLowerCase();if(/office|leave|chhutti|छुट्टी|अवकाश/.test(s)&&/office|company|job|manager|ऑफिस|कार्यालय/.test(s))return'office';if(/school|college|विद्यालय|स्कूल|कॉलेज/.test(s)&&/leave|chhutti|छुट्टी|अवकाश/.test(s))return'school';if(/mobile|phone/.test(s)&&/bank|account|बैंक|खाता/.test(s)&&/change|update|badal|बदल|अपडेट/.test(s))return'bankmobile';if(/cheque|check book|चेक/.test(s))return'cheque';if(/atm|debit/.test(s))return'atm';if(/close|closure|band|बंद/.test(s)&&/bank|account|बैंक|खाता/.test(s))return'bankclose';if(/bank|account|बैंक|खाता/.test(s)&&/open|opening|khul|खोल/.test(s))return'bankopen';if(/police|fir|complaint|lost|stolen|चोरी|खो|पुलिस|शिकायत/.test(s))return'police';if(/electric|bijli|बिजली/.test(s))return'electric';if(/water|pani|पानी/.test(s))return'water';return'general'}function days(s){var m=s.match(/(\d+)\s*(day|days|din|दिन)/i);return m?m[1]:''}function reason(s){if(/family function|शादी|function/i.test(s))return['a family function','पारिवारिक कार्यक्रम'];if(/fever|बुखार|sick|ill|बीमार/i.test(s))return['health reasons','स्वास्थ्य संबंधी कारणों'];if(/personal|personal work|व्यक्तिगत/i.test(s))return['personal reasons','व्यक्तिगत कारणों'];return['personal reasons','व्यक्तिगत कारणों']}function fmtDate(v,hi){if(!v)return'';var a=v.split('-');return hi?a[2]+'/'+a[1]+'/'+a[0]:a[2]+'/'+a[1]+'/'+a[0]}function build(){var p=$('prompt').value.trim();if(!p){alert('Please write your requirement first.');return}var hi=$('lang').value==='hi'||($('lang').value==='auto'&&hasHindi(p)),type=detect(p),n=$('name').value.trim()||(hi?'नाम: __________':'Name: __________'),pl=$('place').value.trim(),dt=fmtDate($('date').value,hi),customTo=$('to').value.trim(),dy=days(p),rs=reason(p),to='',sub='',body='';if(hi){if(type==='office'){to=customTo||'सेवा में,\nप्रबंधक महोदय/महोदया';sub='विषय: अवकाश प्रदान करने हेतु आवेदन';body='महोदय/महोदया,\n\nसविनय निवेदन है कि मुझे '+rs[1]+' से '+(dy?dy+' दिन का ':'')+'अवकाश आवश्यक है। अतः आपसे अनुरोध है कि कृपया मुझे उक्त अवधि के लिए अवकाश प्रदान करने की कृपा करें।\n\nमैं आपका आभारी रहूँगा/रहूँगी।'}else if(type==='school'){to=customTo||'सेवा में,\nप्रधानाचार्य महोदय/महोदया';sub='विषय: अवकाश हेतु आवेदन';body='महोदय/महोदया,\n\nसविनय निवेदन है कि '+rs[1]+' से मैं '+(dy?dy+' दिन ':'')+'विद्यालय/महाविद्यालय में उपस्थित नहीं हो पाऊँगा/पाऊँगी। कृपया मुझे आवश्यक अवकाश प्रदान करने की कृपा करें।'}else if(type==='bankmobile'){to=customTo||'सेवा में,\nशाखा प्रबंधक, बैंक';sub='विषय: बैंक खाते में मोबाइल नंबर अपडेट करने हेतु आवेदन';body='महोदय/महोदया,\n\nनिवेदन है कि मेरे बैंक खाते में दर्ज मोबाइल नंबर को अपडेट करना है। कृपया आवश्यक सत्यापन के बाद मेरे खाते में नया मोबाइल नंबर दर्ज करने की कृपा करें। आवश्यक दस्तावेज संलग्न किए जा सकते हैं।'}else if(type==='cheque'){to=customTo||'सेवा में,\nशाखा प्रबंधक, बैंक';sub='विषय: नई चेक बुक जारी करने हेतु आवेदन';body='महोदय/महोदया,\n\nनिवेदन है कि कृपया मेरे बैंक खाते के लिए नई चेक बुक जारी करने की कृपा करें। आवश्यक औपचारिकताएँ पूर्ण करने के लिए मैं तैयार हूँ।'}else if(type==='police'){to=customTo||'सेवा में,\nथाना प्रभारी महोदय/महोदया';sub='विषय: शिकायत दर्ज करने हेतु आवेदन';body='महोदय/महोदया,\n\nसविनय निवेदन है कि मैं निम्न घटना के संबंध में शिकायत दर्ज कराना चाहता/चाहती हूँ:\n\n'+p+'\n\nकृपया मामले की जाँच कर आवश्यक कार्रवाई करने की कृपा करें। उपलब्ध तथ्य/दस्तावेज आवश्यकता अनुसार प्रस्तुत किए जा सकते हैं।'}else{to=customTo||'सेवा में,\nसंबंधित अधिकारी महोदय/महोदया';sub='विषय: '+p;body='महोदय/महोदया,\n\nसविनय निवेदन है कि '+p+'। कृपया मेरे अनुरोध पर विचार कर आवश्यक कार्रवाई करने की कृपा करें।\n\nधन्यवाद।'}return to+(pl?'\n'+pl:'')+'\n\nदिनांक: '+dt+'\n\n'+sub+'\n\n'+body+'\n\nभवदीय,\n'+n}else{if(type==='office'){to=customTo||'To,\nThe Manager';sub='Subject: Request for Leave';body='Respected Sir/Madam,\n\nI respectfully request '+(dy?dy+' days of ':'')+'leave due to '+rs[0]+'. Kindly grant me leave for the required period. I will ensure that my pending responsibilities are managed appropriately.\n\nI shall be grateful for your consideration.'}else if(type==='school'){to=customTo||'To,\nThe Principal';sub='Subject: Application for Leave';body='Respected Sir/Madam,\n\nI request you to kindly grant me '+(dy?dy+' days of ':'')+'leave due to '+rs[0]+'. I will be unable to attend school/college during this period. Kindly approve my leave.'}else if(type==='bankmobile'){to=customTo||'To,\nThe Branch Manager';sub='Subject: Request to Update Mobile Number in Bank Account';body='Respected Sir/Madam,\n\nI request you to kindly update the mobile number registered with my bank account after completing the required verification. I am ready to provide the necessary documents and account details.'}else if(type==='cheque'){to=customTo||'To,\nThe Branch Manager';sub='Subject: Request for New Cheque Book';body='Respected Sir/Madam,\n\nI request you to kindly issue a new cheque book for my bank account. I am ready to complete the required formalities. Kindly process my request at the earliest.'}else if(type==='police'){to=customTo||'To,\nThe Station House Officer';sub='Subject: Request to Register Complaint';body='Respected Sir/Madam,\n\nI wish to submit a complaint regarding the following matter:\n\n'+p+'\n\nKindly record my complaint, examine the matter, and take appropriate action in accordance with applicable procedure. I can provide supporting details or documents as required.'}else if(type==='electric'){to=customTo||'To,\nThe Concerned Electricity Department Officer';sub='Subject: Electricity Complaint';body='Respected Sir/Madam,\n\nI wish to report the following electricity-related issue:\n\n'+p+'\n\nKindly inspect the matter and arrange the necessary action at the earliest.'}else{to=customTo||'To,\nThe Concerned Officer';sub='Subject: Application regarding '+p;body='Respected Sir/Madam,\n\nI am writing to request your assistance regarding the following matter:\n\n'+p+'\n\nKindly consider my request and take the necessary action.\n\nThank you for your consideration.'}return to+(pl?'\n'+pl:'')+'\n\nDate: '+dt+'\n\n'+sub+'\n\n'+body+'\n\nYours faithfully,\n'+n}}$('generate').onclick=function(){$('paper').textContent=build();$('resultCard').style.display='block';$('resultCard').scrollIntoView({behavior:'smooth'})};$('regen').onclick=$('generate').onclick;$('clear').onclick=function(){$('prompt').value='';$('resultCard').style.display='none'};$('copy').onclick=function(){var t=$('paper').innerText;if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){alert('Application copied.')});else{var r=document.createRange();r.selectNodeContents($('paper'));var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges();alert('Application copied.')}};$('print').onclick=function(){window.print()}})();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Smart Application Writer V3</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6fc;color:#172033;font-family:Arial,sans-serif}
+.wrap{max-width:980px;margin:auto;padding:14px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;margin:10px 0;box-shadow:0 8px 25px rgba(37,99,235,.07)}
+h1{font-size:24px;margin:0 0 5px}.sub{font-size:12px;color:#64748b;line-height:1.5}
+.prompt{min-height:105px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.field{margin:7px 0}
+.field label{display:block;font-size:11px;font-weight:700;color:#475569;margin-bottom:4px}.field input,.field select,.field textarea{width:100%;padding:10px;border:1px solid #dbe3ef;border-radius:9px;font:inherit;font-size:13px;background:#fff}
+.btns,.chips{display:flex;gap:7px;flex-wrap:wrap}.chips{margin:8px 0}.chip,.btn{border:0;border-radius:9px;padding:9px 11px;font-weight:700;cursor:pointer}
+.chip{border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;font-size:10px}.btn{background:#edf4ff;color:#1d4ed8}.primary{background:#2563eb;color:#fff}.green{background:#059669;color:#fff}
+.detected{margin:10px 0;padding:9px 11px;border-radius:10px;background:#f8fafc;border:1px solid #e2e8f0;font-size:11px;color:#475569}
+.paper{background:#fff;border:1px solid #cbd5e1;min-height:600px;padding:38px 44px;white-space:pre-wrap;line-height:1.72;font-family:Georgia,"Times New Roman",serif;font-size:15px;outline:none}
+.note{font-size:10px;color:#64748b;background:#f8fafc;padding:9px;border-radius:9px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.paper{padding:22px 18px;min-height:500px}.wrap{padding:9px}}
+@media print{body{background:#fff}.no-print{display:none!important}.wrap{max-width:none;padding:0}.card{border:0;box-shadow:none;margin:0;padding:0}.paper{border:0;padding:18mm;font-size:13pt;min-height:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card no-print">
+<h1>✨ Smart Application Writer V3</h1>
+<div class="sub">Professional API-free application & letter writer • Hindi, Hinglish or English prompt • Runs locally in your browser</div>
+
+<div class="field">
+<label>What do you need? / आपको किसलिए application चाहिए?</label>
+<textarea id="prompt" class="prompt" placeholder="Examples:
+resign letter last working date 30 September
+office leave 3 din family function ke liye
+bank me mobile number change karna hai
+mera mobile kho gaya police complaint
+experience letter request"></textarea>
+</div>
+
+<div class="chips">
+<button class="chip" data-p="resign letter last working date 30 September">Resignation</button>
+<button class="chip" data-p="office leave 3 din family function ke liye">Office Leave</button>
+<button class="chip" data-p="experience letter request">Experience Letter</button>
+<button class="chip" data-p="salary certificate request">Salary Certificate</button>
+<button class="chip" data-p="bank me mobile number change">Bank Mobile</button>
+<button class="chip" data-p="new cheque book request">Cheque Book</button>
+<button class="chip" data-p="lost mobile police complaint">Police Complaint</button>
+<button class="chip" data-p="school leave due to fever">School Leave</button>
+</div>
+
+<div class="grid">
+<div class="field"><label>Language</label><select id="lang"><option value="auto">Auto Detect</option><option value="en">English</option><option value="hi">Hindi</option></select></div>
+<div class="field"><label>Writing Style</label><select id="tone"><option value="professional">Professional</option><option value="concise">Short & Crisp</option><option value="polite">Very Polite</option></select></div>
+<div class="field"><label>Your Name</label><input id="name" placeholder="Optional"></div>
+<div class="field"><label>Date</label><input id="date" type="date"></div>
+<div class="field"><label>To / Designation</label><input id="to" placeholder="Auto selected if blank"></div>
+<div class="field"><label>Company / Bank / School / Department</label><input id="org" placeholder="Optional"></div>
+</div>
+
+<div id="detected" class="detected">Smart intent: waiting for your requirement…</div>
+<div class="btns"><button id="generate" class="btn primary">✨ Create Professional Letter</button><button id="clear" class="btn">Clear</button></div>
+<div class="note" style="margin-top:10px">No API key or server is used. V3 uses a larger local intent + detail extraction engine and professional letter templates.</div>
+</div>
+
+<div class="card" id="resultCard" style="display:none">
+<div class="no-print btns" style="margin-bottom:10px"><button id="copy" class="btn">📋 Copy</button><button id="print" class="btn green">🖨 Print / Save PDF</button><button id="regen" class="btn">↻ Regenerate</button></div>
+<div id="paper" class="paper" contenteditable="true"></div>
+</div>
+</div>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)}, today=new Date();
+$("date").value=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+Array.prototype.forEach.call(document.querySelectorAll(".chip"),function(b){b.onclick=function(){$("prompt").value=this.getAttribute("data-p");previewIntent()}});
+function hindi(s){return /[\u0900-\u097F]/.test(s)}
+function low(s){return (s||"").toLowerCase().replace(/\s+/g," ").trim()}
+function any(s,a){for(var i=0;i<a.length;i++)if(s.indexOf(a[i])>-1)return true;return false}
+function intent(raw){
+ var s=low(raw);
+ var rules=[
+ ["resignation",["resign","resignation","job chhod","job chod","naukri chhod","naukri chod","istifa","इस्तीफा","त्यागपत्र","नौकरी छोड़"]],
+ ["experience",["experience letter","experience certificate","अनुभव प्रमाण","experience certificate"]],
+ ["relieving",["relieving letter","relieve letter","early relieving","relieving request","रिलीविंग","कार्य मुक्त"]],
+ ["salarycert",["salary certificate","salary slip request","वेतन प्रमाण","salary proof"]],
+ ["officeleave",["office leave","company leave","job leave","manager leave","ऑफिस छुट्टी","कार्यालय अवकाश"]],
+ ["schoolleave",["school leave","college leave","विद्यालय अवकाश","स्कूल छुट्टी","कॉलेज छुट्टी"]],
+ ["bankmobile",["bank mobile","mobile number change","mobile update","number update","बैंक मोबाइल","मोबाइल नंबर बदल"]],
+ ["bankaddress",["bank address change","address update bank","bank address update","बैंक पता बदल"]],
+ ["bankclose",["close bank account","account closure","bank account close","खाता बंद"]],
+ ["bankopen",["open bank account","account opening","new bank account","खाता खोल"]],
+ ["cheque",["cheque book","check book","चेक बुक"]],
+ ["atm",["atm card","debit card","एटीएम","डेबिट कार्ड"]],
+ ["passbook",["passbook","पासबुक"]],
+ ["policelost",["lost mobile","phone lost","lost document","lost wallet","खो गया","गुम","खोया"]],
+ ["policetheft",["stolen","theft","चोरी"]],
+ ["police",["police complaint","fir","पुलिस शिकायत","एफआईआर"]],
+ ["electric",["electricity","bijli","बिजली"]],
+ ["water",["water complaint","pani complaint","पानी शिकायत"]],
+ ["namecorrection",["name correction","correct name","नाम सुधार","नाम संशोधन"]],
+ ["addresschange",["address change","change address","पता बदल","पता संशोधन"]],
+ ["general",[]]
+ ];
+ for(var i=0;i<rules.length-1;i++)if(any(s,rules[i][1]))return rules[i][0];
+ if(any(s,["leave","chhutti","छुट्टी","अवकाश"]))return any(s,["school","college","student","स्कूल","विद्यालय","कॉलेज"])?"schoolleave":"officeleave";
+ return "general";
+}
+var labels={resignation:"Resignation Letter",experience:"Experience Letter Request",relieving:"Relieving Letter Request",salarycert:"Salary Certificate Request",officeleave:"Office Leave",schoolleave:"School / College Leave",bankmobile:"Bank Mobile Number Update",bankaddress:"Bank Address Update",bankclose:"Bank Account Closure",bankopen:"Bank Account Opening",cheque:"Cheque Book Request",atm:"ATM / Debit Card Request",passbook:"Passbook Request",policelost:"Lost Item Police Complaint",policetheft:"Theft Complaint",police:"Police Complaint",electric:"Electricity Complaint",water:"Water Complaint",namecorrection:"Name Correction",addresschange:"Address Change",general:"Custom / General Application"};
+function extract(raw){
+ var s=raw, l=low(raw), o={days:"",lastDate:"",reason:"",item:""};
+ var m=l.match(/(\d+)\s*(day|days|din|दिन)/i); if(m)o.days=m[1];
+ var d=s.match(/(?:last working date|last day|effective from|effective date|अंतिम कार्य दिवस|अंतिम दिन)\s*(?:is|:|-)?\s*([0-9]{1,2}(?:st|nd|rd|th)?[\s\/-]+[A-Za-z]+(?:[\s,]+[0-9]{4})?|[0-9]{1,2}[\/-][0-9]{1,2}(?:[\/-][0-9]{2,4})?)/i); if(d)o.lastDate=d[1];
+ if(any(l,["family function","family event","शादी","पारिवारिक कार्यक्रम"]))o.reason=hindi(raw)?"पारिवारिक कार्यक्रम":"a family function";
+ else if(any(l,["fever","sick","ill","medical","बुखार","बीमार","स्वास्थ्य"]))o.reason=hindi(raw)?"स्वास्थ्य संबंधी कारणों":"health reasons";
+ else if(any(l,["personal work","personal reason","व्यक्तिगत"]))o.reason=hindi(raw)?"व्यक्तिगत कारणों":"personal reasons";
+ var im=l.match(/(?:lost|stolen|खो गया|गुम|चोरी)\s+([a-z ]{2,25})/i); if(im)o.item=im[1].trim();
+ return o;
+}
+function dateFmt(v){if(!v)return"";var a=v.split("-");return a[2]+"/"+a[1]+"/"+a[0]}
+function recipient(t,hi){
+ var map={
+ resignation:hi?"सेवा में,\nमानव संसाधन प्रबंधक / प्रबंधक":"To,\nThe HR Manager / Reporting Manager",
+ experience:hi?"सेवा में,\nमानव संसाधन प्रबंधक":"To,\nThe HR Manager",
+ relieving:hi?"सेवा में,\nमानव संसाधन प्रबंधक":"To,\nThe HR Manager",
+ salarycert:hi?"सेवा में,\nमानव संसाधन / लेखा विभाग":"To,\nThe HR / Accounts Department",
+ officeleave:hi?"सेवा में,\nप्रबंधक महोदय/महोदया":"To,\nThe Manager",
+ schoolleave:hi?"सेवा में,\nप्रधानाचार्य महोदय/महोदया":"To,\nThe Principal",
+ bankmobile:hi?"सेवा में,\nशाखा प्रबंधक":"To,\nThe Branch Manager",
+ bankaddress:hi?"सेवा में,\nशाखा प्रबंधक":"To,\nThe Branch Manager",
+ bankclose:hi?"सेवा में,\nशाखा प्रबंधक":"To,\nThe Branch Manager",
+ bankopen:hi?"सेवा में,\nशाखा प्रबंधक":"To,\nThe Branch Manager",
+ cheque:hi?"सेवा में,\nशाखा प्रबंधक":"To,\nThe Branch Manager",
+ atm:hi?"सेवा में,\nशाखा प्रबंधक":"To,\nThe Branch Manager",
+ passbook:hi?"सेवा में,\nशाखा प्रबंधक":"To,\nThe Branch Manager",
+ policelost:hi?"सेवा में,\nथाना प्रभारी महोदय/महोदया":"To,\nThe Station House Officer",
+ policetheft:hi?"सेवा में,\nथाना प्रभारी महोदय/महोदया":"To,\nThe Station House Officer",
+ police:hi?"सेवा में,\nथाना प्रभारी महोदय/महोदया":"To,\nThe Station House Officer",
+ electric:hi?"सेवा में,\nसंबंधित अधिकारी, विद्युत विभाग":"To,\nThe Concerned Officer,\nElectricity Department",
+ water:hi?"सेवा में,\nसंबंधित अधिकारी, जल विभाग":"To,\nThe Concerned Officer,\nWater Department"
+ };
+ return map[t]||(hi?"सेवा में,\nसंबंधित अधिकारी महोदय/महोदया":"To,\nThe Concerned Officer");
+}
+function english(t,p,x,tone){
+ var concise=tone==="concise", polite=tone==="polite", subject="",body="";
+ if(t==="resignation"){subject="Subject: Formal Resignation from My Position";body="Dear Sir/Madam,\n\nPlease accept this letter as formal notice of my resignation from my position"+(x.lastDate?", with my proposed last working day being "+x.lastDate:"")+". After careful consideration, I have decided to step down from my responsibilities.\n\nI sincerely appreciate the opportunities, guidance, and professional experience I have received during my tenure. I will make every reasonable effort to ensure a smooth handover of my responsibilities and support the transition process.\n\nI request you to kindly accept my resignation and initiate the necessary relieving and full-and-final settlement formalities."+(polite?" I would be grateful for your kind consideration and support during this transition.":"")+"\n\nThank you for the support and opportunities extended to me."}
+ else if(t==="experience"){subject="Subject: Request for Issuance of Experience Letter";body="Dear Sir/Madam,\n\nI am writing to request the issuance of my experience letter for the period of my employment with the organization. I require the document for my professional records and future employment-related formalities.\n\nKindly issue the experience letter at your earliest convenience. I shall be grateful for your assistance."}
+ else if(t==="relieving"){subject="Subject: Request for Relieving Letter";body="Dear Sir/Madam,\n\nI request you to kindly issue my relieving letter and complete the applicable exit formalities. The document is required for my professional records and further employment process.\n\nI would appreciate your support in processing the same at the earliest."}
+ else if(t==="salarycert"){subject="Subject: Request for Salary Certificate";body="Dear Sir/Madam,\n\nI request you to kindly issue a salary certificate confirming my employment and salary details. The certificate is required for official/documentation purposes.\n\nKindly provide the certificate at your earliest convenience."}
+ else if(t==="officeleave"){subject="Subject: Request for Leave";body="Dear Sir/Madam,\n\nI would like to request "+(x.days?x.days+" days of ":"")+"leave"+(x.reason?" due to "+x.reason:" due to personal reasons")+". I request you to kindly approve my leave for the required period. I will ensure that important pending work is appropriately managed before my absence.\n\nThank you for your consideration."}
+ else if(t==="schoolleave"){subject="Subject: Application for Leave";body="Respected Sir/Madam,\n\nI request you to kindly grant me "+(x.days?x.days+" days of ":"")+"leave"+(x.reason?" due to "+x.reason:" due to unavoidable reasons")+". I will be unable to attend classes during this period and will complete the missed academic work after returning.\n\nKindly approve my leave."}
+ else if(t==="bankmobile"){subject="Subject: Request to Update Registered Mobile Number";body="Respected Sir/Madam,\n\nI request you to kindly update the mobile number registered with my bank account. I am ready to provide the prescribed request form, identification, account details, and any other documents required for verification.\n\nKindly process the update at the earliest and confirm the change as per bank procedure."}
+ else if(t==="bankaddress"){subject="Subject: Request to Update Address in Bank Records";body="Respected Sir/Madam,\n\nI request you to kindly update my address in the bank records linked to my account. I am ready to submit valid address proof and complete the required verification formalities.\n\nKindly process my request as per bank procedure."}
+ else if(t==="bankclose"){subject="Subject: Request for Closure of Bank Account";body="Respected Sir/Madam,\n\nI request you to kindly close my bank account after completing the applicable verification and settlement formalities. I will submit the required documents, unused cheque leaves/cards, if applicable, and instructions regarding the remaining balance.\n\nKindly process the account closure and provide acknowledgement as per bank procedure."}
+ else if(t==="bankopen"){subject="Subject: Request for Opening a Bank Account";body="Respected Sir/Madam,\n\nI wish to open a bank account with your branch. Kindly guide me through the applicable account-opening procedure and required KYC documentation.\n\nI am ready to complete the prescribed formalities."}
+ else if(t==="cheque"){subject="Subject: Request for Issuance of New Cheque Book";body="Respected Sir/Madam,\n\nI request you to kindly issue a new cheque book for my bank account. I am ready to complete the required verification and formalities.\n\nKindly process my request at the earliest."}
+ else if(t==="atm"){subject="Subject: Request for ATM / Debit Card";body="Respected Sir/Madam,\n\nI request you to kindly issue a new ATM/debit card for my bank account. I am ready to complete the required verification and applicable formalities.\n\nKindly process my request as per bank procedure."}
+ else if(t==="passbook"){subject="Subject: Request for New / Updated Passbook";body="Respected Sir/Madam,\n\nI request you to kindly issue/update the passbook for my bank account. I am ready to provide the necessary account details and complete the required verification.\n\nKindly assist me with the same."}
+ else if(t==="policelost"){subject="Subject: Complaint Regarding Lost Property";body="Respected Sir/Madam,\n\nI wish to report the loss described below:\n\n"+p+"\n\nI request you to kindly record my complaint and provide the appropriate acknowledgement/report as per procedure. I am ready to provide identification, ownership details, device/document numbers, location, date/time, or any other relevant information available to me.\n\nKindly take the necessary action."}
+ else if(t==="policetheft"||t==="police"){subject="Subject: Request to Register Police Complaint";body="Respected Sir/Madam,\n\nI wish to submit a complaint regarding the following matter:\n\n"+p+"\n\nI request you to kindly record the complaint, examine the facts, and take appropriate action in accordance with applicable procedure. I am available to provide supporting documents or further information as required."}
+ else if(t==="electric"){subject="Subject: Complaint Regarding Electricity Service";body="Respected Sir/Madam,\n\nI wish to bring the following electricity-related issue to your notice:\n\n"+p+"\n\nKindly arrange inspection and necessary corrective action at the earliest. I am available to provide the consumer/account details and any additional information required."}
+ else if(t==="water"){subject="Subject: Complaint Regarding Water Supply / Service";body="Respected Sir/Madam,\n\nI wish to report the following water-service issue:\n\n"+p+"\n\nKindly inspect the matter and arrange the necessary action at the earliest."}
+ else if(t==="namecorrection"){subject="Subject: Request for Correction of Name";body="Respected Sir/Madam,\n\nI request you to kindly correct/update my name in the relevant records. I am ready to submit valid supporting documents and complete the prescribed verification formalities.\n\nKindly process the correction and update the records accordingly."}
+ else if(t==="addresschange"){subject="Subject: Request for Change of Address";body="Respected Sir/Madam,\n\nI request you to kindly update my address in the relevant records. I am ready to submit valid address proof and complete the required verification formalities.\n\nKindly process my request accordingly."}
+ else {subject="Subject: Request Regarding "+p.replace(/\.$/,"");body="Respected Sir/Madam,\n\nI am writing to formally submit the following request:\n\n"+p+"\n\nI request you to kindly review the matter and take the appropriate action as per applicable procedure. I am ready to provide any additional information or supporting documents that may be required.\n\nThank you for your consideration."}
+ if(concise) body=body.replace(/\n\nI sincerely appreciate[\s\S]*?transition process\./,"").replace(/\n\nThank you for the support and opportunities extended to me\./,"\n\nThank you for your consideration.");
+ return {subject:subject,body:body}
+}
+function hindiLetter(t,p,x){
+ var subject="",body="";
+ if(t==="resignation"){subject="विषय: पद से त्यागपत्र प्रस्तुत करने के संबंध में";body="महोदय/महोदया,\n\nकृपया इस पत्र को मेरे पद से औपचारिक त्यागपत्र के रूप में स्वीकार करने की कृपा करें"+(x.lastDate?"। मेरा प्रस्तावित अंतिम कार्य दिवस "+x.lastDate+" रहेगा":"")+"। विचारपूर्वक मैंने अपनी वर्तमान जिम्मेदारियों से पदत्याग करने का निर्णय लिया है।\n\nसंस्था में कार्य करते हुए मिले अवसरों, मार्गदर्शन और अनुभव के लिए मैं हृदय से आभारी हूँ। मैं अपने कार्यों और जिम्मेदारियों का व्यवस्थित हस्तांतरण सुनिश्चित करने में पूरा सहयोग दूँगा/दूँगी।\n\nकृपया मेरा त्यागपत्र स्वीकार कर आवश्यक रिलीविंग एवं अंतिम निपटान संबंधी औपचारिकताएँ पूर्ण करने की कृपा करें।\n\nधन्यवाद।"}
+ else if(t==="experience"){subject="विषय: अनुभव प्रमाण पत्र जारी करने हेतु अनुरोध";body="महोदय/महोदया,\n\nसविनय निवेदन है कि कृपया मेरी सेवा अवधि के लिए अनुभव प्रमाण पत्र जारी करने की कृपा करें। यह दस्तावेज मेरे व्यावसायिक अभिलेख एवं आगामी रोजगार संबंधी औपचारिकताओं के लिए आवश्यक है।\n\nकृपया इसे यथाशीघ्र जारी करने की कृपा करें।"}
+ else if(t==="relieving"){subject="विषय: रिलीविंग लेटर जारी करने हेतु अनुरोध";body="महोदय/महोदया,\n\nसविनय निवेदन है कि कृपया आवश्यक निकास औपचारिकताएँ पूर्ण कर मेरा रिलीविंग लेटर जारी करने की कृपा करें। यह दस्तावेज मेरे व्यावसायिक अभिलेख एवं आगामी रोजगार प्रक्रिया के लिए आवश्यक है।"}
+ else if(t==="salarycert"){subject="विषय: वेतन प्रमाण पत्र जारी करने हेतु अनुरोध";body="महोदय/महोदया,\n\nकृपया मेरे रोजगार एवं वेतन विवरण की पुष्टि हेतु वेतन प्रमाण पत्र जारी करने की कृपा करें। यह प्रमाण पत्र आधिकारिक/दस्तावेजी प्रयोजन के लिए आवश्यक है।"}
+ else if(t==="officeleave"){subject="विषय: अवकाश स्वीकृत करने हेतु आवेदन";body="महोदय/महोदया,\n\nसविनय निवेदन है कि मुझे "+(x.reason||"व्यक्तिगत कारणों")+" से "+(x.days?x.days+" दिन का ":"")+"अवकाश आवश्यक है। कृपया आवश्यक अवधि के लिए मेरा अवकाश स्वीकृत करने की कृपा करें। अनुपस्थिति से पूर्व आवश्यक कार्यों को व्यवस्थित करने का प्रयास करूँगा/करूँगी।\n\nआपकी स्वीकृति के लिए धन्यवाद।"}
+ else if(t==="schoolleave"){subject="विषय: अवकाश प्रदान करने हेतु आवेदन";body="महोदय/महोदया,\n\nसविनय निवेदन है कि "+(x.reason||"अपरिहार्य कारणों")+" से मैं "+(x.days?x.days+" दिन ":"")+"विद्यालय/महाविद्यालय में उपस्थित नहीं हो पाऊँगा/पाऊँगी। कृपया मुझे आवश्यक अवकाश प्रदान करने की कृपा करें।"}
+ else if(t==="bankmobile"){subject="विषय: बैंक खाते में पंजीकृत मोबाइल नंबर अपडेट करने हेतु आवेदन";body="महोदय/महोदया,\n\nसविनय निवेदन है कि मेरे बैंक खाते में पंजीकृत मोबाइल नंबर को अपडेट किया जाना है। कृपया निर्धारित सत्यापन प्रक्रिया पूर्ण कर नया मोबाइल नंबर दर्ज करने की कृपा करें। आवश्यक पहचान, खाता विवरण एवं अन्य दस्तावेज प्रस्तुत करने के लिए मैं तैयार हूँ।"}
+ else if(t==="cheque"){subject="विषय: नई चेक बुक जारी करने हेतु आवेदन";body="महोदय/महोदया,\n\nकृपया मेरे बैंक खाते के लिए नई चेक बुक जारी करने की कृपा करें। आवश्यक सत्यापन एवं औपचारिकताएँ पूर्ण करने के लिए मैं तैयार हूँ।"}
+ else if(t==="policelost"){subject="विषय: वस्तु/दस्तावेज गुम होने के संबंध में शिकायत";body="महोदय/महोदया,\n\nमैं निम्न घटना के संबंध में शिकायत दर्ज कराना चाहता/चाहती हूँ:\n\n"+p+"\n\nकृपया मेरी शिकायत दर्ज कर नियमानुसार आवश्यक पावती/रिपोर्ट प्रदान करने की कृपा करें। उपलब्ध पहचान, स्वामित्व विवरण, स्थान, दिनांक/समय तथा अन्य संबंधित जानकारी आवश्यकता अनुसार प्रस्तुत की जा सकती है।"}
+ else if(t==="policetheft"||t==="police"){subject="विषय: पुलिस शिकायत दर्ज करने हेतु आवेदन";body="महोदय/महोदया,\n\nमैं निम्न मामले के संबंध में शिकायत दर्ज कराना चाहता/चाहती हूँ:\n\n"+p+"\n\nकृपया शिकायत दर्ज कर तथ्यों की जाँच करते हुए नियमानुसार आवश्यक कार्रवाई करने की कृपा करें। आवश्यकता होने पर मैं संबंधित दस्तावेज एवं अतिरिक्त जानकारी प्रस्तुत कर सकता/सकती हूँ।"}
+ else if(t==="electric"){subject="विषय: विद्युत सेवा संबंधी शिकायत";body="महोदय/महोदया,\n\nनिम्न विद्युत समस्या आपके संज्ञान में लाना चाहता/चाहती हूँ:\n\n"+p+"\n\nकृपया मामले की जाँच कर आवश्यक सुधारात्मक कार्रवाई यथाशीघ्र कराने की कृपा करें।"}
+ else {subject="विषय: "+p.replace(/।$/,"");body="महोदय/महोदया,\n\nसविनय निवेदन है कि मैं निम्न अनुरोध आपके समक्ष प्रस्तुत करना चाहता/चाहती हूँ:\n\n"+p+"\n\nकृपया मामले पर विचार कर नियमानुसार आवश्यक कार्रवाई करने की कृपा करें। आवश्यकता होने पर संबंधित दस्तावेज एवं अतिरिक्त जानकारी प्रस्तुत की जा सकती है।\n\nधन्यवाद।"}
+ return {subject:subject,body:body}
+}
+function previewIntent(){var p=$("prompt").value.trim();$("detected").textContent=p?"Smart intent detected: "+labels[intent(p)]:"Smart intent: waiting for your requirement…"}
+$("prompt").oninput=previewIntent;
+function build(){
+ var p=$("prompt").value.trim();if(!p){alert("Please write your requirement first.");return""}
+ var hi=$("lang").value==="hi"||($("lang").value==="auto"&&hindi(p)),t=intent(p),x=extract(p),letter=hi?hindiLetter(t,p,x):english(t,p,x,$("tone").value);
+ var to=$("to").value.trim()||recipient(t,hi),org=$("org").value.trim(),name=$("name").value.trim()||(hi?"नाम: __________________":"Name: __________________"),dt=dateFmt($("date").value);
+ return to+(org?"\n"+org:"")+"\n\n"+(hi?"दिनांक: ":"Date: ")+dt+"\n\n"+letter.subject+"\n\n"+letter.body+"\n\n"+(hi?"भवदीय,\n":"Yours sincerely,\n")+name;
+}
+$("generate").onclick=function(){var out=build();if(!out)return;$("paper").textContent=out;$("resultCard").style.display="block";$("resultCard").scrollIntoView({behavior:"smooth"})};
+$("regen").onclick=$("generate").onclick;
+$("clear").onclick=function(){$("prompt").value="";$("resultCard").style.display="none";previewIntent()};
+$("copy").onclick=function(){var t=$("paper").innerText;if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){alert("Letter copied.")});else{var r=document.createRange();r.selectNodeContents($("paper"));var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand("copy");s.removeAllRanges();alert("Letter copied.")}};
+$("print").onclick=function(){window.print()};
+})();
+</script>
+</body></html>
