@@ -1,13 +1,1 @@
-<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Image to Editable Template</title><link rel="stylesheet" href="style.css"></head><body>
-<header>AI Image → Editable Template <small>Standalone Demo</small></header>
-<main>
-<section class="toolbar">
-<label class="btn">Select Image<input id="file" type="file" accept="image/*"></label>
-<button id="analyze">Analyze & Convert</button><button id="addText" class="light">+ Text</button><button id="toggleBg" class="light">Background On/Off</button>
-<div class="progress"><i id="bar"></i></div><div id="status">पहले image select करें।</div>
-</section>
-<div class="layout"><section class="workspace"><div id="stage"></div></section>
-<aside><h3>Selected Element</h3><label>Text</label><input id="editText"><label>Font size</label><input id="fontSize" type="number" min="6" max="120" value="20"><label>Color</label><input id="color" type="color" value="#111111"><button id="remove" class="danger">Delete</button>
-<p>Analyze के बाद detected words editable layers बनेंगे। उन्हें drag करके move कर सकते हैं।</p><div id="error"></div></aside></div>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="app.js"></script></body></html>
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI Template Reconstructor</title><link rel="stylesheet" href="style.css"></head><body><header>AI Template Reconstructor <small>Demo</small></header><main><section class="card"><label class="btn">Image Upload<input id="file" type="file" accept="image/*"></label><button id="analyze">Analyze & Reconstruct</button><button id="reference" class="light">Original Reference</button><div id="status">Image upload करें।</div></section><div class="layout"><section class="work"><div id="stage"><canvas id="base"></canvas><div id="layers"></div></div></section><aside class="card"><b>Selected Text</b><input id="text"><label>Size</label><input id="size" type="number" value="20"><label>Color</label><input id="color" type="color" value="#111111"><button id="del" class="danger">Delete</button><p>Analyze के बाद detected text original image से साफ करके editable layers में recreate किया जाता है। Original Reference सिर्फ comparison के लिए है।</p><div id="err"></div></aside></div></main><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="app.js"></script></body></html>
