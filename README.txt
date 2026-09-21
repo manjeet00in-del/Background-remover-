@@ -1,0 +1,1 @@
+GitHub Pages demo. Upload all files to repository root. OCR uses Tesseract.js from CDN, so internet is required.
